@@ -1,0 +1,1078 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SUMC AI Assistant - Tech Architecture Theme</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+    
+    <!-- Powerful Document & OCR Engines -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.21/mammoth.browser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+    <script src="https://unpkg.com/tesseract.js@v4.0.1/dist/tesseract.min.js"></script>
+    
+    <!-- DOCX Generator -->
+    <script src="https://unpkg.com/docx@7.1.0/build/index.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        
+        body { 
+            font-family: 'Inter', sans-serif; 
+            /* AWS 다이어그램과 유사한 다크 퍼플/네이비 그라데이션 배경 */
+            background: linear-gradient(135deg, #05001c 0%, #0d0628 50%, #15003b 100%);
+            color: #f8fafc;
+            overflow: hidden; 
+        }
+        
+        .tab-content { display: none; }
+        .active-tab { 
+            display: block; 
+            animation: fadeIn 0.3s ease-in-out; 
+        }
+        
+        @keyframes fadeIn { 
+            from { opacity: 0; transform: translateY(5px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+        
+        /* 다이어그램 스타일의 카드 (직각에 가까운 모서리, 얇은 테두리) */
+        .card { 
+            background-color: rgba(20, 15, 45, 0.6); 
+            backdrop-filter: blur(10px);
+            border-radius: 8px; 
+            border: 1px solid #475569; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+        
+        input, select, textarea { 
+            background-color: rgba(10, 5, 30, 0.8);
+            border: 1px solid #475569; 
+            border-radius: 4px; 
+            padding: 0.75rem 1rem; 
+            outline: none; 
+            width: 100%; 
+            font-size: 0.875rem; 
+            color: #f8fafc;
+            transition: all 0.2s; 
+        }
+        
+        input:focus, select:focus, textarea:focus { 
+            border-color: #00d2ff; 
+            box-shadow: 0 0 0 2px rgba(0, 210, 255, 0.2); 
+        }
+
+        ::placeholder { color: #64748b; }
+        
+        /* 날짜 입력창 달력 아이콘 하얗게 반전 */
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+            opacity: 0.7;
+            cursor: pointer;
+        }
+        
+        label { 
+            display: block; 
+            font-size: 0.7rem; 
+            font-weight: 700; 
+            color: #94a3b8; 
+            text-transform: uppercase; 
+            margin-bottom: 0.4rem; 
+            letter-spacing: 0.05em; 
+        }
+        
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 10px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        
+        .loading-spinner { 
+            border: 2px solid rgba(255,255,255,0.1); 
+            border-top: 2px solid #00d2ff; 
+            border-radius: 50%; 
+            width: 16px; 
+            height: 16px; 
+            animation: spin 1s linear infinite; 
+            display: inline-block; 
+            vertical-align: middle; 
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        .nav-btn { 
+            display: flex; 
+            align-items: center; 
+            gap: 0.75rem; 
+            width: 100%; 
+            padding: 0.75rem 1rem; 
+            border-radius: 4px; 
+            font-size: 0.875rem; 
+            font-weight: 600; 
+            color: #94a3b8; 
+            transition: all 0.2s; 
+            text-align: left; 
+            border-left: 2px solid transparent;
+        }
+        .nav-btn:hover { background-color: rgba(255,255,255,0.05); color: #f8fafc; }
+        .nav-btn.active { 
+            background-color: rgba(251, 191, 36, 0.1); /* Yellow accent */
+            color: #fbbf24; 
+            border-left: 2px solid #fbbf24;
+        }
+
+        /* 표 스타일링 */
+        table { border-collapse: collapse; }
+        thead th { border-bottom: 1px solid #475569; }
+        tbody tr { border-bottom: 1px solid rgba(71, 85, 105, 0.4); transition: background-color 0.2s; }
+        tbody tr:hover { background-color: rgba(255,255,255,0.05); }
+
+        .font-serif-formatted { font-family: 'Times New Roman', Times, serif; }
+    </style>
+</head>
+<body class="flex h-screen">
+
+    <!-- LEFT SIDEBAR -->
+    <aside class="w-64 flex-shrink-0 flex flex-col border-r border-slate-700 relative z-20 shadow-2xl" style="background-color: rgba(5, 0, 25, 0.8); backdrop-filter: blur(10px);">
+        <div class="p-6 border-b border-slate-700">
+            <div class="flex items-center gap-3 cursor-pointer hover:opacity-80 transition" onclick="window.showTab('dashboard', document.querySelectorAll('.nav-btn')[0])">
+                <div class="flex flex-col">
+                    <h1 class="text-2xl font-black text-white tracking-tight leading-none">SUMC AI</h1>
+                    <span class="text-[11px] font-bold text-yellow-400 tracking-widest mt-1">ASSISTANT</span>
+                </div>
+            </div>
+            <div class="mt-5 flex items-center gap-2">
+                <div class="w-2 h-2 rounded-full bg-red-500" id="statusDot"></div>
+                <span id="cloudStatusIndicator" class="text-[10px] text-red-500 uppercase tracking-widest font-bold">Offline</span>
+            </div>
+        </div>
+
+        <nav class="flex-1 overflow-y-auto p-4 space-y-2">
+            <button onclick="window.showTab('dashboard', this)" class="nav-btn active">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
+                Dashboard
+            </button>
+            <button onclick="window.showTab('attendance', this)" class="nav-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg>
+                Attendance
+            </button>
+            <button onclick="window.showTab('directory', this)" class="nav-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" /></svg>
+                Directory
+            </button>
+            <button onclick="window.showTab('prayer-list', this)" class="nav-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
+                Prayer List
+            </button>
+            <button onclick="window.showTab('data-import', this)" class="nav-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>
+                Bulk Import
+            </button>
+        </nav>
+
+        <div class="p-4 border-t border-slate-700">
+            <button onclick="window.openNewMemberForm()" class="w-full bg-cyan-600 hover:bg-cyan-500 text-white p-3 rounded font-bold flex items-center justify-center gap-2 transition shadow-lg shadow-cyan-900/20">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" /></svg>
+                New Data Entry
+            </button>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 overflow-y-auto relative p-4 md:p-8 lg:px-12 z-10">
+        <div class="max-w-6xl mx-auto">
+            
+            <!-- DASHBOARD TAB -->
+            <div id="dashboard" class="tab-content active-tab space-y-6">
+                
+                <!-- Stat Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="card p-6 flex flex-col justify-center relative overflow-hidden group border-t-2 border-emerald-400">
+                        <label class="text-yellow-400">Total Directory</label>
+                        <p class="text-4xl font-black text-white mt-2" id="totalMembers">0</p>
+                        <p class="text-xs text-slate-400 mt-2 font-medium" id="memberBreakdown">Adult: 0 / Child: 0</p>
+                        <div class="absolute right-4 bottom-4 opacity-20"><svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg></div>
+                    </div>
+                    
+                    <div class="card p-6 flex flex-col justify-center relative overflow-hidden group border-t-2 border-emerald-400">
+                        <label class="text-yellow-400">New Records (2026)</label>
+                        <p class="text-4xl font-black text-white mt-2" id="newMemberCount">0</p>
+                        <p class="text-xs text-slate-400 mt-2 font-medium">Recently ingested</p>
+                        <div class="absolute right-4 bottom-4 opacity-20"><svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4v16m8-8H4" /></svg></div>
+                    </div>
+                    
+                    <div class="card p-6 flex flex-col justify-center relative overflow-hidden group border-t-2 border-emerald-400">
+                        <label class="text-yellow-400">Avg. Attendance</label>
+                        <p class="text-4xl font-black text-white mt-2" id="avgAttendanceDisplay">0 / 0%</p>
+                        <p class="text-xs text-slate-400 mt-2 font-medium">Store & Query averages</p>
+                        <div class="absolute right-4 bottom-4 opacity-20"><svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg></div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    
+                    <!-- AI Assistant Section -->
+                    <div class="card flex flex-col h-[600px] border border-fuchsia-500/50 shadow-[0_0_15px_rgba(217,70,239,0.15)] overflow-hidden">
+                        <div class="px-6 py-4 border-b border-slate-700 flex justify-between items-center" style="background-color: rgba(217, 70, 239, 0.05);">
+                            <h3 class="text-base font-extrabold flex items-center gap-2 text-fuchsia-400 tracking-wide">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                                AI & Machine Learning
+                            </h3>
+                            <span id="aiStatus" class="text-[9px] bg-slate-800 border border-slate-600 text-slate-400 px-2.5 py-1 rounded-sm font-bold uppercase tracking-widest">Key Required</span>
+                        </div>
+                        
+                        <div id="geminiChatDisplay" class="flex-1 overflow-y-auto p-6 flex flex-col gap-4 text-sm leading-relaxed" style="background-color: rgba(5,0,20,0.4);">
+                            <div class="p-4 bg-[#1a1c23] border border-slate-700 rounded text-slate-200 self-start max-w-[90%]">
+                                Hello! I am the SUMC AI Assistant. I am connected to the internal <b>Store & Query</b> databases.<br><br>
+                                You can ask me to analyze the members, summarize attendance trends, or process files.<br>
+                                <span class="text-cyan-400 font-semibold mt-2 block">I can understand and reply in any language you use!</span>
+                            </div>
+                        </div>
+                        
+                        <div class="p-4 border-t border-slate-700" style="background-color: rgba(10,5,30,0.6);">
+                            <div id="filePreview" class="hidden mb-3 p-3 bg-[#131b2f] border border-cyan-500/30 rounded flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <span id="fileIcon" class="text-2xl text-cyan-400">📄</span>
+                                    <div>
+                                        <span id="fileName" class="text-xs font-bold text-cyan-100 block truncate max-w-[200px]">document.pdf</span>
+                                        <span id="fileTypeLabel" class="text-[10px] text-cyan-500 uppercase font-black">Data Source Ready</span>
+                                    </div>
+                                </div>
+                                <button onclick="window.clearFile()" class="p-1.5 rounded bg-transparent text-slate-400 hover:text-red-400 transition">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                                </button>
+                            </div>
+
+                            <div class="flex items-center gap-2">
+                                <input type="file" id="aiFileInput" class="hidden" accept=".pdf,.docx,.doc,.xlsx,.xls,.pptx,.ppt,.txt,.csv,image/*" onchange="window.handleFileSelect(event)">
+                                <button onclick="document.getElementById('aiFileInput').click()" class="p-3 bg-[#1a1c23] border border-slate-600 hover:border-cyan-400 transition text-slate-300 rounded flex-shrink-0" title="Add Data Source">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-2.828-6.828l-6.414 6.586a6 6 0 008.485 8.486L20.5 13" /></svg>
+                                </button>
+                                <input type="text" id="geminiInput" placeholder="Query the AI Assistant..." class="flex-1 rounded" onkeypress="if(event.key==='Enter') window.askGemini()">
+                                <button onclick="window.askGemini()" id="sendBtn" class="bg-cyan-600 hover:bg-cyan-500 text-white px-6 py-3 rounded font-bold transition flex-shrink-0 shadow-[0_0_10px_rgba(6,182,212,0.4)]">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" /></svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Main Chart Section (Analytics) -->
+                    <div class="card p-6 flex flex-col h-[600px] border border-cyan-500/50 shadow-[0_0_15px_rgba(6,182,212,0.1)]">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-base font-extrabold text-cyan-400 tracking-wide flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" /></svg>
+                                Analytics & Intelligence
+                            </h3>
+                        </div>
+                        <div class="flex-1 min-h-[300px] w-full"><canvas id="mainAttendanceChart"></canvas></div>
+                    </div>
+                </div>
+
+                <!-- System Configuration & Data Export -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="card p-6 border-slate-700">
+                        <h3 class="text-sm font-bold uppercase text-yellow-400 mb-4 tracking-widest flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg> 
+                            Catalog & Govern
+                        </h3>
+                        <label>AI API Key</label>
+                        <div class="flex gap-2 mb-4"><input type="password" id="apiKeyInput" placeholder="Enter secure key"></div>
+                        <label>Select AI Model</label>
+                        <div class="flex gap-2">
+                            <select id="aiModelSelect" class="flex-1"><option value="">Authenticate first</option></select>
+                            <button onclick="window.verifyAndSaveApiKey()" id="verifyKeyBtn" class="bg-slate-700 text-white px-5 py-2 rounded text-xs font-bold transition hover:bg-slate-600 whitespace-nowrap">Save Key</button>
+                        </div>
+                        <div class="mt-6 pt-4 border-t border-slate-700">
+                            <label class="text-cyan-400">Database Connection</label>
+                            <div class="flex gap-2">
+                                <input type="text" id="appIdInput" placeholder="e.g. sumc-2026-cloud" class="flex-1 font-mono text-sm text-slate-300 font-bold">
+                                <button onclick="window.changeDatabase()" class="bg-transparent border border-cyan-400 text-cyan-400 hover:bg-cyan-900/30 px-5 py-2 rounded text-xs font-bold transition whitespace-nowrap">Connect</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card p-6 border-slate-700">
+                        <h3 class="text-sm font-bold uppercase text-yellow-400 mb-4 tracking-widest flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg> 
+                            Data Extraction
+                        </h3>
+                        <div class="flex flex-col gap-3">
+                            <button onclick="window.exportToSpreadsheet('members')" class="w-full bg-[#1a1c23] border border-slate-600 px-4 py-3 rounded text-sm font-bold text-slate-300 hover:border-cyan-400 hover:text-cyan-400 transition flex items-center justify-between">
+                                Download Directory (CSV) <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                            </button>
+                            <button onclick="window.exportToSpreadsheet('attendance')" class="w-full bg-[#1a1c23] border border-slate-600 px-4 py-3 rounded text-sm font-bold text-slate-300 hover:border-cyan-400 hover:text-cyan-400 transition flex items-center justify-between">
+                                Download Attendance (CSV) <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ATTENDANCE TAB (Data Ingestion) -->
+            <div id="attendance" class="tab-content space-y-6">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-3xl font-black text-white">Attendance</h2>
+                    <div class="w-48"><input type="date" id="attendanceDate" onchange="window.renderAttendanceList()" class="font-bold text-cyan-400 text-center"></div>
+                </div>
+                <div class="card overflow-hidden">
+                    <div class="max-h-[600px] overflow-y-auto">
+                        <table class="min-w-full">
+                            <thead class="bg-[#252836] sticky top-0 z-10">
+                                <tr>
+                                    <th class="px-6 py-4 text-center text-xs font-extrabold text-yellow-400 uppercase w-20">Log</th>
+                                    <th class="px-6 py-4 text-left text-xs font-extrabold text-yellow-400 uppercase">Entity Name (A-Z)</th>
+                                    <th class="px-6 py-4 text-center text-xs font-extrabold text-yellow-400 uppercase">Classification</th>
+                                </tr>
+                            </thead>
+                            <tbody id="attendanceList" class="bg-[#1a1c23] text-slate-200"></tbody>
+                        </table>
+                    </div>
+                    <div class="p-6 bg-[#0f111a] border-t border-slate-700 flex justify-between items-center">
+                        <p id="currentCheckCount" class="text-sm font-bold text-slate-400">Selected: 0</p>
+                        <button onclick="window.saveAttendance()" class="bg-cyan-600 text-white px-8 py-3 rounded font-bold hover:bg-cyan-500 shadow-[0_0_10px_rgba(6,182,212,0.4)] transition flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
+                            Store to Database
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DIRECTORY TAB (Databases) -->
+            <div id="directory" class="tab-content space-y-6">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <h2 class="text-3xl font-black text-white">Directory</h2>
+                    <div class="relative w-full sm:w-72">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 absolute left-3 top-3 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                        <input type="text" placeholder="Query records..." id="dirSearch" onkeyup="window.renderDirectory()" class="pl-10">
+                    </div>
+                </div>
+                <div id="memberContainer" class="columns-1 md:columns-2 gap-6 space-y-6"></div>
+            </div>
+
+            <!-- PRAYER LIST ASSISTANT TAB -->
+            <div id="prayer-list" class="tab-content space-y-6">
+                <div class="card p-8 md:p-10 border-fuchsia-500/50 shadow-[0_0_15px_rgba(217,70,239,0.1)]">
+                    <div class="flex items-center gap-3 mb-6 border-b border-slate-700 pb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-fuchsia-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                        <h2 class="text-2xl font-black text-white tracking-tight">Prayer List Generator</h2>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <div class="space-y-6">
+                            <div class="p-5 bg-[#1a1c23] rounded border border-slate-700">
+                                <label class="text-yellow-400 flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg> Worship Info</label>
+                                <input type="date" id="prayerDate">
+                            </div>
+
+                            <div class="p-5 bg-[#1a1c23] rounded border border-slate-700">
+                                <label class="text-yellow-400 flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg> Data Sources</label>
+                                <label id="prayerDropZone" class="flex flex-col items-center justify-center w-full p-6 border-2 border-dashed border-slate-600 rounded cursor-pointer hover:bg-slate-800 transition-all mb-3 text-center">
+                                    <span class="text-3xl mb-2 text-cyan-400">📷</span>
+                                    <span id="prayerImgLabel" class="text-sm text-slate-300 font-semibold mb-1">Click to upload or Drag & Drop</span>
+                                    <span class="text-xs text-slate-500">Handwritten notes (JPG, PNG)</span>
+                                    <input type="file" accept="image/*" id="prayerImageInput" class="hidden" />
+                                </label>
+                                <input type="url" id="prayerYoutubeUrl" placeholder="YouTube Link (Optional)">
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col bg-[#1a1c23] p-5 rounded border border-slate-700 min-h-[300px]">
+                            <label class="text-cyan-400 flex items-center gap-2 mb-3"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg> Editable Result Preview</label>
+                            <textarea id="prayerResultText" class="flex-grow bg-[#0a0514] font-serif-formatted text-base leading-relaxed p-4 resize-none border border-slate-600 focus:border-cyan-400" placeholder="AI results will appear here. You can manually edit the text before saving.&#10;&#10;Format expected by auto-save:&#10;First Last: Prayer Request."></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8 pt-6 border-t border-slate-700">
+                        <button onclick="window.generatePrayerList()" id="genPrayerBtn" class="w-full bg-fuchsia-600 text-white py-4 rounded font-bold hover:bg-fuchsia-500 transition shadow-[0_0_10px_rgba(217,70,239,0.4)] flex items-center justify-center gap-2 text-lg">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd" /></svg>
+                            Generate with AI
+                        </button>
+                        <button onclick="window.savePrayerList()" class="w-full bg-cyan-600 text-white py-4 rounded font-bold hover:bg-cyan-500 transition shadow-[0_0_10px_rgba(6,182,212,0.4)] flex items-center justify-center gap-2 text-lg">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                            Save & Download .docx
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BULK IMPORT TAB -->
+            <div id="data-import" class="tab-content space-y-6">
+                <div class="card p-10 max-w-3xl mx-auto border-cyan-500/50 shadow-[0_0_15px_rgba(6,182,212,0.1)]">
+                    <div class="text-center mb-8">
+                        <div class="inline-flex items-center justify-center w-16 h-16 rounded bg-cyan-900/30 text-cyan-400 mb-4 border border-cyan-500/50">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
+                        </div>
+                        <h2 class="text-2xl font-extrabold text-cyan-400">AWS DataSync (Bulk)</h2>
+                        <p class="text-sm text-slate-400 mt-2">Format: "LastName, FirstName", "Address", "Phone", "Email"</p>
+                    </div>
+                    <textarea id="bulkDataInput" rows="10" class="font-mono text-sm leading-relaxed" placeholder='"Smith, John", "123 Sussex St, WI", "262-000-0000", "john@email.com"'></textarea>
+                    <button onclick="window.processBulkImport()" class="w-full bg-cyan-600 text-white p-4 rounded font-bold mt-6 hover:bg-cyan-500 transition shadow-[0_0_10px_rgba(6,182,212,0.4)]">Process & Store</button>
+                </div>
+            </div>
+
+            <!-- PROFILE VIEW TAB -->
+            <div id="profile-view" class="tab-content space-y-6">
+                <button onclick="window.showTab('directory', document.querySelectorAll('.nav-btn')[2])" class="text-sm font-bold text-slate-400 hover:text-cyan-400 flex items-center mb-2 transition">&larr; Back to Databases</button>
+                <div class="card p-8 md:p-10">
+                    <div id="profileContent"></div>
+                    <div class="mt-12 pt-8 border-t border-slate-700">
+                        <h4 class="font-extrabold text-yellow-400 mb-6 text-sm uppercase tracking-widest flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2m0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg> 
+                            Historical Metrics
+                        </h4>
+                        <div class="h-48 w-full"><canvas id="personalAttendanceChart"></canvas></div>
+                    </div>
+                    <div class="mt-10 pt-6 flex flex-wrap gap-4 border-t border-slate-700">
+                        <button id="editBtn" class="bg-transparent border border-cyan-400 text-cyan-400 px-8 py-3 rounded font-bold hover:bg-cyan-900/30 transition">Edit Record</button>
+                        <button id="deleteBtn" class="bg-transparent border border-red-500 text-red-500 px-8 py-3 rounded font-bold hover:bg-red-900/30 transition">Drop Record</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- EDIT MEMBER TAB -->
+            <div id="edit-member" class="tab-content">
+                <button onclick="window.showTab('profile-view')" class="text-sm font-bold text-slate-400 hover:text-cyan-400 flex items-center mb-6 transition">&larr; Cancel Update</button>
+                <div class="card p-8 md:p-10 max-w-3xl mx-auto">
+                    <h2 class="text-2xl font-black mb-8 text-white">Update Record</h2>
+                    <form id="editMemberForm" onsubmit="window.submitEdit(event)" class="space-y-5">
+                        <input type="hidden" name="id">
+                        <div class="grid grid-cols-2 gap-5">
+                            <div><label>First Name</label><input type="text" name="firstName" required></div>
+                            <div><label>Last Name</label><input type="text" name="lastName" required></div>
+                        </div>
+                        <div class="grid grid-cols-3 gap-5">
+                            <div><label>Date of Birth</label><input type="date" name="dob"></div>
+                            <div><label>Anniversary</label><input type="date" name="anniversary"></div>
+                            <div><label>Gender</label><select name="gender"><option value="Male">Male</option><option value="Female">Female</option></select></div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-5">
+                            <div><label>Home Phone</label><input type="tel" name="homePhone"></div>
+                            <div><label>Cell Phone</label><input type="tel" name="cellPhone"></div>
+                        </div>
+                        <div><label>Email Address</label><input type="email" name="email"></div>
+                        <div><label>Home Address</label><input type="text" name="address"></div>
+                        <div class="grid grid-cols-2 gap-5">
+                            <div><label>Cluster Group</label><select id="familySelect" name="familyId" class="text-cyan-300"></select></div>
+                            <div><label>Ingestion Date</label><input type="date" name="joinDate"></div>
+                        </div>
+                        <div>
+                            <label class="text-fuchsia-400">Prayers / Intercessions</label>
+                            <textarea name="prayers" rows="3" placeholder="Automatically filled by Prayer List Assistant or add manually..."></textarea>
+                        </div>
+                        <div>
+                            <label>Metadata / Notes</label>
+                            <textarea name="notes" rows="3"></textarea>
+                        </div>
+                        <div class="flex flex-wrap gap-6 border-t border-slate-700 pt-5">
+                            <label class="flex items-center space-x-2 cursor-pointer normal-case text-sm text-slate-300"><input type="checkbox" name="isAdult" class="w-5 h-5 rounded bg-transparent border-slate-600"><span>Adult Entity</span></label>
+                            <label class="flex items-center space-x-2 cursor-pointer normal-case text-sm text-slate-300"><input type="checkbox" name="isBaptized" class="w-5 h-5 rounded bg-transparent border-slate-600"><span>Baptized</span></label>
+                            <label class="flex items-center space-x-2 cursor-pointer normal-case text-sm text-slate-300"><input type="checkbox" name="isNonMember" class="w-5 h-5 rounded bg-transparent border-slate-600"><span>Non-Member</span></label>
+                        </div>
+                        <button type="submit" class="w-full bg-cyan-600 text-white p-4 rounded font-bold mt-6 shadow-[0_0_10px_rgba(6,182,212,0.4)] hover:bg-cyan-500 transition">Update Cloud DB</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- NEW MEMBER TAB -->
+            <div id="new-member" class="tab-content">
+                <div class="card p-8 md:p-10 max-w-3xl mx-auto mt-6 border-cyan-500/50">
+                    <h2 class="text-2xl font-black mb-8 text-cyan-400 text-center">New Entity Insertion</h2>
+                    <form id="newMemberForm" onsubmit="window.registerNewMember(event)" class="space-y-5">
+                        <div class="grid grid-cols-2 gap-5">
+                            <div><label>First Name</label><input type="text" name="firstName" required></div>
+                            <div><label>Last Name</label><input type="text" name="lastName" required></div>
+                        </div>
+                        <div class="grid grid-cols-3 gap-5">
+                            <div><label>Date of Birth</label><input type="date" name="dob"></div>
+                            <div><label>Anniversary</label><input type="date" name="anniversary"></div>
+                            <div><label>Gender</label><select name="gender"><option value="Male">Male</option><option value="Female">Female</option></select></div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-5">
+                            <div><label>Home Phone</label><input type="tel" name="homePhone"></div>
+                            <div><label>Cell Phone</label><input type="tel" name="cellPhone"></div>
+                        </div>
+                        <div><label>Email Address</label><input type="email" name="email"></div>
+                        <div><label>Home Address</label><input type="text" name="address"></div>
+                        <div class="grid grid-cols-2 gap-5">
+                            <div><label>Cluster Group</label><select id="newFamilySelect" name="familyId" class="text-cyan-300"></select></div>
+                            <div><label>Ingestion Date</label><input type="date" name="joinDate"></div>
+                        </div>
+                        <div>
+                            <label class="text-fuchsia-400">Prayers / Intercessions</label>
+                            <textarea name="prayers" rows="3"></textarea>
+                        </div>
+                        <div>
+                            <label>Metadata / Notes</label>
+                            <textarea name="notes" rows="3"></textarea>
+                        </div>
+                        <div class="flex flex-wrap gap-6 border-t border-slate-700 pt-5">
+                            <label class="flex items-center space-x-2 cursor-pointer normal-case text-sm text-slate-300"><input type="checkbox" name="isAdult" checked class="w-5 h-5 rounded"><span>Adult Entity</span></label>
+                            <label class="flex items-center space-x-2 cursor-pointer normal-case text-sm text-slate-300"><input type="checkbox" name="isBaptized" class="w-5 h-5 rounded"><span>Baptized</span></label>
+                            <label class="flex items-center space-x-2 cursor-pointer normal-case text-sm text-slate-300"><input type="checkbox" name="isNonMember" class="w-5 h-5 rounded"><span>Non-Member</span></label>
+                        </div>
+                        <button type="submit" class="w-full bg-cyan-600 text-white p-4 rounded font-bold mt-6 shadow-[0_0_10px_rgba(6,182,212,0.4)] hover:bg-cyan-500 transition">Write to DB</button>
+                    </form>
+                </div>
+            </div>
+            
+        </div>
+    </main>
+
+    <!-- CORE SCRIPT ENGINE -->
+    <script>
+        // Setup Chart defaults for Dark Theme
+        Chart.defaults.color = '#94a3b8';
+        Chart.defaults.borderColor = 'rgba(71, 85, 105, 0.4)';
+        Chart.register(ChartDataLabels);
+
+        window.pdfjsLib = window['pdfjs-dist/build/pdf'];
+        if(window.pdfjsLib) window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+
+        window.members = []; window.attendanceRecords = []; window.mainChart = null; window.profileChart = null;
+        window.currentApiKey = localStorage.getItem('sumc_gemini_key') || "";
+        window.currentAiModel = localStorage.getItem('sumc_gemini_model') || "";
+        window.currentDbId = localStorage.getItem('sumc_db_id') || "sumc-2026-production-main";
+        window.attachedFileData = { extractedText: null, fileName: null };
+        window.prayerImageBase64 = '';
+
+        const sundayLabels = (function getSundays(count = 12) {
+            let s = []; let c = new Date(); c.setDate(c.getDate() - c.getDay());
+            for(let i=0; i<count; i++) { s.push(new Date(c).toISOString().split('T')[0]); c.setDate(c.getDate() - 7); }
+            return s.reverse();
+        })();
+
+        window.showTab = (tabId, btnElement = null) => {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active-tab'));
+            const target = document.getElementById(tabId);
+            if(target) target.classList.add('active-tab');
+            if(btnElement) { document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active')); btnElement.classList.add('active'); }
+            if(tabId === 'attendance') window.renderAttendanceList();
+            window.scrollTo(0,0); window.updateDashboard();
+        };
+
+        window.openNewMemberForm = () => {
+            document.getElementById('newMemberForm').reset();
+            populateFamilyDropdown(document.getElementById('newFamilySelect'), 'new');
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active-tab'));
+            document.getElementById('new-member').classList.add('active-tab');
+        };
+
+        function populateFamilyDropdown(sel, selectedValue) {
+            const uniqueFamilies = {};
+            window.members.forEach(m => { if(!uniqueFamilies[m.familyId]) uniqueFamilies[m.familyId] = m; });
+            const sortedFamilies = Object.values(uniqueFamilies).sort((a, b) => (a.lastName + a.firstName).localeCompare(b.lastName + b.firstName));
+            let html = '<option value="new">-- Create New Cluster --</option>';
+            sortedFamilies.forEach(boss => { html += `<option value="${boss.familyId}" ${boss.familyId === selectedValue ? 'selected' : ''}>Link to: ${boss.lastName}, ${boss.firstName}'s Cluster</option>`; });
+            sel.innerHTML = html;
+        }
+
+        window.changeDatabase = () => {
+            const newId = document.getElementById('appIdInput').value.trim();
+            if(newId) { localStorage.setItem('sumc_db_id', newId); alert("DB Endpoints changed. Reloading."); window.location.reload(); }
+        };
+
+        window.updateDashboard = () => {
+            const adults = window.members.filter(m => m.isAdult).length;
+            const children = window.members.filter(m => !m.isAdult).length;
+            if(document.getElementById('totalMembers')) document.getElementById('totalMembers').innerText = window.members.length;
+            if(document.getElementById('memberBreakdown')) document.getElementById('memberBreakdown').innerText = `Adult: ${adults} / Child: ${children}`;
+            const disp = document.getElementById('avgAttendanceDisplay');
+            if(disp) {
+                if(window.attendanceRecords.length === 0) disp.innerText = "0 / 0%";
+                else { const total = window.attendanceRecords.reduce((sum, r) => sum + (r.attendees ? r.attendees.length : 0), 0); const avg = Math.round(total / window.attendanceRecords.length); const pct = window.members.length > 0 ? Math.round((avg / window.members.length) * 100) : 0; disp.innerText = `${avg} / ${pct}%`; }
+            }
+            if(window.currentApiKey && window.currentAiModel) { const s = document.getElementById('aiStatus'); s.innerText = "AI Ready"; s.className = "text-[9px] bg-fuchsia-900 border border-fuchsia-500 text-fuchsia-100 px-2.5 py-1 rounded-sm font-bold uppercase tracking-widest"; }
+            renderMainChart();
+        };
+
+        function renderMainChart() {
+            const canvas = document.getElementById('mainAttendanceChart'); if(!canvas) return;
+            const ctx = canvas.getContext('2d'); if(window.mainChart) window.mainChart.destroy();
+            const data = sundayLabels.map(l => { const rec = window.attendanceRecords.find(r => r.date === l); return rec ? (rec.attendees ? rec.attendees.length : 0) : 0; });
+            
+            // Styled like Amazon QuickSight lines
+            window.mainChart = new Chart(ctx, { 
+                type: 'line', 
+                data: { labels: sundayLabels, datasets: [{ label: 'Attendees', data: data, borderColor: '#fbbf24', backgroundColor: 'rgba(251, 191, 36, 0.1)', fill: true, tension: 0.3, borderWidth: 2, pointBackgroundColor: '#0f172a', pointBorderColor: '#fbbf24', pointRadius: 4 }] }, 
+                options: { 
+                    maintainAspectRatio: false, 
+                    layout: { padding: { top: 20 } },
+                    scales: { y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' } }, x: { grid: { display: false } } }, 
+                    plugins: { 
+                        legend: { display: false },
+                        datalabels: {
+                            color: '#fbbf24',
+                            anchor: 'end',
+                            align: 'top',
+                            offset: 4,
+                            font: { weight: 'bold', size: 12 },
+                            formatter: function(value) { return value > 0 ? value : ''; }
+                        }
+                    } 
+                } 
+            });
+        }
+
+        window.renderDirectory = () => {
+            const container = document.getElementById('memberContainer'); if(!container) return;
+            const search = document.getElementById('dirSearch').value.toLowerCase();
+            const filtered = window.members.filter(m => (m.firstName + " " + m.lastName).toLowerCase().includes(search));
+            const families = {}; filtered.forEach(m => { if(!families[m.familyId]) families[m.familyId] = []; families[m.familyId].push(m); });
+            const sortedFamilies = Object.values(families).sort((a, b) => (a[0].lastName + a[0].firstName).localeCompare(b[0].lastName + b[0].firstName));
+            sortedFamilies.forEach(fam => fam.sort((a, b) => a.firstName.localeCompare(b.firstName)));
+            
+            container.innerHTML = sortedFamilies.map(fam => `
+                <div class="card p-6 break-inside-avoid border-t-2 border-slate-600">
+                    <div class="text-[10px] font-black text-yellow-400 uppercase mb-4 tracking-widest flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg> ${fam[0].lastName} Cluster</div>
+                    <div class="space-y-3">${fam.map(m => `
+                            <button onclick="window.viewProfile('${m.id}')" class="w-full text-left p-4 rounded bg-[#1a1c23] border border-slate-700 hover:border-cyan-400 transition group shadow-sm">
+                                <div class="font-bold text-slate-200 group-hover:text-cyan-400 transition">${m.lastName}, ${m.firstName}</div>
+                                <div class="mt-2 flex flex-wrap gap-2">
+                                    <span class="text-[9px] px-2 py-0.5 rounded font-bold uppercase border border-slate-600 ${m.isAdult ? 'text-slate-300' : 'text-yellow-500 border-yellow-600/50'}">${m.isAdult ? 'Adult' : 'Child'}</span>
+                                    ${m.isNonMember ? '<span class="text-[9px] px-2 py-0.5 rounded font-bold uppercase border border-slate-600 text-slate-500">Non-Member</span>' : ''}
+                                </div>
+                            </button>`).join('')}</div></div>`).join('');
+        };
+
+        window.viewProfile = (id) => {
+            const m = window.members.find(m => m.id === id); if(!m) return;
+            const household = window.members.filter(fm => fm.familyId === m.familyId && fm.id !== m.id).sort((a, b) => a.firstName.localeCompare(b.firstName));
+            window.showTab('profile-view');
+            document.getElementById('profileContent').innerHTML = `
+                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 pb-6 border-b border-slate-700">
+                    <div>
+                        <h2 class="text-4xl font-black text-white tracking-tight">${m.firstName} <span class="text-cyan-400">${m.lastName}</span></h2>
+                        <div class="flex items-center gap-3 mt-3">
+                            <span class="text-sm font-bold text-slate-300 border border-slate-600 px-3 py-1 rounded">${m.isAdult ? 'Adult' : 'Child'}</span>
+                            ${m.isNonMember ? '<span class="text-sm font-bold text-slate-400 border border-slate-700 px-3 py-1 rounded">Non-Member</span>' : ''}
+                            <span class="text-sm font-bold text-yellow-400 border border-yellow-600/30 bg-yellow-900/10 px-3 py-1 rounded">${m.gender || 'Unknown'}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-8 mt-8">
+                    <div class="space-y-6">
+                        <div class="grid grid-cols-2 gap-4"><div><label>Home Phone</label><div class="font-bold text-slate-200 text-base">${m.homePhone || '—'}</div></div><div><label>Cell Phone</label><div class="font-bold text-slate-200 text-base">${m.cellPhone || '—'}</div></div></div>
+                        <div><label>Email</label><div class="font-bold text-cyan-400 text-base break-all">${m.email || '—'}</div></div>
+                        <div><label>Address</label><div class="font-bold text-slate-200 text-base">${m.address || '—'}</div></div>
+                        <div class="grid grid-cols-2 gap-4"><div><label>Birthday</label><div class="font-bold text-slate-200">${m.dob || '—'}</div></div><div><label>Anniversary</label><div class="font-bold text-slate-200">${m.anniversary || '—'}</div></div></div>
+                        
+                        <div class="p-5 bg-fuchsia-900/20 border border-fuchsia-500/30 rounded"><label class="text-fuchsia-400 mb-2">Prayers / Intercessions</label><div class="font-medium text-fuchsia-100 text-sm whitespace-pre-wrap leading-relaxed">${m.prayers || 'No prayer requests logged.'}</div></div>
+                        <div class="p-5 bg-[#1a1c23] border border-slate-700 rounded"><label class="text-slate-400 mb-2">Metadata / Notes</label><div class="font-medium text-slate-300 text-sm whitespace-pre-wrap leading-relaxed">${m.notes || 'Null'}</div></div>
+                    </div>
+                    <div class="bg-[#1a1c23] p-6 rounded border border-slate-700 shadow-inner h-fit">
+                        <h4 class="text-[10px] font-black text-yellow-400 uppercase mb-4 tracking-widest flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg> Linked Entities</h4>
+                        <div class="space-y-2">${household.length ? household.map(fm => `<button onclick="window.viewProfile('${fm.id}')" class="block w-full text-left p-4 bg-[#0a0514] rounded border border-slate-700 hover:border-cyan-400 transition shadow-sm font-bold text-slate-300 hover:text-cyan-400">${fm.firstName} ${fm.lastName}</button>`).join('') : '<p class="text-slate-500 font-medium text-sm">No linked entities.</p>'}</div>
+                    </div>
+                </div>`;
+            document.getElementById('editBtn').onclick = () => window.openEditForm(m.id);
+            document.getElementById('deleteBtn').onclick = () => window.deleteMember(m.id);
+            renderPersonalChart(m.id);
+        };
+
+        function renderPersonalChart(mid) {
+            const ctx = document.getElementById('personalAttendanceChart').getContext('2d'); if(!ctx) return;
+            if(window.profileChart) window.profileChart.destroy();
+            const hist = sundayLabels.map(l => { const rec = window.attendanceRecords.find(r => r.date === l); return rec && rec.attendees && rec.attendees.includes(mid) ? 1 : 0; });
+            window.profileChart = new Chart(ctx, { 
+                type: 'bar', 
+                data: { labels: sundayLabels, datasets: [{ data: hist, backgroundColor: hist.map(h => h ? '#00d2ff' : 'rgba(71, 85, 105, 0.3)'), borderRadius: 2 }] }, 
+                options: { 
+                    maintainAspectRatio: false, 
+                    scales: { y: { display: false, max: 1.2, beginAtZero: true }, x: { grid: { display: false } } }, 
+                    plugins: { legend: { display: false }, datalabels: { display: false } } 
+                } 
+            });
+        }
+
+        window.renderAttendanceList = () => {
+            const list = document.getElementById('attendanceList'); if(!list) return;
+            const dateInput = document.getElementById('attendanceDate');
+            if (!dateInput.value) { const today = new Date(); today.setDate(today.getDate() - today.getDay()); dateInput.value = today.toISOString().split('T')[0]; }
+            const existingRecord = window.attendanceRecords.find(r => r.date === dateInput.value);
+            const checkedIds = existingRecord ? existingRecord.attendees : [];
+            const sortedMembers = [...window.members].sort((a, b) => { const cmp = a.lastName.localeCompare(b.lastName); return cmp !== 0 ? cmp : a.firstName.localeCompare(b.firstName); });
+            
+            list.innerHTML = sortedMembers.map(m => `
+                <tr>
+                    <td class="px-6 py-4 text-center">
+                        <input type="checkbox" value="${m.id}" ${checkedIds.includes(m.id) ? 'checked' : ''} onchange="window.updateCheckCount()" class="w-5 h-5 cursor-pointer accent-cyan-500 rounded bg-transparent border-slate-600">
+                    </td>
+                    <td class="px-6 py-4 font-bold text-slate-200">${m.lastName}, ${m.firstName}</td>
+                    <td class="px-6 py-4 flex justify-center gap-1">
+                        <span class="text-[9px] font-bold uppercase px-2 py-0.5 rounded border border-slate-600 ${m.isAdult ? 'text-slate-300' : 'text-yellow-500 border-yellow-600/50'}">${m.isAdult ? 'Adult' : 'Child'}</span>
+                        ${m.isNonMember ? '<span class="text-[9px] font-bold uppercase px-2 py-0.5 rounded bg-transparent border border-slate-600 text-slate-500">Non-Member</span>' : ''}
+                    </td>
+                </tr>`).join('');
+            window.updateCheckCount();
+        };
+
+        window.updateCheckCount = () => { const cnt = document.querySelectorAll('.attendee-check:checked').length; const disp = document.getElementById('currentCheckCount'); if(disp) disp.innerText = `Selected: ${cnt} Entities`; };
+
+        window.openEditForm = (id) => {
+            const m = window.members.find(m => m.id === id); if(!m) return;
+            const form = document.getElementById('editMemberForm'); window.showTab('edit-member');
+            form.id.value = m.id; form.firstName.value = m.firstName; form.lastName.value = m.lastName; form.dob.value = m.dob || ''; form.anniversary.value = m.anniversary || ''; form.gender.value = m.gender || 'Male'; form.homePhone.value = m.homePhone || ''; form.cellPhone.value = m.cellPhone || ''; form.email.value = m.email || ''; form.address.value = m.address || ''; form.joinDate.value = m.joinDate || ''; form.notes.value = m.notes || ''; form.prayers.value = m.prayers || '';
+            form.isAdult.checked = m.isAdult !== false; form.isBaptized.checked = m.isBaptized === true; form.isNonMember.checked = m.isNonMember === true;
+            populateFamilyDropdown(document.getElementById('familySelect'), m.familyId);
+        };
+
+        window.verifyAndSaveApiKey = async () => {
+            const key = document.getElementById('apiKeyInput').value.trim(); if(!key) return alert("Please enter API Key.");
+            const btn = document.getElementById('verifyKeyBtn'); btn.innerText = "Verifying..."; btn.disabled = true;
+            try {
+                const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${key}`);
+                const data = await resp.json(); if (data.error) throw new Error(data.error.message);
+                const validModels = data.models.filter(m => m.supportedGenerationMethods && m.supportedGenerationMethods.includes("generateContent"));
+                const select = document.getElementById('aiModelSelect'); select.innerHTML = ''; 
+                validModels.forEach(m => { const modelId = m.name.replace('models/', ''); const option = document.createElement('option'); option.value = modelId; option.innerText = (modelId.includes('flash') ? "⚡ " : "🧠 ") + modelId; select.appendChild(option); });
+                const bestModelId = validModels.find(m => m.name.includes('gemini-1.5-flash'))?.name.replace('models/', '') || validModels[0].name.replace('models/', '');
+                select.value = bestModelId;
+                localStorage.setItem('sumc_gemini_key', key); localStorage.setItem('sumc_gemini_model', bestModelId);
+                window.currentApiKey = key; window.currentAiModel = bestModelId; alert(`✅ Key Authenticated.`); window.updateDashboard();
+            } catch (e) { alert(`❌ Authentication Failed.`); } finally { btn.innerText = "Save Key"; btn.disabled = false; }
+        };
+
+        window.restoreSettingsOnLoad = async () => {
+            const key = window.currentApiKey; const savedModel = window.currentAiModel;
+            if(document.getElementById('appIdInput')) document.getElementById('appIdInput').value = window.currentDbId;
+            if(key) {
+                document.getElementById('apiKeyInput').value = key;
+                try {
+                    const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${key}`);
+                    const data = await resp.json();
+                    if(data.models) {
+                        const validModels = data.models.filter(m => m.supportedGenerationMethods && m.supportedGenerationMethods.includes("generateContent"));
+                        const select = document.getElementById('aiModelSelect'); select.innerHTML = '';
+                        validModels.forEach(m => { const modelId = m.name.replace('models/', ''); const option = document.createElement('option'); option.value = modelId; option.innerText = (modelId.includes('flash') ? "⚡ " : "🧠 ") + modelId; select.appendChild(option); });
+                        if(savedModel) select.value = savedModel;
+                        select.addEventListener('change', (e) => { window.currentAiModel = e.target.value; localStorage.setItem('sumc_gemini_model', e.target.value); });
+                    }
+                } catch(e) {}
+            }
+        };
+
+        window.downloadCSV = (csvContent, fileName) => { const encodedUri = encodeURI("data:text/csv;charset=utf-8,\uFEFF" + csvContent); const link = document.createElement("a"); link.setAttribute("href", encodedUri); link.setAttribute("download", fileName); document.body.appendChild(link); link.click(); document.body.removeChild(link); };
+
+        window.exportToSpreadsheet = (type) => {
+            if(type === 'members') {
+                const headers = "LastName,FirstName,Gender,Address,Phone,Email,Status,Notes,Prayers\n";
+                const rows = window.members.map(m => `"${m.lastName}","${m.firstName}","${m.gender || ''}","${m.address}","${m.cellPhone}","${m.email}","${m.isNonMember ? 'Non-Member' : 'Member'}","${(m.notes || '').replace(/"/g, '""')}","${(m.prayers || '').replace(/"/g, '""')}"`).join("\n");
+                window.downloadCSV(headers + rows, "SUMC_Directory.csv");
+            } else {
+                const headers = "Date,Total,Adults,Children,Names\n";
+                const rows = window.attendanceRecords.map(r => `"${r.date}",${r.attendees ? r.attendees.length : 0},${r.adults || 0},${r.children || 0},"${r.names || ''}"`).join("\n");
+                window.downloadCSV(headers + rows, "SUMC_Attendance.csv");
+            }
+        };
+
+        window.handleFileSelect = async (e) => {
+            const file = e.target.files[0]; if(!file) return;
+            window.attachedFileData.fileName = file.name; const ext = file.name.split('.').pop().toLowerCase();
+            document.getElementById('filePreview').classList.remove('hidden'); document.getElementById('fileName').innerText = file.name; document.getElementById('fileTypeLabel').innerText = "Analyzing...";
+            if (ext === 'pdf') { const reader = new FileReader(); reader.onload = async (ev) => { try { const pdf = await pdfjsLib.getDocument(new Uint8Array(ev.target.result)).promise; let fullText = ""; for (let i = 1; i <= pdf.numPages; i++) { const page = await pdf.getPage(i); const textContent = await page.getTextContent(); fullText += textContent.items.map(item => item.str).join(' ') + "\n"; } window.attachedFileData.extractedText = fullText; document.getElementById('fileTypeLabel').innerText = "Ready"; } catch(err) { alert("PDF Error"); window.clearFile(); } }; reader.readAsArrayBuffer(file); } 
+            else if (['jpg','jpeg','png','webp'].includes(ext)) { Tesseract.recognize(file, 'eng+kor').then(({ data: { text } }) => { window.attachedFileData.extractedText = text; document.getElementById('fileTypeLabel').innerText = "Ready"; }).catch(err => { alert("OCR Error"); window.clearFile(); }); } 
+            else if (ext === 'docx' || ext === 'doc') { const reader = new FileReader(); reader.onload = async (ev) => { try { const res = await mammoth.extractRawText({ arrayBuffer: ev.target.result }); window.attachedFileData.extractedText = res.value; document.getElementById('fileTypeLabel').innerText = "Ready"; } catch(err) { alert("Word Error"); window.clearFile(); } }; reader.readAsArrayBuffer(file); } 
+            else if (ext === 'xlsx' || ext === 'csv' || ext === 'xls') { const reader = new FileReader(); reader.onload = (ev) => { try { const wb = XLSX.read(ev.target.result, { type: 'array' }); window.attachedFileData.extractedText = XLSX.utils.sheet_to_csv(wb.Sheets[wb.SheetNames[0]]); document.getElementById('fileTypeLabel').innerText = "Ready"; } catch(err) { alert("Excel Error"); window.clearFile(); } }; reader.readAsArrayBuffer(file); } 
+            else { const reader = new FileReader(); reader.onload = (ev) => { window.attachedFileData.extractedText = ev.target.result; document.getElementById('fileTypeLabel').innerText = "Ready"; }; reader.readAsText(file); }
+        };
+
+        window.clearFile = () => { window.attachedFileData = { extractedText: null, fileName: null }; document.getElementById('filePreview').classList.add('hidden'); };
+
+        window.askGemini = async () => {
+            const key = window.currentApiKey; if(!key) return alert("Save API Key in Dashboard first.");
+            const query = document.getElementById('geminiInput').value; if(!query && !window.attachedFileData.extractedText) return;
+            const chat = document.getElementById('geminiChatDisplay'); const sendBtn = document.getElementById('sendBtn');
+            sendBtn.disabled = true; sendBtn.innerHTML = `<span class="loading-spinner"></span>`;
+            const uMsg = document.createElement('div'); uMsg.className = "p-4 bg-[#1e2330] border border-cyan-500/50 rounded text-cyan-100 text-right self-end max-w-[90%] font-semibold"; uMsg.innerHTML = (window.attachedFileData.fileName ? `<span class="block text-[10px] text-cyan-400 mb-1">📎 Source: ${window.attachedFileData.fileName}</span>` : "") + (query || "Analyze data"); chat.appendChild(uMsg); document.getElementById('geminiInput').value = "";
+            const load = document.createElement('div'); load.className = "p-4 bg-[#1a1c23] border border-slate-700 rounded italic text-slate-400 self-start max-w-[90%] flex items-center gap-3"; load.innerHTML = `<span class="loading-spinner"></span> Computing...`; chat.appendChild(load); chat.scrollTop = chat.scrollHeight;
+
+            try {
+                let model = document.getElementById('aiModelSelect').value || window.currentAiModel || "gemini-1.5-flash";
+                let finalAnswer = "";
+                
+                const dbContext = {
+                    totalMembers: window.members.length,
+                    membersData: window.members.map(m => ({ 
+                        id: m.id, name: `${m.lastName}, ${m.firstName}`, gender: m.gender || 'Not Checked', type: m.isNonMember ? 'Non-Member' : 'Full Member', group: m.isAdult ? 'Adult' : 'Child', baptized: m.isBaptized ? 'Yes' : 'No', contact: { cell: m.cellPhone || 'N/A', home: m.homePhone || 'N/A', email: m.email || 'N/A' }, address: m.address || 'N/A', dates: { dob: m.dob || 'N/A', anniversary: m.anniversary || 'N/A', joined: m.joinDate || 'N/A' }, householdId: m.familyId, notes: m.notes || '', prayers: m.prayers || ''
+                    })),
+                    attendanceRecords: window.attendanceRecords.map(r => ({ date: r.date, count: r.attendees ? r.attendees.length : 0, members: r.names }))
+                };
+                
+                const sysPrompt = `You are the SUMC AI Assistant. You have full read-access to the internal church database context provided below in JSON format.
+Your goal is to answer ANY request using this data. If gender is 'Not Checked', mention that it's missing for those individuals. Always reply in the exact language the user uses in their prompt. 
+
+--- DB CONTEXT ---
+${JSON.stringify(dbContext)}
+--- END CONTEXT ---`;
+
+                const attemptCall = async (m, userText) => {
+                    const apiEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${key}`;
+                    const payload = { contents: [{ role: "user", parts: [{ text: `${sysPrompt}\n\nUser Request: ${userText}` }] }] };
+                    const resp = await fetch(apiEndpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                    const res = await resp.json(); if (res.error) throw res.error; return res.candidates[0].content.parts[0].text;
+                };
+
+                const textData = window.attachedFileData.extractedText || "";
+                if (textData.length > 15000) {
+                    const chunks = textData.match(/.{1,15000}/g);
+                    for (let i = 0; i < chunks.length; i++) { finalAnswer += `\n\n🔹 **[Part ${i+1}]**\n` + await attemptCall(model, `Document chunk: ${chunks[i]}\nRequest: ${query}`); if (i < chunks.length - 1) await new Promise(r => setTimeout(r, 4000)); }
+                } else {
+                    let fullQuery = query; if(textData) fullQuery += `\n\nDocument text: ${textData}`;
+                    try { finalAnswer = await attemptCall(model, fullQuery); } catch (err) { if (err.code === 429) finalAnswer = await attemptCall("gemini-1.5-flash", fullQuery); else throw err; }
+                }
+                chat.removeChild(load); const aiMsg = document.createElement('div'); aiMsg.className = "p-4 bg-[#1a1c23] border border-fuchsia-500/50 rounded text-slate-200 self-start max-w-[95%] shadow-[0_0_15px_rgba(217,70,239,0.1)] whitespace-pre-wrap leading-relaxed"; aiMsg.innerHTML = finalAnswer; chat.appendChild(aiMsg); chat.scrollTop = chat.scrollHeight; window.clearFile(); 
+            } catch (e) { chat.removeChild(load); alert(`AI Error: ${e.message}`); } finally { sendBtn.disabled = false; sendBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" /></svg>`; }
+        };
+
+        // ==========================================
+        // 🔥 PRAYER LIST ASSISTANT LOGIC 🔥
+        // ==========================================
+        window.handlePrayerImageChange = (e) => {
+            const file = e.target?.files?.[0];
+            if (file) {
+                document.getElementById('prayerImgLabel').innerText = file.name;
+                const reader = new FileReader();
+                reader.onloadend = () => { window.prayerImageBase64 = reader.result.split(',')[1]; };
+                reader.readAsDataURL(file);
+            }
+        };
+
+        // Initialize Drag & Drop for Image
+        setTimeout(() => {
+            const dropZone = document.getElementById('prayerDropZone');
+            const fileInput = document.getElementById('prayerImageInput');
+            
+            if(dropZone && fileInput) {
+                ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                    dropZone.addEventListener(eventName, e => { e.preventDefault(); e.stopPropagation(); }, false);
+                });
+                
+                ['dragenter', 'dragover'].forEach(eventName => {
+                    dropZone.addEventListener(eventName, () => dropZone.classList.add('border-cyan-400', 'bg-slate-800'), false);
+                });
+                
+                ['dragleave', 'drop'].forEach(eventName => {
+                    dropZone.addEventListener(eventName, () => dropZone.classList.remove('border-cyan-400', 'bg-slate-800'), false);
+                });
+                
+                dropZone.addEventListener('drop', (e) => {
+                    if(e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                        fileInput.files = e.dataTransfer.files;
+                        window.handlePrayerImageChange({ target: fileInput });
+                    }
+                }, false);
+            }
+        }, 500);
+
+        window.generatePrayerList = async () => {
+            const key = window.currentApiKey;
+            if(!key) return alert("Please authenticate AI Key in Dashboard first.");
+            
+            const ytUrl = document.getElementById('prayerYoutubeUrl').value;
+            if(!window.prayerImageBase64 && !ytUrl) return alert("Please provide an image or a YouTube link.");
+            
+            const btn = document.getElementById('genPrayerBtn');
+            const resBox = document.getElementById('prayerResultText');
+            
+            btn.disabled = true; 
+            btn.innerHTML = `<span class="loading-spinner"></span> Generating...`;
+            
+            try {
+                let model = window.currentAiModel || "gemini-1.5-flash";
+                const promptText = `You are the 'Intercessory Prayer Organization Expert' for our US UMC congregation.
+STRICT RULES:
+1. ONLY use data provided in the attached image or the YouTube video info.
+2. DO NOT hallucinate or search for external data.
+3. If no prayer requests are identified, simply say "No prayer requests found."
+4. Format MUST BE: First Last: [Formal Prayer/Joy Sentence]. (Use a colon after the name).
+5. Language: Formal English for a US church context.
+
+DATA SOURCES:
+YouTube Link: ${ytUrl || 'Not provided'}
+
+TASK: Extract and format the prayer list accordingly.`;
+
+                const payload = {
+                    contents: [{
+                        role: "user",
+                        parts: [
+                            { text: promptText },
+                            ...(window.prayerImageBase64 ? [{ inlineData: { mimeType: "image/jpeg", data: window.prayerImageBase64 } }] : [])
+                        ]
+                    }]
+                };
+
+                const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await resp.json();
+                if(data.error) throw new Error(data.error.message);
+                
+                resBox.value = data.candidates[0].content.parts[0].text;
+            } catch(e) {
+                alert("Generation failed: " + e.message);
+            } finally {
+                btn.disabled = false; 
+                btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd" /></svg> Generate with AI`;
+            }
+        };
+
+        window.savePrayerList = async () => {
+            const dateVal = document.getElementById('prayerDate').value;
+            
+            // Format Date safely
+            let formattedDate = "";
+            if (dateVal) {
+                const [year, month, day] = dateVal.split('-');
+                formattedDate = `${parseInt(month)}/${parseInt(day)}/${year}`;
+            } else {
+                const today = new Date();
+                formattedDate = `${today.getMonth() + 1}/${today.getDate()}/${today.getFullYear()}`;
+            }
+            
+            const text = document.getElementById('prayerResultText').value;
+
+            if(!text) return alert("No prayer requests to save!");
+
+            // 1. Download DOCX
+            try {
+                const { Document, Paragraph, TextRun, Packer } = docx;
+                const doc = new Document({
+                    sections: [{
+                        children: [
+                            new Paragraph({ children: [new TextRun({ text: `Prayer List (${formattedDate})`, font: "Times New Roman", size: 28 })], spacing: { after: 400 } }),
+                            ...text.split('\n').filter(l => l.trim()).map(line => new Paragraph({ children: [new TextRun({ text: line.trim(), font: "Times New Roman", size: 24 })], spacing: { before: 120 } }))
+                        ]
+                    }]
+                });
+                const blob = await Packer.toBlob(doc);
+                saveAs(blob, `Prayer_List_${formattedDate.replace(/\//g,'_')}.docx`);
+            } catch(e) {
+                console.error("DOCX generation error:", e);
+                alert("Word document generation failed. Proceeding to save to profiles.");
+            }
+
+            // 2. Parse and Update Firestore
+            if(window.updatePrayerInDb) {
+                const lines = text.split('\n');
+                let updatedCount = 0;
+                
+                for(let line of lines) {
+                    // Match format "First Last: Prayer..."
+                    const match = line.match(/^([^:]+):\s*(.*)$/);
+                    if(match) {
+                        const namePart = match[1].trim().toLowerCase();
+                        const prayerPart = match[2].trim();
+                        
+                        // Find matching member in Directory
+                        const member = window.members.find(m => namePart.includes(m.firstName.toLowerCase()) && namePart.includes(m.lastName.toLowerCase()));
+                        
+                        if(member) {
+                            const newPrayerEntry = `- ${prayerPart} (${formattedDate})`;
+                            const currentPrayers = member.prayers || "";
+                            const updatedPrayers = currentPrayers ? `${currentPrayers}\n${newPrayerEntry}` : newPrayerEntry;
+                            
+                            // Send to Cloud
+                            await window.updatePrayerInDb(member.id, updatedPrayers);
+                            updatedCount++;
+                        }
+                    }
+                }
+                alert(`Successfully generated Document & automatically updated prayer logs for ${updatedCount} matched profiles!`);
+            } else {
+                alert("Database connection not ready. Document downloaded.");
+            }
+        };
+
+        window.restoreSettingsOnLoad();
+    </script>
+
+    <!-- FIREBASE CLOUD MODULE -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, collection, onSnapshot, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAqJPIupZD6ke0ecNLPmJHp-JcndLRIwaU",
+  authDomain: "sumc-ai-management-system.firebaseapp.com",
+  databaseURL: "https://sumc-ai-management-system-default-rtdb.firebaseio.com",
+  projectId: "sumc-ai-management-system",
+  storageBucket: "sumc-ai-management-system.firebasestorage.app",
+  messagingSenderId: "50235569152",
+  appId: "1:50235569152:web:3d708d469624680a3014e5",
+  measurementId: "G-BJT0DEGZ36"
+};
+
+        if (!firebaseConfig.apiKey.startsWith("여기에")) {
+            const app = initializeApp(firebaseConfig); const auth = getAuth(app); const db = getFirestore(app);
+            const appId = localStorage.getItem('sumc_db_id') || "sumc-2026-production-main";
+            
+            // Expose the update function globally for the Prayer Assistant
+            window.updatePrayerInDb = async (id, updatedPrayers) => {
+                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'members', id), { prayers: updatedPrayers });
+            };
+
+            signInAnonymously(auth).then(() => {
+                onAuthStateChanged(auth, (user) => {
+                    const statusEl = document.getElementById('cloudStatusIndicator'); const dot = document.getElementById('statusDot');
+                    if (user) {
+                        statusEl.innerText = "Online"; statusEl.className = "text-[10px] text-emerald-400 uppercase tracking-widest font-bold"; dot.className = "w-2 h-2 rounded-full bg-emerald-400";
+                        onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'members'), (snap) => { window.members = snap.docs.map(d => ({ id: d.id, ...d.data() })); window.updateDashboard(); window.renderDirectory(); if(document.getElementById('attendance').classList.contains('active-tab')) window.renderAttendanceList(); });
+                        onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'attendance'), (snap) => { window.attendanceRecords = snap.docs.map(d => ({ id: d.id, ...d.data() })); window.updateDashboard(); if(document.getElementById('attendance').classList.contains('active-tab')) window.renderAttendanceList(); });
+                    }
+                });
+            });
+
+            window.saveAttendance = async () => {
+                const date = document.getElementById('attendanceDate').value; const checkedIds = Array.from(document.querySelectorAll('.attendee-check:checked')).map(cb => cb.value);
+                if (!date) return alert("Select a date first."); 
+                const attended = window.members.filter(m => checkedIds.includes(m.id)); 
+                const adultsCount = attended.filter(m => m.isAdult).length; const childrenCount = attended.filter(m => !m.isAdult).length; const names = attended.map(m => `${m.lastName}, ${m.firstName}`).join('; ');
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'attendance', date), { date, attendees: checkedIds, adults: adultsCount, children: childrenCount, names });
+                const csvContent = `Date,Total Attendees,Adults,Children,Names\n"${date}",${checkedIds.length},${adultsCount},${childrenCount},"${names}"`; window.downloadCSV(csvContent, `SUMC_Attendance_${date}.csv`); alert("Data written to Store & Exported to CSV.");
+            };
+
+            window.submitEdit = async (e) => {
+                e.preventDefault(); const fd = new FormData(e.target); const id = fd.get('id'); const data = Object.fromEntries(fd.entries());
+                data.isAdult = fd.get('isAdult') === 'on'; data.isBaptized = fd.get('isBaptized') === 'on'; data.isNonMember = fd.get('isNonMember') === 'on';
+                if (data.familyId === 'new') data.familyId = 'fam_' + Date.now() + Math.random();
+                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'members', id), data); alert("Entity Updated."); window.viewProfile(id);
+            };
+
+            window.deleteMember = async (id) => { if(!confirm("Permanently drop this entity?")) return; await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'members', id)); alert("Dropped."); window.showTab('directory'); };
+
+            window.registerNewMember = async (e) => {
+                e.preventDefault(); const fd = new FormData(e.target); const data = Object.fromEntries(fd.entries());
+                data.isAdult = fd.get('isAdult') === 'on'; data.isBaptized = fd.get('isBaptized') === 'on'; data.isNonMember = fd.get('isNonMember') === 'on';
+                if (!data.familyId || data.familyId === 'new') data.familyId = 'fam_' + Date.now() + Math.random();
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'members', Date.now().toString()), data); alert("Insertion Complete!"); window.showTab('directory');
+            };
+
+            window.processBulkImport = async () => {
+                const input = document.getElementById('bulkDataInput').value; if(!input) return alert("Enter payload first.");
+                const lines = input.split('\n'); let count = 0;
+                for(let line of lines) {
+                    if(!line.trim()) continue; 
+                    try {
+                        const matches = [...line.matchAll(/"([^"]*)"/g)].map(m => m[1]);
+                        if (matches.length >= 1) {
+                            const fullName = matches[0] || ""; const nameParts = fullName.split(',').map(n => n.trim());
+                            const data = { lastName: nameParts[0] || 'Unknown', firstName: nameParts[1] || '', address: matches[1] || '', cellPhone: matches[2] || '', email: matches[3] || '', isAdult: true, isBaptized: false, isNonMember: false, familyId: 'fam_' + Date.now() + count };
+                            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'members', (Date.now() + count).toString()), data); count++;
+                        }
+                    } catch(err) { console.error("Parse Error:", err); }
+                }
+                if(count > 0) { alert(`${count} entities ingested to Cloud.`); document.getElementById('bulkDataInput').value = ""; window.showTab('directory'); } else { alert("Format Error. Check quotes."); }
+            };
+        }
+    </script>
+</body>
+</html>
