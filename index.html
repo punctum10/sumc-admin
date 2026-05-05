@@ -86,17 +86,25 @@
 </head>
 <body class="flex h-screen">
 
+    <!-- MOBILE SIDEBAR OVERLAY -->
+    <div id="sidebarOverlay" class="fixed inset-0 bg-black/80 z-40 hidden md:hidden" onclick="window.toggleSidebar()"></div>
+
     <!-- LEFT SIDEBAR -->
-    <aside class="w-64 flex-shrink-0 flex flex-col border-r border-slate-700 relative z-20 shadow-2xl" style="background-color: rgba(5, 0, 25, 0.8); backdrop-filter: blur(10px);">
-        <div class="p-6 border-b border-slate-700">
+    <aside id="sidebar" class="w-64 flex-shrink-0 flex flex-col border-r border-slate-700 absolute md:relative z-50 h-full transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out" style="background-color: rgba(5, 0, 25, 0.95); backdrop-filter: blur(10px);">
+        <div class="p-6 border-b border-slate-700 flex justify-between items-center">
             <div class="flex flex-col cursor-pointer hover:opacity-80 transition" onclick="window.showTab('dashboard', document.querySelectorAll('.nav-btn')[0])">
                 <h1 class="text-2xl font-black text-white tracking-tight leading-none">SUMC AI</h1>
                 <span class="text-[11px] font-bold text-yellow-400 tracking-widest mt-1 uppercase tracking-tighter">Assistant</span>
             </div>
-            <div class="mt-5 flex items-center gap-2">
-                <div class="w-2.5 h-2.5 rounded-full bg-red-600 shadow-[0_0_8px_rgba(220,38,38,0.5)] transition-colors duration-500" id="statusDot"></div>
-                <span id="cloudStatusIndicator" class="text-[10px] text-red-500 uppercase tracking-widest font-black">Offline</span>
-            </div>
+            <!-- Mobile Close Button -->
+            <button class="md:hidden text-slate-400 hover:text-white" onclick="window.toggleSidebar()">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+        </div>
+        
+        <div class="px-6 py-4 flex items-center gap-2">
+            <div class="w-2.5 h-2.5 rounded-full bg-red-600 shadow-[0_0_8px_rgba(220,38,38,0.5)] transition-colors duration-500" id="statusDot"></div>
+            <span id="cloudStatusIndicator" class="text-[10px] text-red-500 uppercase tracking-widest font-black">Offline</span>
         </div>
 
         <nav class="flex-1 overflow-y-auto p-4 space-y-2">
@@ -125,203 +133,233 @@
         <div class="p-4 border-t border-slate-700">
             <button onclick="window.openNewMemberForm()" class="w-full bg-cyan-600 hover:bg-cyan-500 text-white p-3 rounded font-bold flex items-center justify-center gap-2 transition shadow-lg shadow-cyan-900/20">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" /></svg>
-                New Data Entry
+                Add New Member
             </button>
         </div>
     </aside>
 
-    <!-- MAIN CONTENT -->
-    <main class="flex-1 overflow-y-auto relative p-4 md:p-8 lg:px-12 z-10">
-        <div class="max-w-6xl mx-auto">
-            
-            <!-- DASHBOARD TAB -->
-            <div id="dashboard" class="tab-content active-tab space-y-6">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="card p-6 flex flex-col justify-center border-t-2 border-emerald-400">
-                        <label class="text-yellow-400 font-bold">Total Directory</label>
-                        <p class="text-4xl font-black text-white mt-2" id="totalMembers">0</p>
-                        <p class="text-xs text-slate-400 mt-2 font-medium" id="memberBreakdown">Adult: 0 / Child: 0</p>
-                    </div>
-                    <div class="card p-6 flex flex-col justify-center border-t-2 border-emerald-400">
-                        <label class="text-yellow-400 font-bold">New Records (2026)</label>
-                        <p class="text-4xl font-black text-white mt-2" id="newMemberCount">0</p>
-                        <p class="text-xs text-slate-400 mt-2 font-medium">Recently ingested</p>
-                    </div>
-                    <div class="card p-6 flex flex-col justify-center border-t-2 border-emerald-400">
-                        <label class="text-yellow-400 font-bold">Avg. Attendance</label>
-                        <p class="text-4xl font-black text-white mt-2" id="avgAttendanceDisplay">0 / 0%</p>
-                        <p class="text-xs text-slate-400 mt-2 font-medium">Analytics snapshots</p>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div class="card flex flex-col h-[600px] border border-fuchsia-500/50 shadow-[0_0_15px_rgba(217,70,239,0.15)] overflow-hidden">
-                        <div class="px-6 py-4 border-b border-slate-700 flex justify-between items-center" style="background-color: rgba(217, 70, 239, 0.05);">
-                            <h3 class="text-base font-extrabold flex items-center gap-2 text-fuchsia-400">AI Assistant</h3>
-                            <span id="aiStatus" class="text-[9px] bg-slate-800 border border-slate-600 text-slate-400 px-2.5 py-1 rounded-sm font-bold uppercase tracking-widest">Key Required</span>
-                        </div>
-                        <div id="geminiChatDisplay" class="flex-1 overflow-y-auto p-6 flex flex-col gap-4 text-sm leading-relaxed" style="background-color: rgba(5,0,20,0.4);">
-                            <div class="p-4 bg-[#1a1c23] border border-slate-700 rounded text-slate-200 self-start max-w-[90%]">Welcome to SUMC AI. Query any data point below.</div>
-                        </div>
-                        <div class="p-4 border-t border-slate-700" style="background-color: rgba(10,5,30,0.6);">
-                            <div class="flex items-center gap-2">
-                                <input type="file" id="aiFileInput" class="hidden" onchange="window.handleFileSelect(event)">
-                                <button onclick="document.getElementById('aiFileInput').click()" class="p-3 bg-[#1a1c23] border border-slate-600 hover:border-cyan-400 transition text-slate-300 rounded"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-2.828-6.828l-6.414 6.586a6 6 0 008.485 8.486L20.5 13" /></svg></button>
-                                <input type="text" id="geminiInput" placeholder="Analyze members or trends..." class="flex-1 rounded" onkeypress="if(event.key==='Enter') window.askGemini()">
-                                <button onclick="window.askGemini()" id="sendBtn" class="bg-cyan-600 hover:bg-cyan-500 text-white px-6 py-3 rounded font-bold transition flex-shrink-0 shadow-[0_0_10px_rgba(6,182,212,0.4)]"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" /></svg></button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card p-6 flex flex-col h-[600px] border border-cyan-500/50 shadow-[0_0_15px_rgba(6,182,212,0.1)]">
-                        <h3 class="text-base font-extrabold text-cyan-400 mb-6">Attendance Trends</h3>
-                        <div class="flex-1 min-h-[300px] w-full"><canvas id="mainAttendanceChart"></canvas></div>
-                    </div>
-                </div>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="card p-6 border-slate-700">
-                        <h3 class="text-sm font-bold uppercase text-yellow-400 mb-4 tracking-widest">System Configuration</h3>
-                        <label>AI API Key <span class="text-xs text-slate-500 lowercase">(Leave empty if Master Key is set)</span></label>
-                        <div class="flex gap-2 mb-4"><input type="password" id="apiKeyInput" placeholder="Enter secure key"></div>
-                        <label>Select AI Model</label>
-                        <div class="flex gap-2">
-                            <select id="aiModelSelect" class="flex-1"><option value="">Authenticate first</option></select>
-                            <button onclick="window.verifyAndSaveApiKey()" id="verifyKeyBtn" class="bg-slate-700 text-white px-5 py-2 rounded text-xs font-bold transition hover:bg-slate-600 whitespace-nowrap">Save Key</button>
-                        </div>
-                        <div class="mt-6 pt-4 border-t border-slate-700">
-                            <label class="text-cyan-400 font-bold mb-2">Database Connection</label>
-                            <div class="flex gap-2">
-                                <input type="text" id="appIdInput" placeholder="e.g. sumc-2026-production-db" class="flex-1 font-mono text-sm text-slate-300 font-bold" readonly>
-                                <button onclick="window.changeDatabase()" class="bg-transparent border border-cyan-400 text-cyan-400 hover:bg-cyan-900/30 px-5 py-2 rounded text-xs font-bold transition whitespace-nowrap">Connect</button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card p-6 border-slate-700">
-                        <h3 class="text-sm font-bold uppercase text-yellow-400 mb-4 tracking-widest font-black">Data Extraction</h3>
-                        <div class="flex flex-col gap-3 text-sm">
-                            <button onclick="window.exportToSpreadsheet('members')" class="w-full bg-[#1a1c23] border border-slate-600 px-4 py-3 rounded text-sm font-bold text-slate-300 hover:border-cyan-400 hover:text-cyan-400 transition flex items-center justify-between">Download Directory (CSV) <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg></button>
-                            <button onclick="window.exportToSpreadsheet('attendance')" class="w-full bg-[#1a1c23] border border-slate-600 px-4 py-3 rounded text-sm font-bold text-slate-300 hover:border-cyan-400 hover:text-cyan-400 transition flex items-center justify-between">Download Attendance (CSV) <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg></button>
-                        </div>
-                    </div>
-                </div>
+    <!-- MAIN CONTENT WRAPPER -->
+    <div class="flex-1 flex flex-col min-w-0 h-screen">
+        
+        <!-- MOBILE HEADER -->
+        <div class="md:hidden flex items-center justify-between p-4 border-b border-slate-700 bg-[rgba(5,0,25,0.9)] backdrop-blur z-30 shadow-md">
+            <div class="flex flex-col">
+                <h1 class="text-xl font-black text-white leading-none">SUMC AI</h1>
+                <span class="text-[9px] font-bold text-yellow-400 tracking-widest mt-1 uppercase">Assistant</span>
             </div>
-
-            <!-- ATTENDANCE TAB -->
-            <div id="attendance" class="tab-content space-y-6">
-                <div class="flex justify-between items-center"><h2 class="text-3xl font-black text-white">Attendance</h2><div class="w-48"><input type="date" id="attendanceDate" onchange="window.renderAttendanceList()" class="font-bold text-cyan-400 text-center"></div></div>
-                <div class="card overflow-hidden">
-                    <div class="max-h-[600px] overflow-y-auto">
-                        <table class="min-w-full">
-                            <thead class="bg-[#252836] sticky top-0 z-10"><tr><th class="px-6 py-4 text-center text-xs font-extrabold text-yellow-400 uppercase w-20">Log</th><th class="px-6 py-4 text-left text-xs font-extrabold text-yellow-400 uppercase font-black">Entity Name (A-Z)</th><th class="px-6 py-4 text-center text-xs font-extrabold text-yellow-400 uppercase">Category</th></tr></thead>
-                            <tbody id="attendanceList" class="bg-[#1a1c23] text-slate-200"></tbody>
-                        </table>
-                    </div>
-                    <div class="p-6 bg-[#0f111a] border-t border-slate-700 flex justify-between items-center">
-                        <p id="currentCheckCount" class="text-sm font-bold text-slate-400">Selected: 0</p>
-                        <button onclick="window.saveAttendance()" class="bg-cyan-600 text-white px-8 py-3 rounded font-bold hover:bg-cyan-500 shadow-[0_0_10px_rgba(6,182,212,0.4)] transition">Store to Database</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- DIRECTORY TAB -->
-            <div id="directory" class="tab-content space-y-6">
-                <div class="flex flex-col sm:flex-row justify-between items-center gap-4"><h2 class="text-3xl font-black text-white">Directory</h2><div class="relative w-full sm:w-72"><input type="text" placeholder="Query records..." id="dirSearch" onkeyup="window.renderDirectory()" class="pl-10"></div></div>
-                <div id="memberContainer" class="columns-1 md:columns-2 gap-6 space-y-6"></div>
-            </div>
-
-            <!-- PRAYER LIST ASSISTANT -->
-            <div id="prayer-list" class="tab-content space-y-6">
-                <div class="card p-8 md:p-10 border-fuchsia-500/50 shadow-[0_0_15px_rgba(217,70,239,0.1)]">
-                    <h2 class="text-2xl font-black text-white mb-6 border-b border-slate-700 pb-4">Prayer List Generator</h2>
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                        <div class="space-y-6">
-                            <div class="p-5 bg-[#1a1c23] rounded border border-slate-700"><label class="text-yellow-400 font-black">Worship Date</label><input type="date" id="prayerDate"></div>
-                            <div class="p-5 bg-[#1a1c23] rounded border border-slate-700">
-                                <label class="text-yellow-400 font-black mb-3">Data Sources (Click or Drag & Drop)</label>
-                                <label id="prayerDropZone" class="flex flex-col items-center justify-center w-full p-8 border-2 border-dashed border-slate-600 rounded cursor-pointer hover:bg-slate-800 transition-all text-center">
-                                    <span class="text-4xl mb-2">📷</span>
-                                    <span id="prayerImgLabel" class="text-sm text-slate-300 font-semibold">Drop Handwritten Notes Here</span>
-                                    <input type="file" accept="image/*" id="prayerImageInput" class="hidden" />
-                                </label>
-                                <input type="url" id="prayerYoutubeUrl" placeholder="YouTube Link (Optional)" class="mt-4">
-                            </div>
-                        </div>
-                        <div class="flex flex-col bg-[#1a1c23] p-5 rounded border border-slate-700 min-h-[350px]">
-                            <label class="text-cyan-400 font-black mb-3 uppercase tracking-widest text-[10px]">Editable Result Preview</label>
-                            <textarea id="prayerResultText" class="flex-grow bg-[#0a0514] font-serif-formatted text-lg leading-relaxed p-4 resize-none border border-slate-600 focus:border-cyan-400" placeholder="Extracted results will appear here for editing..."></textarea>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8 pt-6 border-t border-slate-700">
-                        <button onclick="window.generatePrayerList()" id="genPrayerBtn" class="w-full bg-fuchsia-600 text-white py-4 rounded font-bold hover:bg-fuchsia-500 transition shadow-[0_0_10px_rgba(217,70,239,0.4)] text-lg flex items-center justify-center gap-2">
-                            <span class="loading-spinner hidden" id="prayerSpinner"></span>
-                            Generate with AI
-                        </button>
-                        <button onclick="window.savePrayerList()" class="w-full bg-cyan-600 text-white py-4 rounded font-bold hover:bg-cyan-500 transition shadow-[0_0_10px_rgba(6,182,212,0.4)] text-lg">Save & Download .docx</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- BULK IMPORT TAB -->
-            <div id="data-import" class="tab-content space-y-6">
-                <div class="card p-10 max-w-3xl mx-auto border-cyan-500/50 shadow-[0_0_15px_rgba(6,182,212,0.1)]">
-                    <h2 class="text-2xl font-extrabold text-cyan-400 text-center mb-8 uppercase tracking-tighter">Bulk Data Ingestion</h2>
-                    <textarea id="bulkDataInput" rows="10" class="font-mono text-sm leading-relaxed" placeholder='"LastName, FirstName", "Address", "Phone", "Email"'></textarea>
-                    <button onclick="window.processBulkImport()" class="w-full bg-cyan-600 text-white p-4 rounded font-bold mt-6 hover:bg-cyan-500 transition shadow-[0_0_10px_rgba(6,182,212,0.4)]">Execute Bulk Process</button>
-                </div>
-            </div>
-
-            <!-- PROFILE VIEW TAB -->
-            <div id="profile-view" class="tab-content space-y-6">
-                <button onclick="window.showTab('directory', document.querySelectorAll('.nav-btn')[2])" class="text-sm font-bold text-slate-400 hover:text-cyan-400">&larr; Back to Databases</button>
-                <div class="card p-8 md:p-10 border-t-2 border-cyan-400"><div id="profileContent"></div><div class="mt-12 pt-8 border-t border-slate-700"><h4 class="text-yellow-400 mb-6 text-sm uppercase tracking-widest font-black">Attendance Record</h4><div class="h-48 w-full"><canvas id="personalAttendanceChart"></canvas></div></div><div class="mt-10 pt-6 flex gap-4 border-t border-slate-700"><button id="editBtn" class="border border-cyan-400 text-cyan-400 px-8 py-3 rounded font-bold hover:bg-cyan-900/30 transition">Edit Record</button><button id="deleteBtn" class="border border-red-500 text-red-500 px-8 py-3 rounded font-bold hover:bg-red-900/30 transition">Drop Record</button></div></div>
-            </div>
-
-            <!-- EDIT MEMBER TAB -->
-            <div id="edit-member" class="tab-content">
-                <button onclick="window.showTab('profile-view')" class="text-sm font-bold text-slate-400 hover:text-cyan-400">&larr; Cancel Update</button>
-                <div class="card p-8 md:p-10 max-w-3xl mx-auto border-t-2 border-yellow-400">
-                    <h2 class="text-2xl font-black mb-8 text-white uppercase tracking-tight">Modify Entity Data</h2>
-                    <form id="editMemberForm" onsubmit="window.submitEdit(event)" class="space-y-5">
-                        <input type="hidden" name="id">
-                        <div class="grid grid-cols-2 gap-5"><div><label>First Name</label><input type="text" name="firstName" required></div><div><label>Last Name</label><input type="text" name="lastName" required></div></div>
-                        <div class="grid grid-cols-3 gap-5"><div><label>Birthday</label><input type="date" name="dob"></div><div><label>Anniversary</label><input type="date" name="anniversary"></div><div><label>Gender</label><select name="gender"><option value="Male">Male</option><option value="Female">Female</option></select></div></div>
-                        <div class="grid grid-cols-2 gap-5"><div><label>Home Phone</label><input type="tel" name="homePhone"></div><div><label>Cell Phone</label><input type="tel" name="cellPhone"></div></div>
-                        <div><label>Email Address</label><input type="email" name="email"></div>
-                        <div><label>Home Address</label><input type="text" name="address"></div>
-                        <div class="grid grid-cols-2 gap-5"><div><label>Cluster Group</label><select id="familySelect" name="familyId"></select></div><div><label>Ingestion Date</label><input type="date" name="joinDate"></div></div>
-                        <div><label class="text-fuchsia-400 font-black">Intercessory Prayers (Log)</label><textarea name="prayers" rows="4"></textarea></div>
-                        <div><label class="font-black">Administrative Notes</label><textarea name="notes" rows="3"></textarea></div>
-                        <div class="flex gap-6 border-t border-slate-700 pt-5"><label class="flex items-center space-x-2"><input type="checkbox" name="isAdult" class="w-5 h-5"><span>Adult</span></label><label class="flex items-center space-x-2"><input type="checkbox" name="isBaptized" class="w-5 h-5"><span>Baptized</span></label><label class="flex items-center space-x-2"><input type="checkbox" name="isNonMember" class="w-5 h-5"><span>Non-Member</span></label></div>
-                        <button type="submit" class="w-full bg-cyan-600 text-white p-4 rounded font-bold mt-6 shadow-[0_0_10px_rgba(6,182,212,0.4)]">Push Changes to Cloud</button>
-                    </form>
-                </div>
-            </div>
-
-            <!-- NEW MEMBER TAB -->
-            <div id="new-member" class="tab-content">
-                <div class="card p-8 md:p-10 max-w-3xl mx-auto mt-6 border-t-2 border-emerald-400">
-                    <h2 class="text-2xl font-black mb-8 text-white uppercase text-center tracking-tight">Manual Entity Ingestion</h2>
-                    <form id="newMemberForm" onsubmit="window.registerNewMember(event)" class="space-y-5">
-                        <div class="grid grid-cols-2 gap-5"><div><label>First Name</label><input type="text" name="firstName" required></div><div><label>Last Name</label><input type="text" name="lastName" required></div></div>
-                        <div class="grid grid-cols-3 gap-5"><div><label>Birthday</label><input type="date" name="dob"></div><div><label>Anniversary</label><input type="date" name="anniversary"></div><div><label>Gender</label><select name="gender"><option value="Male">Male</option><option value="Female">Female</option></select></div></div>
-                        <div class="grid grid-cols-2 gap-5"><div><label>Home Phone</label><input type="tel" name="homePhone"></div><div><label>Cell Phone</label><input type="tel" name="cellPhone"></div></div>
-                        <div><label>Email</label><input type="email" name="email"></div>
-                        <div><label>Address</label><input type="text" name="address"></div>
-                        <div class="grid grid-cols-2 gap-5"><div><label>Cluster Group</label><select id="newFamilySelect" name="familyId"></select></div><div><label>Ingestion Date</label><input type="date" name="joinDate"></div></div>
-                        <div><label class="text-fuchsia-400 font-black">Initial Prayers</label><textarea name="prayers" rows="3"></textarea></div>
-                        <div><label class="font-black">Metadata / Notes</label><textarea name="notes" rows="3"></textarea></div>
-                        <div class="flex gap-6 border-t border-slate-700 pt-5"><label class="flex items-center space-x-2"><input type="checkbox" name="isAdult" checked class="w-5 h-5"><span>Adult</span></label><label class="flex items-center space-x-2"><input type="checkbox" name="isBaptized" class="w-5 h-5"><span>Baptized</span></label><label class="flex items-center space-x-2"><input type="checkbox" name="isNonMember" class="w-5 h-5"><span>Non-Member</span></label></div>
-                        <button type="submit" class="w-full bg-cyan-600 text-white p-4 rounded font-bold mt-6 shadow-[0_0_10px_rgba(6,182,212,0.4)]">Submit Ingestion</button>
-                    </form>
-                </div>
-            </div>
+            <button onclick="window.toggleSidebar()" class="text-slate-300 hover:text-white p-2 focus:outline-none">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+            </button>
         </div>
-    </main>
+
+        <main class="flex-1 overflow-y-auto relative p-4 md:p-8 lg:px-12 z-10">
+            <div class="max-w-6xl mx-auto">
+                
+                <!-- DASHBOARD TAB -->
+                <div id="dashboard" class="tab-content active-tab space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="card p-6 flex flex-col justify-center border-t-2 border-emerald-400">
+                            <label class="text-yellow-400 font-bold">Total Directory</label>
+                            <p class="text-4xl font-black text-white mt-2" id="totalMembers">0</p>
+                            <p class="text-xs text-slate-400 mt-2 font-medium" id="memberBreakdown">Adult: 0 / Child: 0</p>
+                        </div>
+                        <div class="card p-6 flex flex-col justify-center border-t-2 border-emerald-400">
+                            <label class="text-yellow-400 font-bold">New Records (2026)</label>
+                            <p class="text-4xl font-black text-white mt-2" id="newMemberCount">0</p>
+                            <p class="text-xs text-slate-400 mt-2 font-medium">Recently ingested</p>
+                        </div>
+                        <div class="card p-6 flex flex-col justify-center border-t-2 border-emerald-400">
+                            <label class="text-yellow-400 font-bold">Avg. Attendance</label>
+                            <p class="text-4xl font-black text-white mt-2" id="avgAttendanceDisplay">0 / 0%</p>
+                            <p class="text-xs text-slate-400 mt-2 font-medium">Analytics snapshots</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="card flex flex-col h-[500px] md:h-[600px] border border-fuchsia-500/50 shadow-[0_0_15px_rgba(217,70,239,0.15)] overflow-hidden">
+                            <div class="px-6 py-4 border-b border-slate-700 flex justify-between items-center" style="background-color: rgba(217, 70, 239, 0.05);">
+                                <h3 class="text-base font-extrabold flex items-center gap-2 text-fuchsia-400">AI Assistant</h3>
+                                <span id="aiStatus" class="text-[9px] bg-slate-800 border border-slate-600 text-slate-400 px-2.5 py-1 rounded-sm font-bold uppercase tracking-widest">Key Required</span>
+                            </div>
+                            <div id="geminiChatDisplay" class="flex-1 overflow-y-auto p-6 flex flex-col gap-4 text-sm leading-relaxed" style="background-color: rgba(5,0,20,0.4);">
+                                <div class="p-4 bg-[#1a1c23] border border-slate-700 rounded text-slate-200 self-start max-w-[90%]">Welcome to SUMC AI. Ask me to find specific people, summarize data, or analyze any metrics based on the database.</div>
+                            </div>
+                            <div class="p-4 border-t border-slate-700" style="background-color: rgba(10,5,30,0.6);">
+                                <div class="flex items-center gap-2">
+                                    <input type="file" id="aiFileInput" class="hidden" onchange="window.handleFileSelect(event)">
+                                    <button onclick="document.getElementById('aiFileInput').click()" class="p-3 bg-[#1a1c23] border border-slate-600 hover:border-cyan-400 transition text-slate-300 rounded"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-2.828-6.828l-6.414 6.586a6 6 0 008.485 8.486L20.5 13" /></svg></button>
+                                    <input type="text" id="geminiInput" placeholder="Analyze members or trends..." class="flex-1 rounded" onkeypress="if(event.key==='Enter') window.askGemini()">
+                                    <button onclick="window.askGemini()" id="sendBtn" class="bg-cyan-600 hover:bg-cyan-500 text-white px-6 py-3 rounded font-bold transition flex-shrink-0 shadow-[0_0_10px_rgba(6,182,212,0.4)]"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" /></svg></button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card p-6 flex flex-col h-[500px] md:h-[600px] border border-cyan-500/50 shadow-[0_0_15px_rgba(6,182,212,0.1)]">
+                            <h3 class="text-base font-extrabold text-cyan-400 mb-6">Attendance Trends</h3>
+                            <div class="flex-1 min-h-[250px] w-full"><canvas id="mainAttendanceChart"></canvas></div>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="card p-6 border-slate-700">
+                            <h3 class="text-sm font-bold uppercase text-yellow-400 mb-4 tracking-widest">System Configuration</h3>
+                            <label>AI API Key <span class="text-xs text-slate-500 lowercase">(Leave empty if Master Key is set)</span></label>
+                            <div class="flex gap-2 mb-4"><input type="password" id="apiKeyInput" placeholder="Enter secure key"></div>
+                            <label>Select AI Model</label>
+                            <div class="flex gap-2">
+                                <select id="aiModelSelect" class="flex-1"><option value="">Authenticate first</option></select>
+                                <button onclick="window.verifyAndSaveApiKey()" id="verifyKeyBtn" class="bg-slate-700 text-white px-5 py-2 rounded text-xs font-bold transition hover:bg-slate-600 whitespace-nowrap">Save Key</button>
+                            </div>
+                            <div class="mt-6 pt-4 border-t border-slate-700">
+                                <label class="text-cyan-400 font-bold mb-2">Database Connection</label>
+                                <div class="flex gap-2">
+                                    <input type="text" id="appIdInput" placeholder="e.g. sumc-2026-production-db" class="flex-1 font-mono text-sm text-slate-300 font-bold" readonly>
+                                    <button onclick="window.changeDatabase()" class="bg-transparent border border-cyan-400 text-cyan-400 hover:bg-cyan-900/30 px-5 py-2 rounded text-xs font-bold transition whitespace-nowrap">Connect</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card p-6 border-slate-700">
+                            <h3 class="text-sm font-bold uppercase text-yellow-400 mb-4 tracking-widest font-black">Data Extraction</h3>
+                            <div class="flex flex-col gap-3 text-sm">
+                                <button onclick="window.exportToSpreadsheet('members')" class="w-full bg-[#1a1c23] border border-slate-600 px-4 py-3 rounded text-sm font-bold text-slate-300 hover:border-cyan-400 hover:text-cyan-400 transition flex items-center justify-between">Download Directory (CSV) <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg></button>
+                                <button onclick="window.exportToSpreadsheet('attendance')" class="w-full bg-[#1a1c23] border border-slate-600 px-4 py-3 rounded text-sm font-bold text-slate-300 hover:border-cyan-400 hover:text-cyan-400 transition flex items-center justify-between">Download Attendance (CSV) <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ATTENDANCE TAB -->
+                <div id="attendance" class="tab-content space-y-6">
+                    <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+                        <h2 class="text-3xl font-black text-white">Attendance</h2>
+                        <div class="w-full md:w-48"><input type="date" id="attendanceDate" onchange="window.renderAttendanceList()" class="font-bold text-cyan-400 text-center"></div>
+                    </div>
+                    <div class="card overflow-hidden flex flex-col h-[70vh] md:h-auto">
+                        <div class="flex-1 overflow-y-auto md:max-h-[600px]">
+                            <table class="min-w-full">
+                                <thead class="bg-[#252836] sticky top-0 z-10"><tr><th class="px-6 py-4 text-center text-xs font-extrabold text-yellow-400 uppercase w-20">Log</th><th class="px-6 py-4 text-left text-xs font-extrabold text-yellow-400 uppercase font-black">Entity Name (A-Z)</th><th class="px-6 py-4 text-center text-xs font-extrabold text-yellow-400 uppercase">Category</th></tr></thead>
+                                <tbody id="attendanceList" class="bg-[#1a1c23] text-slate-200"></tbody>
+                            </table>
+                        </div>
+                        <div class="p-6 bg-[#0f111a] border-t border-slate-700 flex justify-between items-center">
+                            <p id="currentCheckCount" class="text-sm font-bold text-slate-400">Selected: 0</p>
+                            <button onclick="window.saveAttendance()" class="bg-cyan-600 text-white px-6 md:px-8 py-3 rounded font-bold hover:bg-cyan-500 shadow-[0_0_10px_rgba(6,182,212,0.4)] transition">Store to DB</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- DIRECTORY TAB -->
+                <div id="directory" class="tab-content space-y-6">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                        <h2 class="text-3xl font-black text-white">Directory</h2>
+                        <div class="relative w-full sm:w-72"><input type="text" placeholder="Query records..." id="dirSearch" onkeyup="window.renderDirectory()" class="pl-10 w-full"></div>
+                    </div>
+                    <div id="memberContainer" class="columns-1 md:columns-2 gap-6 space-y-6"></div>
+                </div>
+
+                <!-- PRAYER LIST ASSISTANT -->
+                <div id="prayer-list" class="tab-content space-y-6">
+                    <div class="card p-6 md:p-10 border-fuchsia-500/50 shadow-[0_0_15px_rgba(217,70,239,0.1)]">
+                        <h2 class="text-xl md:text-2xl font-black text-white mb-6 border-b border-slate-700 pb-4">Prayer List Generator</h2>
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                            <div class="space-y-6">
+                                <div class="p-5 bg-[#1a1c23] rounded border border-slate-700"><label class="text-yellow-400 font-black">Worship Date</label><input type="date" id="prayerDate"></div>
+                                <div class="p-5 bg-[#1a1c23] rounded border border-slate-700">
+                                    <label class="text-yellow-400 font-black mb-3">Data Sources (Click or Drag & Drop)</label>
+                                    <label id="prayerDropZone" class="flex flex-col items-center justify-center w-full p-8 border-2 border-dashed border-slate-600 rounded cursor-pointer hover:bg-slate-800 transition-all text-center">
+                                        <span class="text-4xl mb-2">📷</span>
+                                        <span id="prayerImgLabel" class="text-sm text-slate-300 font-semibold">Drop Handwritten Notes Here</span>
+                                        <input type="file" accept="image/*" id="prayerImageInput" class="hidden" />
+                                    </label>
+                                    <input type="url" id="prayerYoutubeUrl" placeholder="YouTube Link (Optional)" class="mt-4">
+                                </div>
+                            </div>
+                            <div class="flex flex-col bg-[#1a1c23] p-5 rounded border border-slate-700 min-h-[350px]">
+                                <label class="text-cyan-400 font-black mb-3 uppercase tracking-widest text-[10px]">Editable Result Preview</label>
+                                <textarea id="prayerResultText" class="flex-grow bg-[#0a0514] font-serif-formatted text-lg leading-relaxed p-4 resize-none border border-slate-600 focus:border-cyan-400" placeholder="Extracted results will appear here for editing..."></textarea>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8 pt-6 border-t border-slate-700">
+                            <button onclick="window.generatePrayerList()" id="genPrayerBtn" class="w-full bg-fuchsia-600 text-white py-4 rounded font-bold hover:bg-fuchsia-500 transition shadow-[0_0_10px_rgba(217,70,239,0.4)] text-lg flex items-center justify-center gap-2">
+                                <span class="loading-spinner hidden" id="prayerSpinner"></span>
+                                Generate with AI
+                            </button>
+                            <button onclick="window.savePrayerList()" class="w-full bg-cyan-600 text-white py-4 rounded font-bold hover:bg-cyan-500 transition shadow-[0_0_10px_rgba(6,182,212,0.4)] text-lg">Save & Download .docx</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BULK IMPORT TAB -->
+                <div id="data-import" class="tab-content space-y-6">
+                    <div class="card p-6 md:p-10 max-w-3xl mx-auto border-cyan-500/50 shadow-[0_0_15px_rgba(6,182,212,0.1)]">
+                        <h2 class="text-xl md:text-2xl font-extrabold text-cyan-400 text-center mb-8 uppercase tracking-tighter">Bulk Data Ingestion</h2>
+                        <textarea id="bulkDataInput" rows="10" class="font-mono text-sm leading-relaxed" placeholder='"LastName, FirstName", "Address", "Phone", "Email"'></textarea>
+                        <button onclick="window.processBulkImport()" class="w-full bg-cyan-600 text-white p-4 rounded font-bold mt-6 hover:bg-cyan-500 transition shadow-[0_0_10px_rgba(6,182,212,0.4)]">Execute Bulk Process</button>
+                    </div>
+                </div>
+
+                <!-- PROFILE VIEW TAB -->
+                <div id="profile-view" class="tab-content space-y-6">
+                    <button onclick="window.showTab('directory', document.querySelectorAll('.nav-btn')[2])" class="text-sm font-bold text-slate-400 hover:text-cyan-400">&larr; Back to Databases</button>
+                    <div class="card p-6 md:p-10 border-t-2 border-cyan-400">
+                        <div id="profileContent"></div>
+                        <div class="mt-12 pt-8 border-t border-slate-700">
+                            <h4 class="text-yellow-400 mb-6 text-sm uppercase tracking-widest font-black">Attendance Record</h4>
+                            <div class="h-48 w-full"><canvas id="personalAttendanceChart"></canvas></div>
+                        </div>
+                        <div class="mt-10 pt-6 flex flex-col md:flex-row gap-4 border-t border-slate-700">
+                            <button id="editBtn" class="border border-cyan-400 text-cyan-400 px-8 py-3 rounded font-bold hover:bg-cyan-900/30 transition w-full md:w-auto">Edit Record</button>
+                            <button id="deleteBtn" class="border border-red-500 text-red-500 px-8 py-3 rounded font-bold hover:bg-red-900/30 transition w-full md:w-auto">Drop Record</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- EDIT MEMBER TAB -->
+                <div id="edit-member" class="tab-content">
+                    <button onclick="window.showTab('profile-view')" class="text-sm font-bold text-slate-400 hover:text-cyan-400">&larr; Cancel Update</button>
+                    <div class="card p-6 md:p-10 max-w-3xl mx-auto border-t-2 border-yellow-400">
+                        <h2 class="text-2xl font-black mb-8 text-white uppercase tracking-tight">Modify Entity Data</h2>
+                        <form id="editMemberForm" onsubmit="window.submitEdit(event)" class="space-y-5">
+                            <input type="hidden" name="id">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5"><div><label>First Name</label><input type="text" name="firstName" required></div><div><label>Last Name</label><input type="text" name="lastName" required></div></div>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-5"><div><label>Birthday</label><input type="date" name="dob"></div><div><label>Anniversary</label><input type="date" name="anniversary"></div><div><label>Gender</label><select name="gender"><option value="Male">Male</option><option value="Female">Female</option></select></div></div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5"><div><label>Home Phone</label><input type="tel" name="homePhone"></div><div><label>Cell Phone</label><input type="tel" name="cellPhone"></div></div>
+                            <div><label>Email Address</label><input type="email" name="email"></div>
+                            <div><label>Home Address</label><input type="text" name="address"></div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5"><div><label>Cluster Group</label><select id="familySelect" name="familyId"></select></div><div><label>Ingestion Date</label><input type="date" name="joinDate"></div></div>
+                            <div><label class="text-fuchsia-400 font-black">Intercessory Prayers (Log)</label><textarea name="prayers" rows="4"></textarea></div>
+                            <div><label class="font-black">Administrative Notes</label><textarea name="notes" rows="3"></textarea></div>
+                            <div class="flex flex-wrap gap-6 border-t border-slate-700 pt-5"><label class="flex items-center space-x-2"><input type="checkbox" name="isAdult" class="w-5 h-5"><span>Adult</span></label><label class="flex items-center space-x-2"><input type="checkbox" name="isBaptized" class="w-5 h-5"><span>Baptized</span></label><label class="flex items-center space-x-2"><input type="checkbox" name="isNonMember" class="w-5 h-5"><span>Non-Member</span></label></div>
+                            <button type="submit" class="w-full bg-cyan-600 text-white p-4 rounded font-bold mt-6 shadow-[0_0_10px_rgba(6,182,212,0.4)]">Push Changes to Cloud</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- NEW MEMBER TAB -->
+                <div id="new-member" class="tab-content">
+                    <div class="card p-6 md:p-10 max-w-3xl mx-auto mt-6 border-t-2 border-emerald-400">
+                        <h2 class="text-2xl font-black mb-8 text-white uppercase text-center tracking-tight">Manual Entity Ingestion</h2>
+                        <form id="newMemberForm" onsubmit="window.registerNewMember(event)" class="space-y-5">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5"><div><label>First Name</label><input type="text" name="firstName" required></div><div><label>Last Name</label><input type="text" name="lastName" required></div></div>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-5"><div><label>Birthday</label><input type="date" name="dob"></div><div><label>Anniversary</label><input type="date" name="anniversary"></div><div><label>Gender</label><select name="gender"><option value="Male">Male</option><option value="Female">Female</option></select></div></div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5"><div><label>Home Phone</label><input type="tel" name="homePhone"></div><div><label>Cell Phone</label><input type="tel" name="cellPhone"></div></div>
+                            <div><label>Email</label><input type="email" name="email"></div>
+                            <div><label>Address</label><input type="text" name="address"></div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5"><div><label>Cluster Group</label><select id="newFamilySelect" name="familyId"></select></div><div><label>Ingestion Date</label><input type="date" name="joinDate"></div></div>
+                            <div><label class="text-fuchsia-400 font-black">Initial Prayers</label><textarea name="prayers" rows="3"></textarea></div>
+                            <div><label class="font-black">Metadata / Notes</label><textarea name="notes" rows="3"></textarea></div>
+                            <div class="flex flex-wrap gap-6 border-t border-slate-700 pt-5"><label class="flex items-center space-x-2"><input type="checkbox" name="isAdult" checked class="w-5 h-5"><span>Adult</span></label><label class="flex items-center space-x-2"><input type="checkbox" name="isBaptized" class="w-5 h-5"><span>Baptized</span></label><label class="flex items-center space-x-2"><input type="checkbox" name="isNonMember" class="w-5 h-5"><span>Non-Member</span></label></div>
+                            <button type="submit" class="w-full bg-cyan-600 text-white p-4 rounded font-bold mt-6 shadow-[0_0_10px_rgba(6,182,212,0.4)]">Submit Ingestion</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
 
     <!-- SCRIPT ENGINE -->
     <script>
         // 🔥 하단에 목사님의 제미나이 API 키를 입력하시면 모든 기기에서 자동 인증됩니다 🔥
-        const MASTER_GEMINI_API_KEY = "여기에_제미나이_API_KEY_입력"; // 예: "AIzaSyB..."
+        const MASTER_GEMINI_API_KEY = "AIzaSyAtugzLT5l6XtjtWyaqgieEoV3SbKq1AEM"; // 예: "AIzaSyB..."
 
         Chart.defaults.color = '#94a3b8';
         Chart.defaults.borderColor = 'rgba(71, 85, 105, 0.4)';
@@ -329,11 +367,11 @@
 
         window.members = []; window.attendanceRecords = []; window.mainChart = null; window.profileChart = null;
         
-        // 마스터 키가 있으면 마스터 키를, 없으면 브라우저에 저장된 키를 불러옵니다.
+        // 마스터 키 우선 적용
         window.currentApiKey = MASTER_GEMINI_API_KEY !== "여기에_제미나이_API_KEY_입력" ? MASTER_GEMINI_API_KEY : (localStorage.getItem('sumc_gemini_key') || "");
         window.currentAiModel = localStorage.getItem('sumc_gemini_model') || "gemini-1.5-flash";
         
-        // 데이터베이스 이름 고정 (절대 초기화되지 않도록 하드코딩)
+        // 데이터베이스 아이디 강제 고정
         window.currentDbId = "sumc-2026-production-db";
         
         window.prayerImageBase64 = '';
@@ -344,6 +382,21 @@
             return s.reverse();
         })();
 
+        // 모바일 사이드바 토글 로직
+        window.toggleSidebar = () => {
+            const sb = document.getElementById('sidebar');
+            const ov = document.getElementById('sidebarOverlay');
+            if (sb && ov) {
+                if (sb.classList.contains('-translate-x-full')) {
+                    sb.classList.remove('-translate-x-full');
+                    ov.classList.remove('hidden');
+                } else {
+                    sb.classList.add('-translate-x-full');
+                    ov.classList.add('hidden');
+                }
+            }
+        };
+
         window.showTab = (tabId, btnElement = null) => {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active-tab'));
             const target = document.getElementById(tabId);
@@ -351,6 +404,14 @@
             if(btnElement) { document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active')); btnElement.classList.add('active'); }
             if(tabId === 'attendance') window.renderAttendanceList();
             window.scrollTo(0,0); window.updateDashboard();
+            
+            // 탭 클릭 시 모바일 사이드바가 열려있다면 닫기
+            const sb = document.getElementById('sidebar');
+            const ov = document.getElementById('sidebarOverlay');
+            if (window.innerWidth < 768 && sb && !sb.classList.contains('-translate-x-full')) {
+                sb.classList.add('-translate-x-full');
+                if (ov) ov.classList.add('hidden');
+            }
         };
 
         window.openNewMemberForm = () => {
@@ -359,6 +420,14 @@
             document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active-tab'));
             document.getElementById('new-member').classList.add('active-tab');
+            
+            // 모바일 사이드바 닫기
+            const sb = document.getElementById('sidebar');
+            const ov = document.getElementById('sidebarOverlay');
+            if (window.innerWidth < 768 && sb && !sb.classList.contains('-translate-x-full')) {
+                sb.classList.add('-translate-x-full');
+                if (ov) ov.classList.add('hidden');
+            }
         };
 
         function populateFamilyDropdown(sel, selectedValue) {
@@ -461,7 +530,7 @@
             const checkedIds = existingRecord ? existingRecord.attendees : [];
             const sortedMembers = [...window.members].sort((a, b) => a.lastName.localeCompare(b.lastName));
             list.innerHTML = sortedMembers.map(m => `
-                <tr class="hover:bg-white/5 transition"><td class="px-6 py-4 text-center"><input type="checkbox" value="${m.id}" ${checkedIds.includes(m.id) ? 'checked' : ''} onchange="window.updateCheckCount()" class="w-5 h-5 cursor-pointer accent-cyan-500"></td><td class="px-6 py-4 font-bold text-slate-200">${m.lastName}, ${m.firstName}</td><td class="px-6 py-4 text-center text-xs font-black uppercase text-slate-400">${m.isAdult ? 'Adult' : 'Child'}</td></tr>`).join('');
+                <tr class="hover:bg-white/5 transition"><td class="px-6 py-4 text-center"><input type="checkbox" value="${m.id}" ${checkedIds.includes(m.id) ? 'checked' : ''} onchange="window.updateCheckCount()" class="w-5 h-5 cursor-pointer accent-cyan-500 rounded bg-transparent border-slate-600"></td><td class="px-6 py-4 font-bold text-slate-200">${m.lastName}, ${m.firstName}</td><td class="px-6 py-4 text-center text-xs font-black uppercase text-slate-400">${m.isAdult ? 'Adult' : 'Child'}</td></tr>`).join('');
             window.updateCheckCount();
         };
 
@@ -499,7 +568,7 @@
             }
             
             if(k) {
-                if(document.getElementById('apiKeyInput') && MASTER_GEMINI_API_KEY === "AIzaSyAtugzLT5l6XtjtWyaqgieEoV3SbKq1AEM") {
+                if(document.getElementById('apiKeyInput') && MASTER_GEMINI_API_KEY === "여기에_제미나이_API_KEY_입력") {
                     document.getElementById('apiKeyInput').value = k;
                 }
                 
@@ -554,7 +623,27 @@
 
             try {
                 let m = document.getElementById('aiModelSelect').value || window.currentAiModel || "gemini-1.5-flash";
-                const dbContext = { membersSummary: window.members.map(mb => ({ id: mb.id, name: `${mb.lastName}, ${mb.firstName}`, prayers: mb.prayers || '', notes: mb.notes || '' })) };
+                
+                // 🔥 모든 컨텍스트 정보 완전 복구 (다각도 분석 가능) 🔥
+                const dbContext = { 
+                    totalMembers: window.members.length,
+                    membersData: window.members.map(mb => ({ 
+                        id: mb.id, 
+                        name: `${mb.lastName}, ${mb.firstName}`, 
+                        gender: mb.gender || 'Unknown',
+                        type: mb.isNonMember ? 'Non-Member' : 'Full Member',
+                        group: mb.isAdult ? 'Adult' : 'Child',
+                        baptized: mb.isBaptized ? 'Yes' : 'No',
+                        contact: { cell: mb.cellPhone || 'N/A', home: mb.homePhone || 'N/A', email: mb.email || 'N/A' },
+                        address: mb.address || 'N/A',
+                        dates: { dob: mb.dob || 'N/A', anniversary: mb.anniversary || 'N/A', joined: mb.joinDate || 'N/A' },
+                        householdId: mb.familyId,
+                        prayers: mb.prayers || '', 
+                        notes: mb.notes || '' 
+                    })),
+                    attendanceRecords: window.attendanceRecords.slice(-10).map(r => ({ date: r.date, count: r.attendees ? r.attendees.length : 0 }))
+                };
+                
                 const prompt = `System: You are SUMC church assistant. Use context: ${JSON.stringify(dbContext)}. User: ${query}`;
                 const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${key}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }) });
                 const d = await resp.json(); if(d.error) throw new Error(d.error.message);
