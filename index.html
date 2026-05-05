@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SUMC Admin Portal</title>
+    <title>SUMC AI Assistant</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -20,152 +20,337 @@
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-        body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #05001c 0%, #0d0628 50%, #15003b 100%); color: #f8fafc; overflow: hidden; }
+        
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #0f172a; overflow: hidden; }
         .tab-content { display: none; }
         .active-tab { display: block; animation: fadeIn 0.3s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-        .card { background-color: rgba(20, 15, 45, 0.6); backdrop-filter: blur(10px); border-radius: 8px; border: 1px solid #475569; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
-        input, select, textarea { background-color: rgba(10, 5, 30, 0.8); border: 1px solid #475569; border-radius: 4px; padding: 0.75rem 1rem; outline: none; width: 100%; font-size: 0.875rem; color: #f8fafc; transition: all 0.2s; }
-        input:focus, select:focus, textarea:focus { border-color: #00d2ff; box-shadow: 0 0 0 2px rgba(0, 210, 255, 0.2); }
-        label { display: block; font-size: 0.7rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; margin-bottom: 0.4rem; letter-spacing: 0.05em; }
+        
+        /* Light Theme Cards & Inputs */
+        .card { background-color: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+        input, select, textarea { background-color: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 8px; padding: 0.75rem 1rem; outline: none; width: 100%; font-size: 0.875rem; color: #1e293b; transition: all 0.2s; }
+        input:focus, select:focus, textarea:focus { border-color: #a855f7; box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.15); background-color: #ffffff; }
+        ::placeholder { color: #94a3b8; }
+        label { display: block; font-size: 0.75rem; font-weight: 700; color: #475569; text-transform: uppercase; margin-bottom: 0.4rem; letter-spacing: 0.05em; }
+        
+        /* Gradient Utilities */
+        .gradient-text { background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-image: linear-gradient(to right, #8b5cf6, #ec4899, #3b82f6); }
+        .gradient-bg { background-image: linear-gradient(to right, #8b5cf6, #ec4899, #3b82f6); color: white; }
+        .gradient-hover:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 10px 15px -3px rgba(168, 85, 247, 0.3); transition: all 0.2s; }
+        
         ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 10px; }
-        .loading-spinner { border: 2px solid rgba(255,255,255,0.1); border-top: 2px solid #00d2ff; border-radius: 50%; width: 16px; height: 16px; animation: spin 1s linear infinite; display: inline-block; vertical-align: middle; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        
+        .loading-spinner { border: 2px solid rgba(255,255,255,0.3); border-top: 2px solid #ffffff; border-radius: 50%; width: 16px; height: 16px; animation: spin 1s linear infinite; display: inline-block; vertical-align: middle; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .nav-btn { display: flex; align-items: center; gap: 0.75rem; width: 100%; padding: 0.75rem 1rem; border-radius: 4px; font-size: 0.875rem; font-weight: 600; color: #94a3b8; transition: all 0.2s; text-align: left; border-left: 2px solid transparent; }
-        .nav-btn:hover { background-color: rgba(255,255,255,0.05); color: #f8fafc; }
-        .nav-btn.active { background-color: rgba(251, 191, 36, 0.1); color: #fbbf24; border-left: 2px solid #fbbf24; }
+        
+        /* Navigation Sidebar */
+        .nav-btn { display: flex; align-items: center; gap: 0.75rem; width: 100%; padding: 0.875rem 1.25rem; border-radius: 8px; font-size: 0.875rem; font-weight: 600; color: #64748b; transition: all 0.2s; text-align: left; }
+        .nav-btn:hover { background-color: #f1f5f9; color: #0f172a; }
+        .nav-btn.active { background-color: #fdf4ff; color: #c026d3; border-left: 4px solid #c026d3; }
+        
         .font-serif-formatted { font-family: 'Times New Roman', Times, serif; }
     </style>
 </head>
-<body class="flex h-screen overflow-hidden relative">
+<body class="flex h-screen overflow-hidden relative text-slate-800">
 
-    <div id="loginScreen" class="fixed inset-0 z-[100] flex items-center justify-center bg-[rgba(5,0,25,0.98)] backdrop-blur-xl">
-        <div class="card p-10 max-w-sm w-full mx-4 border-t-4 border-cyan-500 shadow-2xl">
-            <div class="text-center mb-8"><h1 class="text-4xl font-black text-white mb-2">SUMC</h1><span class="text-[10px] font-bold text-yellow-400 tracking-widest uppercase border border-yellow-500/30 px-3 py-1 rounded">Secure Admin Access</span></div>
+    <!-- 🔐 LOGIN OVERLAY -->
+    <div id="loginScreen" class="fixed inset-0 z-[100] flex items-center justify-center bg-white/95 backdrop-blur-xl transition-opacity duration-500">
+        <div class="card p-10 max-w-sm w-full mx-4 shadow-2xl border-t-4 border-violet-500 transform transition-transform">
+            <div class="text-center mb-8">
+                <h1 class="text-4xl font-black tracking-tight leading-none mb-2 text-slate-900">SUMC <span class="gradient-text">AI</span></h1>
+                
+                <!-- SVG Gradient Icon representing AI/Network -->
+                <svg class="w-20 h-20 mx-auto my-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="aiGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#8b5cf6" />
+                            <stop offset="50%" stop-color="#ec4899" />
+                            <stop offset="100%" stop-color="#3b82f6" />
+                        </linearGradient>
+                    </defs>
+                    <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="url(#aiGrad)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M12 18C15.3137 18 18 15.3137 18 12C18 8.68629 15.3137 6 12 6C8.68629 6 6 8.68629 6 12C6 15.3137 8.68629 18 12 18Z" stroke="url(#aiGrad)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="2 2"/>
+                    <circle cx="12" cy="12" r="2" fill="url(#aiGrad)"/>
+                    <circle cx="12" cy="6" r="1.5" fill="url(#aiGrad)"/>
+                    <circle cx="12" cy="18" r="1.5" fill="url(#aiGrad)"/>
+                    <circle cx="6" cy="12" r="1.5" fill="url(#aiGrad)"/>
+                    <circle cx="18" cy="12" r="1.5" fill="url(#aiGrad)"/>
+                </svg>
+
+                <span class="text-xs font-black tracking-widest uppercase gradient-text">AI Assistant</span>
+            </div>
             <form onsubmit="window.handleLogin(event)" class="space-y-6">
-                <div><label>ID</label><input type="text" id="loginId" required class="text-center font-mono"></div>
-                <div><label>Password</label><input type="password" id="loginPw" required class="text-center font-mono"></div>
-                <button type="submit" class="w-full bg-cyan-600 text-white py-4 rounded font-bold hover:bg-cyan-500 shadow-lg uppercase text-xs tracking-widest">Login</button>
+                <div>
+                    <label class="text-slate-500">Administrator ID</label>
+                    <input type="text" id="loginId" required placeholder="Enter ID" class="font-mono text-center text-lg bg-slate-50">
+                </div>
+                <div>
+                    <label class="text-slate-500">Passcode</label>
+                    <input type="password" id="loginPw" required placeholder="••••••••" class="font-mono text-center text-lg tracking-widest bg-slate-50">
+                </div>
+                <button type="submit" class="w-full gradient-bg gradient-hover py-4 rounded-xl font-bold uppercase tracking-widest text-sm flex items-center justify-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" /></svg>
+                    Login
+                </button>
             </form>
-            <p id="loginError" class="text-red-500 text-xs font-bold text-center mt-4 hidden">Invalid Credentials.</p>
+            <p id="loginError" class="text-red-500 text-xs font-bold text-center mt-6 hidden bg-red-50 border border-red-200 py-2 rounded">Authentication Failed.</p>
         </div>
     </div>
 
-    <div id="sidebarOverlay" class="fixed inset-0 bg-black/80 z-40 hidden" onclick="window.toggleSidebar()"></div>
+    <!-- MOBILE SIDEBAR OVERLAY -->
+    <div id="sidebarOverlay" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40 hidden" onclick="window.toggleSidebar()"></div>
 
-    <aside id="sidebar" class="fixed md:relative w-64 flex-shrink-0 flex flex-col border-r border-slate-700 z-50 h-full transform -translate-x-full md:translate-x-0 transition-transform duration-300 bg-[rgba(5,0,25,0.95)] backdrop-blur-lg">
-        <div class="p-6 border-b border-slate-700 flex justify-between items-center">
-            <div class="flex flex-col"><h1 class="text-2xl font-black text-white leading-none">SUMC AI</h1><span class="text-[9px] font-bold text-yellow-400 tracking-widest uppercase">Assistant</span></div>
-            <button class="md:hidden text-slate-400" onclick="window.toggleSidebar()"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"></path></svg></button>
+    <!-- LEFT SIDEBAR -->
+    <aside id="sidebar" class="fixed md:relative w-64 flex-shrink-0 flex flex-col border-r border-slate-200 z-50 h-full transform -translate-x-full md:translate-x-0 transition-transform duration-300 bg-white">
+        <!-- Sidebar Header (Clickable to Dashboard) -->
+        <div class="p-6 border-b border-slate-100 flex justify-between items-center cursor-pointer hover:bg-slate-50 transition" onclick="window.showTab('dashboard', document.querySelectorAll('.nav-btn')[0])">
+            <div class="flex flex-col">
+                <h1 class="text-2xl font-black text-slate-900 leading-none">SUMC <span class="gradient-text">AI</span></h1>
+                <span class="text-[10px] font-bold text-slate-500 tracking-widest mt-1 uppercase">Assistant (v.2.00)</span>
+            </div>
+            <button class="md:hidden text-slate-400 hover:text-slate-700" onclick="window.toggleSidebar(); event.stopPropagation();">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
         </div>
-        <div class="px-6 py-4 flex items-center gap-2 border-b border-slate-700/50"><div class="w-2.5 h-2.5 rounded-full bg-red-600" id="statusDot"></div><span id="cloudStatusIndicator" class="text-[10px] text-red-500 uppercase tracking-widest font-black">Offline</span></div>
-        <nav class="flex-1 overflow-y-auto p-4 space-y-2">
-            <button onclick="window.showTab('dashboard', this)" class="nav-btn active"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>Dashboard</button>
-            <button onclick="window.showTab('attendance', this)" class="nav-btn"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>Attendance</button>
-            <button onclick="window.showTab('directory', this)" class="nav-btn"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"/></svg>Directory</button>
-            <button onclick="window.showTab('prayer-list', this)" class="nav-btn"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>Prayer List</button>
-            <button onclick="window.showTab('data-import', this)" class="nav-btn"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>Bulk Import</button>
-            <button onclick="window.showTab('settings-tab', this)" class="nav-btn"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>Settings (Key)</button>
+        
+        <div class="px-6 py-4 flex items-center gap-2 border-b border-slate-100 bg-slate-50/50">
+            <div class="w-2.5 h-2.5 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)] transition-colors duration-500" id="statusDot"></div>
+            <span id="cloudStatusIndicator" class="text-[10px] text-red-500 uppercase tracking-widest font-black">Offline</span>
+        </div>
+
+        <nav class="flex-1 overflow-y-auto p-4 space-y-1">
+            <button onclick="window.showTab('dashboard', this)" class="nav-btn active"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>Dashboard</button>
+            <button onclick="window.showTab('attendance', this)" class="nav-btn"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>Attendance</button>
+            <button onclick="window.showTab('directory', this)" class="nav-btn"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>Directory</button>
+            <button onclick="window.showTab('prayer-list', this)" class="nav-btn"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>Prayer List</button>
+            <button onclick="window.showTab('data-import', this)" class="nav-btn"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>Bulk Import</button>
+            <button onclick="window.showTab('settings-tab', this)" class="nav-btn"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>Settings</button>
         </nav>
-        <div class="p-4 border-t border-slate-700 space-y-3">
-            <button onclick="window.openNewMemberForm()" class="w-full bg-cyan-600 hover:bg-cyan-500 text-white p-3 rounded font-bold flex items-center justify-center gap-2 transition shadow-lg text-sm"><svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"/></svg>Add New Member</button>
-            <button onclick="window.handleLogout()" class="w-full text-slate-500 hover:text-red-400 text-xs font-bold py-2 transition">Lock System</button>
+
+        <div class="p-4 border-t border-slate-100 space-y-3 bg-slate-50/50">
+            <button onclick="window.openNewMemberForm()" class="w-full gradient-bg gradient-hover p-3 rounded-xl font-bold flex items-center justify-center gap-2 shadow-md text-sm">
+                <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/></svg>
+                Add New Member
+            </button>
+            <button onclick="window.handleLogout()" class="w-full text-slate-500 hover:text-red-500 hover:bg-red-50 text-xs font-bold py-2.5 rounded-lg transition flex items-center justify-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+                Log Out
+            </button>
         </div>
     </aside>
 
-    <div class="flex-1 flex flex-col min-w-0 h-screen">
-        <header class="md:hidden flex items-center justify-between p-4 bg-[rgba(5,0,25,0.9)] border-b border-slate-700">
-            <div class="flex flex-col"><h1 class="text-xl font-black text-white leading-none">SUMC AI</h1><span class="text-[9px] font-bold text-yellow-400 tracking-widest uppercase">Assistant</span></div>
-            <button onclick="window.toggleSidebar()" class="p-2 text-slate-300 focus:outline-none"><svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"></path></svg></button>
+    <!-- MAIN AREA -->
+    <div class="flex-1 flex flex-col min-w-0 h-screen bg-slate-50/50">
+        <!-- MOBILE HEADER (Clickable to Dashboard) -->
+        <header class="md:hidden flex items-center justify-between p-4 bg-white border-b border-slate-200 shadow-sm z-30 cursor-pointer" onclick="window.showTab('dashboard', document.querySelectorAll('.nav-btn')[0])">
+            <div class="flex flex-col">
+                <h1 class="text-xl font-black text-slate-900 leading-none">SUMC <span class="gradient-text">AI</span></h1>
+                <span class="text-[9px] font-bold text-slate-500 tracking-widest mt-1 uppercase">Assistant (v.2.00)</span>
+            </div>
+            <button onclick="window.toggleSidebar(); event.stopPropagation();" class="p-2 text-slate-600 focus:outline-none bg-slate-100 rounded-lg"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg></button>
         </header>
 
-        <main class="flex-1 overflow-y-auto p-4 md:p-8 lg:px-12 z-10">
+        <main class="flex-1 overflow-y-auto p-4 md:p-8 lg:px-10 z-10 relative">
             <div class="max-w-6xl mx-auto">
                 
+                <!-- DASHBOARD TAB -->
                 <div id="dashboard" class="tab-content active-tab space-y-6">
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
-                        <div class="card p-6 flex flex-col justify-center border-t-2 border-emerald-400"><label class="text-yellow-400 font-bold">Total Directory</label><p class="text-4xl font-black text-white mt-2" id="totalMembers">0</p><p class="text-xs text-slate-400 mt-2 font-medium" id="memberBreakdown">Adult: 0 / Child: 0</p></div>
-                        <div class="card p-6 flex flex-col justify-center border-t-2 border-emerald-400"><label class="text-yellow-400 font-bold">New Records (2026)</label><p class="text-4xl font-black text-white mt-2" id="newMemberCount">0</p><p class="text-xs text-slate-400 mt-2 font-medium">Recently ingested</p></div>
-                        <div class="card p-6 flex flex-col justify-center border-t-2 border-emerald-400"><label class="text-yellow-400 font-bold">Avg. Attendance</label><p class="text-4xl font-black text-white mt-2" id="avgAttendanceDisplay">0 / 0%</p><p class="text-xs text-slate-400 mt-2 font-medium">Recent snapshots</p></div>
-                    </div>
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <div class="card flex flex-col h-[500px] md:h-[600px] border border-fuchsia-500/50 shadow-lg overflow-hidden">
-                            <div class="px-6 py-4 border-b border-slate-700 flex justify-between items-center" style="background-color: rgba(217, 70, 239, 0.05);"><h3 class="text-base font-extrabold text-fuchsia-400">AI Assistant</h3><span id="aiStatus" class="text-[9px] bg-slate-800 border border-slate-600 text-slate-400 px-2.5 py-1 rounded-sm font-bold uppercase">Key Required</span></div>
-                            <div id="geminiChatDisplay" class="flex-1 overflow-y-auto p-4 md:p-6 flex flex-col gap-4 text-sm leading-relaxed" style="background-color: rgba(5,0,20,0.4);"><div class="p-4 bg-[#1a1c23] border border-slate-700 rounded text-slate-200 self-start max-w-[90%]">Welcome to SUMC AI. Database analysis is now active.</div></div>
-                            <div class="p-4 border-t border-slate-700" style="background-color: rgba(10,5,30,0.6);"><div class="flex items-center gap-2"><input type="file" id="aiFileInput" class="hidden" onchange="window.handleFileSelect(event)"><button onclick="document.getElementById('aiFileInput').click()" class="p-3 bg-[#1a1c23] border border-slate-600 hover:border-cyan-400 transition text-slate-300 rounded"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-2.828-6.828l-6.414 6.586a6 6 0 008.485 8.486L20.5 13"/></svg></button><input type="text" id="geminiInput" placeholder="Query data..." class="flex-1 rounded" onkeypress="if(event.key==='Enter') window.askGemini()"><button onclick="window.askGemini()" id="sendBtn" class="bg-cyan-600 hover:bg-cyan-500 text-white px-5 py-3 rounded font-bold transition flex-shrink-0 shadow-lg"><svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"/></svg></button></div></div>
+                        <div class="card p-6 flex flex-col justify-center border-t-4 border-violet-500">
+                            <label class="text-violet-600 font-extrabold text-[10px]">Total Directory</label>
+                            <p class="text-4xl font-black text-slate-800 mt-2" id="totalMembers">0</p>
+                            <p class="text-xs text-slate-500 mt-2 font-medium" id="memberBreakdown">Adult: 0 / Child: 0</p>
                         </div>
-                        <div class="card p-6 flex flex-col h-[500px] md:h-[600px] border border-cyan-500/50"><h3 class="text-base font-extrabold text-cyan-400 mb-6">Attendance Trends</h3><div class="flex-1 min-h-[250px] w-full"><canvas id="mainAttendanceChart"></canvas></div></div>
+                        <div class="card p-6 flex flex-col justify-center border-t-4 border-fuchsia-500">
+                            <label class="text-fuchsia-600 font-extrabold text-[10px]">New Records (2026)</label>
+                            <p class="text-4xl font-black text-slate-800 mt-2" id="newMemberCount">0</p>
+                            <p class="text-xs text-slate-500 mt-2 font-medium">Recently ingested</p>
+                        </div>
+                        <div class="card p-6 flex flex-col justify-center border-t-4 border-blue-500">
+                            <label class="text-blue-600 font-extrabold text-[10px]">Avg. Attendance</label>
+                            <p class="text-4xl font-black text-slate-800 mt-2" id="avgAttendanceDisplay">0 / 0%</p>
+                            <p class="text-xs text-slate-500 mt-2 font-medium">Recent snapshots</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- AI Chat Box -->
+                        <div class="card flex flex-col h-[500px] md:h-[600px] overflow-hidden">
+                            <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-white">
+                                <h3 class="text-sm font-extrabold flex items-center gap-2 gradient-text">AI Assistant</h3>
+                                <span id="aiStatus" class="text-[9px] bg-slate-100 border border-slate-200 text-slate-500 px-3 py-1 rounded-full font-bold uppercase tracking-widest">Key Required</span>
+                            </div>
+                            <div id="geminiChatDisplay" class="flex-1 overflow-y-auto p-4 md:p-6 flex flex-col gap-4 text-sm leading-relaxed bg-slate-50/50">
+                                <div class="p-4 bg-white border border-slate-200 shadow-sm rounded-2xl rounded-tl-sm text-slate-700 self-start max-w-[90%]">
+                                    Welcome to SUMC AI. Database analysis is now active. You can ask me anything about the congregation!
+                                </div>
+                            </div>
+                            <div class="p-4 border-t border-slate-100 bg-white">
+                                <div class="flex items-center gap-2">
+                                    <input type="file" id="aiFileInput" class="hidden" onchange="window.handleFileSelect(event)">
+                                    <button onclick="document.getElementById('aiFileInput').click()" class="p-3 bg-slate-100 hover:bg-slate-200 transition text-slate-500 rounded-xl"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-2.828-6.828l-6.414 6.586a6 6 0 008.485 8.486L20.5 13"/></svg></button>
+                                    <input type="text" id="geminiInput" placeholder="Ask AI..." class="flex-1 rounded-xl bg-slate-100 border-none focus:ring-2 focus:ring-violet-500 focus:bg-white" onkeypress="if(event.key==='Enter') window.askGemini()">
+                                    <button onclick="window.askGemini()" id="sendBtn" class="gradient-bg gradient-hover text-white px-5 py-3 rounded-xl font-bold transition flex-shrink-0 shadow-md"><svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"/></svg></button>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Analytics Chart -->
+                        <div class="card p-6 flex flex-col h-[500px] md:h-[600px]">
+                            <h3 class="text-sm font-extrabold text-slate-700 mb-6 uppercase tracking-widest">Attendance Trends</h3>
+                            <div class="flex-1 min-h-[250px] w-full"><canvas id="mainAttendanceChart"></canvas></div>
+                        </div>
                     </div>
                 </div>
 
+                <!-- 탭: ⚙️ SETTINGS -->
                 <div id="settings-tab" class="tab-content space-y-6">
-                    <div class="card p-8 max-w-2xl mx-auto border-t-2 border-yellow-400 shadow-2xl">
-                        <h2 class="text-2xl font-black text-white mb-8 flex items-center gap-3">⚙️ System Configuration</h2>
+                    <div class="card p-8 max-w-2xl mx-auto border-t-4 border-violet-500 shadow-xl">
+                        <h2 class="text-2xl font-black text-slate-900 mb-8 flex items-center gap-3">System Configuration</h2>
                         <div class="space-y-6">
                             <div>
-                                <label class="text-cyan-400">Gemini AI API Key</label>
-                                <input type="password" id="apiKeyInput" placeholder="Enter your Google AI Studio key" class="mb-2">
-                                <p class="text-[10px] text-slate-500">This key will be synced to your secure cloud database for all your devices.</p>
+                                <label class="text-violet-600">Gemini AI API Key</label>
+                                <input type="password" id="apiKeyInput" placeholder="Enter your Google AI Studio key" class="mb-2 border-slate-300 bg-white">
+                                <p class="text-xs text-slate-500">This key will be securely synced to your cloud database for all your devices.</p>
                             </div>
                             <div>
-                                <label class="text-cyan-400">Database Connection ID</label>
-                                <input type="text" id="appIdInput" value="sumc-2026-production-db" readonly class="bg-slate-900/50 border-slate-800 font-mono text-slate-500">
+                                <label class="text-slate-500">Database Connection ID</label>
+                                <input type="text" id="appIdInput" value="sumc-2026-production-db" readonly class="bg-slate-100 text-slate-500 font-mono border-none cursor-not-allowed">
                             </div>
-                            <button onclick="window.verifyAndSaveApiKey()" id="verifyKeyBtn" class="w-full bg-yellow-600 text-black py-4 rounded font-black hover:bg-yellow-500 transition shadow-lg uppercase tracking-tighter">Validate & Sync to Cloud</button>
+                            <button onclick="window.verifyAndSaveApiKey()" id="verifyKeyBtn" class="w-full gradient-bg gradient-hover text-white py-4 rounded-xl font-bold transition shadow-md uppercase tracking-widest text-sm">Validate & Sync to Cloud</button>
                         </div>
                     </div>
                 </div>
 
+                <!-- 탭: ATTENDANCE -->
                 <div id="attendance" class="tab-content space-y-6">
-                    <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4"><h2 class="text-3xl font-black text-white">Attendance</h2><div class="w-full md:w-48"><input type="date" id="attendanceDate" onchange="window.renderAttendanceList()" class="font-bold text-cyan-400 text-center"></div></div>
-                    <div class="card overflow-hidden flex flex-col h-[70vh] md:h-auto">
-                        <div class="flex-1 overflow-y-auto md:max-h-[600px]"><table class="min-w-full"><thead class="bg-[#252836] sticky top-0 z-10"><tr><th class="px-6 py-4 text-center text-xs font-black uppercase w-20">Log</th><th class="px-6 py-4 text-left text-xs font-black uppercase">Entity Name</th><th class="px-6 py-4 text-center text-xs font-black uppercase">Category</th></tr></thead><tbody id="attendanceList" class="bg-[#1a1c23] text-slate-200"></tbody></table></div>
-                        <div class="p-6 bg-[#0f111a] border-t border-slate-700 flex justify-between items-center"><p id="currentCheckCount" class="text-sm text-slate-400 font-bold">Selected: 0</p><button onclick="window.saveAttendance()" class="bg-cyan-600 text-white px-8 py-3 rounded font-bold hover:bg-cyan-500 shadow-md">Store to DB</button></div>
+                    <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+                        <h2 class="text-3xl font-black text-slate-900">Attendance</h2>
+                        <div class="w-full md:w-48"><input type="date" id="attendanceDate" onchange="window.renderAttendanceList()" class="font-bold text-violet-600 text-center border-slate-300 bg-white"></div>
+                    </div>
+                    <div class="card overflow-hidden flex flex-col h-[70vh] md:h-auto border-slate-200">
+                        <div class="flex-1 overflow-y-auto md:max-h-[600px]">
+                            <table class="min-w-full">
+                                <thead class="bg-slate-100 sticky top-0 z-10 border-b border-slate-200">
+                                    <tr><th class="px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase w-20">Log</th><th class="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase">Member Name</th><th class="px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase">Group</th></tr>
+                                </thead>
+                                <tbody id="attendanceList" class="bg-white text-slate-700 divide-y divide-slate-100"></tbody>
+                            </table>
+                        </div>
+                        <div class="p-6 bg-slate-50 border-t border-slate-200 flex justify-between items-center">
+                            <p id="currentCheckCount" class="text-sm text-violet-600 font-bold bg-violet-100 px-4 py-2 rounded-lg">Selected: 0</p>
+                            <button onclick="window.saveAttendance()" class="gradient-bg gradient-hover text-white px-8 py-3 rounded-xl font-bold shadow-md">Store to DB</button>
+                        </div>
                     </div>
                 </div>
 
+                <!-- 탭: DIRECTORY -->
                 <div id="directory" class="tab-content space-y-6">
-                    <div class="flex flex-col sm:flex-row justify-between items-center gap-4"><h2 class="text-3xl font-black text-white">Directory</h2><div class="relative w-full sm:w-72"><input type="text" placeholder="Search members..." id="dirSearch" onkeyup="window.renderDirectory()" class="pl-10 w-full"></div></div>
+                    <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+                        <h2 class="text-3xl font-black text-slate-900">Directory</h2>
+                        <div class="relative w-full sm:w-72">
+                            <input type="text" placeholder="Search members..." id="dirSearch" onkeyup="window.renderDirectory()" class="pl-10 w-full border-slate-300 bg-white shadow-sm rounded-xl">
+                        </div>
+                    </div>
                     <div id="memberContainer" class="columns-1 md:columns-2 gap-6 space-y-6"></div>
                 </div>
 
+                <!-- 탭: PRAYER LIST -->
                 <div id="prayer-list" class="tab-content space-y-6">
-                    <div class="card p-6 md:p-10 border-fuchsia-500/50">
-                        <h2 class="text-2xl font-black text-white mb-6 border-b border-slate-700 pb-4">Prayer List Generator</h2>
+                    <div class="card p-6 md:p-10 border-t-4 border-fuchsia-500">
+                        <h2 class="text-2xl font-black text-slate-900 mb-6 border-b border-slate-100 pb-4">Prayer List Generator</h2>
                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                             <div class="space-y-6">
-                                <div class="p-5 bg-[#1a1c23] rounded border border-slate-700"><label>Worship Date</label><input type="date" id="prayerDate"></div>
-                                <div class="p-5 bg-[#1a1c23] rounded border border-slate-700">
-                                    <label class="mb-3 text-[10px]">Data Sources (Drag & Drop)</label>
-                                    <label id="prayerDropZone" class="flex flex-col items-center justify-center w-full p-8 border-2 border-dashed border-slate-600 rounded cursor-pointer hover:bg-slate-800 transition-all text-center">
-                                        <span class="text-4xl mb-2">📷</span><span id="prayerImgLabel" class="text-sm text-slate-300 font-semibold">Handwritten Notes</span>
+                                <div class="p-5 bg-slate-50 rounded-xl border border-slate-200"><label class="text-slate-600 font-black">Worship Date</label><input type="date" id="prayerDate" class="bg-white border-slate-300"></div>
+                                <div class="p-5 bg-slate-50 rounded-xl border border-slate-200">
+                                    <label class="mb-3 text-[10px] text-slate-500">Data Sources (Drag & Drop)</label>
+                                    <label id="prayerDropZone" class="flex flex-col items-center justify-center w-full p-8 border-2 border-dashed border-violet-300 bg-white rounded-xl cursor-pointer hover:bg-violet-50 transition-all text-center">
+                                        <span class="text-4xl mb-2">📷</span><span id="prayerImgLabel" class="text-sm text-violet-600 font-semibold">Handwritten Notes</span>
                                         <input type="file" accept="image/*" id="prayerImageInput" class="hidden" />
                                     </label>
-                                    <input type="url" id="prayerYoutubeUrl" placeholder="YouTube Link" class="mt-4">
+                                    <input type="url" id="prayerYoutubeUrl" placeholder="YouTube Link" class="mt-4 bg-white border-slate-300">
                                 </div>
                             </div>
-                            <div class="flex flex-col bg-[#1a1c23] p-5 rounded border border-slate-700 min-h-[350px]">
-                                <label class="text-cyan-400 font-black mb-3 text-[10px]">Result Preview</label>
-                                <textarea id="prayerResultText" class="flex-grow bg-[#0a0514] font-serif-formatted text-lg leading-relaxed p-4 resize-none border border-slate-600 focus:border-cyan-400"></textarea>
+                            <div class="flex flex-col bg-slate-50 p-5 rounded-xl border border-slate-200 min-h-[350px]">
+                                <label class="text-fuchsia-600 font-black mb-3 text-[10px] uppercase tracking-widest">Result Preview</label>
+                                <textarea id="prayerResultText" class="flex-grow bg-white font-serif-formatted text-lg leading-relaxed p-4 resize-none border border-slate-300 rounded-xl focus:border-fuchsia-500 focus:ring-2 focus:ring-fuchsia-200 shadow-inner"></textarea>
                             </div>
                         </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8 pt-6 border-t border-slate-700">
-                            <button onclick="window.generatePrayerList()" id="genPrayerBtn" class="bg-fuchsia-600 text-white py-4 rounded font-bold hover:bg-fuchsia-500 shadow-md text-lg flex items-center justify-center gap-2"><span class="loading-spinner hidden" id="prayerSpinner"></span>Generate AI</button>
-                            <button onclick="window.savePrayerList()" class="bg-cyan-600 text-white py-4 rounded font-bold hover:bg-cyan-500 shadow-md text-lg">Save & Download</button>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8 pt-6 border-t border-slate-100">
+                            <button onclick="window.generatePrayerList()" id="genPrayerBtn" class="bg-slate-900 text-white py-4 rounded-xl font-bold hover:bg-slate-800 shadow-md text-base flex items-center justify-center gap-2"><span class="loading-spinner hidden" id="prayerSpinner"></span>Extract with AI</button>
+                            <button onclick="window.savePrayerList()" class="gradient-bg gradient-hover text-white py-4 rounded-xl font-bold shadow-md text-base">Save & Download</button>
                         </div>
                     </div>
                 </div>
 
-                <div id="profile-view" class="tab-content space-y-6"><button onclick="window.showTab('directory', document.querySelectorAll('.nav-btn')[2])" class="text-xs font-bold text-slate-400 hover:text-cyan-400">&larr; Back</button><div class="card p-6 md:p-10 border-t-2 border-cyan-400"><div id="profileContent"></div><div class="mt-12 pt-8 border-t border-slate-700"><h4 class="text-yellow-400 mb-6 text-[10px] font-black uppercase">Attendance Chart</h4><div class="h-48 w-full"><canvas id="personalAttendanceChart"></canvas></div></div><div class="mt-10 pt-6 flex flex-col md:flex-row gap-4 border-t border-slate-700"><button id="editBtn" class="border border-cyan-400 text-cyan-400 px-8 py-3 rounded font-bold hover:bg-cyan-900/30 transition w-full md:w-auto">Edit Member</button><button id="deleteBtn" class="border border-red-500 text-red-500 px-8 py-3 rounded font-bold hover:bg-red-900/30 transition w-full md:w-auto">Remove</button></div></div></div>
-                <div id="data-import" class="tab-content space-y-6"><div class="card p-6 md:p-10 max-w-3xl mx-auto border-cyan-500/50"><h2 class="text-xl font-extrabold text-cyan-400 text-center mb-8 uppercase">Bulk Import</h2><textarea id="bulkDataInput" rows="10" class="font-mono text-sm" placeholder='"LastName, FirstName", "Address", "Phone"'></textarea><button onclick="window.processBulkImport()" class="w-full bg-cyan-600 text-white p-4 rounded font-bold mt-6 shadow-md transition">Start Batch Process</button></div></div>
-                <div id="edit-member" class="tab-content"><div class="card p-6 md:p-10 max-w-3xl mx-auto border-t-2 border-yellow-400"><h2 class="text-2xl font-black mb-8 text-white uppercase">Modify Profile</h2><form id="editMemberForm" onsubmit="window.submitEdit(event)" class="space-y-4"><input type="hidden" name="id"><div class="grid grid-cols-2 gap-4"><div><label>First Name</label><input type="text" name="firstName" required></div><div><label>Last Name</label><input type="text" name="lastName" required></div></div><div class="grid grid-cols-1 md:grid-cols-3 gap-4"><div><label>Birthday</label><input type="date" name="dob"></div><div><label>Anniversary</label><input type="date" name="anniversary"></div><div><label>Gender</label><select name="gender"><option value="Male">Male</option><option value="Female">Female</option></select></div></div><div class="grid grid-cols-1 md:grid-cols-2 gap-4"><div><label>Cell Phone</label><input type="tel" name="cellPhone"></div><div><label>Home Phone</label><input type="tel" name="homePhone"></div></div><div><label>Email</label><input type="email" name="email"></div><div><label>Address</label><input type="text" name="address"></div><div class="grid grid-cols-1 md:grid-cols-2 gap-4"><div><label>Household</label><select id="familySelect" name="familyId"></select></div><div><label>Join Date</label><input type="date" name="joinDate"></div></div><div><label class="text-fuchsia-400 uppercase text-[9px]">Prayers</label><textarea name="prayers" rows="3"></textarea></div><div><label class="uppercase text-[9px]">Notes</label><textarea name="notes" rows="3"></textarea></div><div class="flex flex-wrap gap-4 border-t border-slate-700 pt-5"><label class="flex items-center gap-2"><input type="checkbox" name="isAdult"><span>Adult</span></label><label class="flex items-center gap-2"><input type="checkbox" name="isBaptized"><span>Baptized</span></label><label class="flex items-center gap-2"><input type="checkbox" name="isNonMember"><span>Non-Member</span></label></div><button type="submit" class="w-full bg-cyan-600 text-white p-4 rounded font-bold mt-6 shadow-lg">Save Changes</button></form></div></div>
-                <div id="new-member" class="tab-content"><div class="card p-6 md:p-10 max-w-3xl mx-auto mt-6 border-t-2 border-emerald-400"><h2 class="text-2xl font-black mb-8 text-white uppercase text-center">Add New Member</h2><form id="newMemberForm" onsubmit="window.registerNewMember(event)" class="space-y-4"><div class="grid grid-cols-2 gap-4"><div><label>First Name</label><input type="text" name="firstName" required></div><div><label>Last Name</label><input type="text" name="lastName" required></div></div><div class="grid grid-cols-1 md:grid-cols-3 gap-4"><div><label>Birthday</label><input type="date" name="dob"></div><div><label>Anniversary</label><input type="date" name="anniversary"></div><div><label>Gender</label><select name="gender"><option value="Male">Male</option><option value="Female">Female</option></select></div></div><div class="grid grid-cols-1 md:grid-cols-2 gap-4"><div><label>Cell</label><input type="tel" name="cellPhone"></div><div><label>Home</label><input type="tel" name="homePhone"></div></div><div><label>Email</label><input type="email" name="email"></div><div><label>Address</label><input type="text" name="address"></div><div class="grid grid-cols-1 md:grid-cols-2 gap-4"><div><label>Household</label><select id="newFamilySelect" name="familyId"></select></div><div><label>Join Date</label><input type="date" name="joinDate"></div></div><div><label class="uppercase text-[9px]">Notes</label><textarea name="notes" rows="3"></textarea></div><div class="flex flex-wrap gap-4 border-t border-slate-700 pt-5"><label class="flex items-center gap-2"><input type="checkbox" name="isAdult" checked><span>Adult</span></label><label class="flex items-center gap-2"><input type="checkbox" name="isBaptized"><span>Baptized</span></label><label class="flex items-center gap-2"><input type="checkbox" name="isNonMember"><span>Non-Member</span></label></div><button type="submit" class="w-full bg-cyan-600 text-white p-4 rounded font-bold mt-6 shadow-lg">Register</button></form></div></div>
+                <!-- 탭: PROFILE VIEW -->
+                <div id="profile-view" class="tab-content space-y-6">
+                    <button onclick="window.showTab('directory', document.querySelectorAll('.nav-btn')[2])" class="text-xs font-bold text-slate-400 hover:text-violet-600 flex items-center gap-1">&larr; Back to Directory</button>
+                    <div class="card p-6 md:p-10 border-t-4 border-blue-500 shadow-lg">
+                        <div id="profileContent"></div>
+                        <div class="mt-12 pt-8 border-t border-slate-100">
+                            <h4 class="text-slate-500 mb-6 text-[10px] font-black uppercase tracking-widest">Attendance Chart</h4>
+                            <div class="h-48 w-full"><canvas id="personalAttendanceChart"></canvas></div>
+                        </div>
+                        <div class="mt-10 pt-6 flex flex-col md:flex-row gap-4 border-t border-slate-100">
+                            <button id="editBtn" class="bg-slate-100 text-slate-700 px-8 py-3 rounded-xl font-bold hover:bg-slate-200 transition w-full md:w-auto">Edit Member</button>
+                            <button id="deleteBtn" class="bg-red-50 text-red-600 px-8 py-3 rounded-xl font-bold hover:bg-red-100 transition w-full md:w-auto">Remove</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 탭: BULK IMPORT -->
+                <div id="data-import" class="tab-content space-y-6">
+                    <div class="card p-6 md:p-10 max-w-3xl mx-auto border-t-4 border-blue-500">
+                        <h2 class="text-xl font-extrabold text-slate-900 text-center mb-8 uppercase tracking-widest">Bulk Import</h2>
+                        <textarea id="bulkDataInput" rows="10" class="font-mono text-sm bg-slate-50 border-slate-300" placeholder='"LastName, FirstName", "Address", "Phone"'></textarea>
+                        <button onclick="window.processBulkImport()" class="w-full gradient-bg gradient-hover text-white p-4 rounded-xl font-bold mt-6 shadow-md transition">Start Batch Process</button>
+                    </div>
+                </div>
+
+                <!-- 탭: EDIT MEMBER FORM -->
+                <div id="edit-member" class="tab-content">
+                    <div class="card p-6 md:p-10 max-w-3xl mx-auto border-t-4 border-violet-500 shadow-xl">
+                        <h2 class="text-2xl font-black mb-8 text-slate-900 uppercase">Modify Profile</h2>
+                        <form id="editMemberForm" onsubmit="window.submitEdit(event)" class="space-y-4">
+                            <input type="hidden" name="id">
+                            <div class="grid grid-cols-2 gap-4"><div><label>First Name</label><input type="text" name="firstName" required></div><div><label>Last Name</label><input type="text" name="lastName" required></div></div>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4"><div><label>Birthday</label><input type="date" name="dob"></div><div><label>Anniversary</label><input type="date" name="anniversary"></div><div><label>Gender</label><select name="gender"><option value="Male">Male</option><option value="Female">Female</option></select></div></div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4"><div><label>Cell Phone</label><input type="tel" name="cellPhone"></div><div><label>Home Phone</label><input type="tel" name="homePhone"></div></div>
+                            <div><label>Email</label><input type="email" name="email"></div>
+                            <div><label>Address</label><input type="text" name="address"></div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4"><div><label>Household</label><select id="familySelect" name="familyId"></select></div><div><label>Join Date</label><input type="date" name="joinDate"></div></div>
+                            <div><label class="text-fuchsia-600 uppercase text-[9px]">Prayers</label><textarea name="prayers" rows="3"></textarea></div>
+                            <div><label class="text-slate-500 uppercase text-[9px]">Notes</label><textarea name="notes" rows="3"></textarea></div>
+                            <div class="flex flex-wrap gap-4 border-t border-slate-200 pt-5"><label class="flex items-center gap-2"><input type="checkbox" name="isAdult" class="w-4 h-4 text-violet-600 rounded"><span>Adult</span></label><label class="flex items-center gap-2"><input type="checkbox" name="isBaptized" class="w-4 h-4 text-violet-600 rounded"><span>Baptized</span></label><label class="flex items-center gap-2"><input type="checkbox" name="isNonMember" class="w-4 h-4 text-violet-600 rounded"><span>Non-Member</span></label></div>
+                            <button type="submit" class="w-full gradient-bg gradient-hover text-white p-4 rounded-xl font-bold mt-6 shadow-lg">Save Changes</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- 탭: NEW MEMBER FORM -->
+                <div id="new-member" class="tab-content">
+                    <div class="card p-6 md:p-10 max-w-3xl mx-auto border-t-4 border-fuchsia-500 shadow-xl">
+                        <h2 class="text-2xl font-black mb-8 text-slate-900 uppercase text-center tracking-tight">Add New Member</h2>
+                        <form id="newMemberForm" onsubmit="window.registerNewMember(event)" class="space-y-4">
+                            <div class="grid grid-cols-2 gap-4"><div><label>First Name</label><input type="text" name="firstName" required></div><div><label>Last Name</label><input type="text" name="lastName" required></div></div>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4"><div><label>Birthday</label><input type="date" name="dob"></div><div><label>Anniversary</label><input type="date" name="anniversary"></div><div><label>Gender</label><select name="gender"><option value="Male">Male</option><option value="Female">Female</option></select></div></div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4"><div><label>Cell</label><input type="tel" name="cellPhone"></div><div><label>Home</label><input type="tel" name="homePhone"></div></div>
+                            <div><label>Email</label><input type="email" name="email"></div>
+                            <div><label>Address</label><input type="text" name="address"></div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4"><div><label>Household</label><select id="newFamilySelect" name="familyId"></select></div><div><label>Join Date</label><input type="date" name="joinDate"></div></div>
+                            <div><label class="text-slate-500 uppercase text-[9px]">Notes</label><textarea name="notes" rows="3"></textarea></div>
+                            <div class="flex flex-wrap gap-4 border-t border-slate-200 pt-5"><label class="flex items-center gap-2"><input type="checkbox" name="isAdult" checked class="w-4 h-4 text-violet-600 rounded"><span>Adult</span></label><label class="flex items-center gap-2"><input type="checkbox" name="isBaptized" class="w-4 h-4 text-violet-600 rounded"><span>Baptized</span></label><label class="flex items-center gap-2"><input type="checkbox" name="isNonMember" class="w-4 h-4 text-violet-600 rounded"><span>Non-Member</span></label></div>
+                            <button type="submit" class="w-full gradient-bg gradient-hover text-white p-4 rounded-xl font-bold mt-6 shadow-lg text-base">Register Member</button>
+                        </form>
+                    </div>
+                </div>
 
             </div>
         </main>
     </div>
 
+    <!-- SCRIPT ENGINE -->
     <script>
         // --- 🔐 LOGIN & SIDEBAR LOGIC ---
         document.addEventListener("DOMContentLoaded", () => {
@@ -189,8 +374,8 @@
             else { sb.classList.add('-translate-x-full'); ov.classList.add('hidden'); }
         };
 
-        // --- CORE STATE ---
-        Chart.defaults.color = '#94a3b8'; Chart.defaults.borderColor = 'rgba(71, 85, 105, 0.4)'; Chart.register(ChartDataLabels);
+        // --- CORE STATE & CHART THEMING ---
+        Chart.defaults.color = '#64748b'; Chart.defaults.borderColor = 'rgba(0,0,0,0.05)'; Chart.defaults.font.family = 'Inter'; Chart.register(ChartDataLabels);
         window.members = []; window.attendanceRecords = []; window.mainChart = null; window.profileChart = null;
         window.currentApiKey = localStorage.getItem('sumc_gemini_key') || "";
         window.currentAiModel = "gemini-1.5-flash"; window.currentDbId = "sumc-2026-production-db"; window.prayerImageBase64 = '';
@@ -230,14 +415,16 @@
                 if(window.attendanceRecords.length === 0) disp.innerText = "0 / 0%";
                 else { const total = window.attendanceRecords.reduce((sum, r) => sum + (r.attendees ? r.attendees.length : 0), 0); const avg = Math.round(total / window.attendanceRecords.length); const pct = window.members.length > 0 ? Math.round((avg / window.members.length) * 100) : 0; disp.innerText = `${avg} / ${pct}%`; }
             }
-            if(window.currentApiKey) { const s = document.getElementById('aiStatus'); if(s) { s.innerText = "Ready"; s.className = "text-[9px] bg-fuchsia-900 border border-fuchsia-500 text-fuchsia-100 px-2.5 py-1 rounded-sm font-bold tracking-widest"; } }
+            if(window.currentApiKey) { const s = document.getElementById('aiStatus'); if(s) { s.innerText = "Ready"; s.className = "text-[9px] bg-violet-100 text-violet-600 px-3 py-1 rounded-full font-bold uppercase tracking-widest"; } }
             renderMainChart();
         };
 
         function renderMainChart() {
             const canvas = document.getElementById('mainAttendanceChart'); if(!canvas) return; const ctx = canvas.getContext('2d'); if(window.mainChart) window.mainChart.destroy();
             const data = sundayLabels.map(l => { const rec = window.attendanceRecords.find(r => r.date === l); return rec ? (rec.attendees ? rec.attendees.length : 0) : 0; });
-            window.mainChart = new Chart(ctx, { type: 'line', data: { labels: sundayLabels, datasets: [{ label: 'Attendees', data: data, borderColor: '#fbbf24', backgroundColor: 'rgba(251, 191, 36, 0.1)', fill: true, tension: 0.3, borderWidth: 2, pointRadius: 4 }] }, options: { maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { color: '#fbbf24', anchor: 'end', align: 'top', font: { weight: 'bold' }, formatter: (v) => v > 0 ? v : '' } }, scales: { y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' } }, x: { grid: { display: false } } } } });
+            // Gradient fill for chart
+            let gradient = ctx.createLinearGradient(0, 0, 0, 400); gradient.addColorStop(0, 'rgba(139, 92, 246, 0.4)'); gradient.addColorStop(1, 'rgba(139, 92, 246, 0.0)');
+            window.mainChart = new Chart(ctx, { type: 'line', data: { labels: sundayLabels, datasets: [{ label: 'Attendees', data: data, borderColor: '#8b5cf6', backgroundColor: gradient, fill: true, tension: 0.3, borderWidth: 3, pointBackgroundColor: '#ffffff', pointBorderColor: '#8b5cf6', pointRadius: 5 }] }, options: { maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { color: '#8b5cf6', anchor: 'end', align: 'top', font: { weight: 'bold' }, formatter: (v) => v > 0 ? v : '' } }, scales: { y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } }, x: { grid: { display: false } } } } });
         }
 
         window.renderDirectory = () => {
@@ -246,13 +433,13 @@
             const filtered = window.members.filter(m => (m.firstName + " " + m.lastName).toLowerCase().includes(search));
             const families = {}; filtered.forEach(m => { if(!families[m.familyId]) families[m.familyId] = []; families[m.familyId].push(m); });
             const sortedFamilies = Object.values(families).sort((a, b) => (a[0].lastName + a[0].firstName).localeCompare(b[0].lastName + b[0].firstName));
-            container.innerHTML = sortedFamilies.map(fam => `<div class="card p-6 break-inside-avoid border-t-2 border-slate-600"><div class="text-[10px] font-black text-yellow-400 uppercase mb-4">${fam[0].lastName} Household</div><div class="space-y-3">${fam.map(m => `<button onclick="window.viewProfile('${m.id}')" class="w-full text-left p-4 rounded bg-[#1a1c23] border border-slate-700 hover:border-cyan-400 transition shadow-sm"><div class="font-bold text-slate-200">${m.lastName}, ${m.firstName}</div><div class="mt-2 flex flex-wrap gap-2"><span class="text-[9px] px-2 py-0.5 rounded font-bold border border-slate-600 ${m.isAdult ? 'text-slate-300' : 'text-yellow-500'}">${m.isAdult ? 'Adult' : 'Child'}</span></div></button>`).join('')}</div></div>`).join('');
+            container.innerHTML = sortedFamilies.map(fam => `<div class="card p-6 break-inside-avoid"><div class="text-[10px] font-black text-slate-400 uppercase mb-4 tracking-widest">${fam[0].lastName} Household</div><div class="space-y-3">${fam.map(m => `<button onclick="window.viewProfile('${m.id}')" class="w-full text-left p-4 rounded-xl bg-slate-50 border border-slate-200 hover:border-violet-400 hover:bg-white transition shadow-sm group"><div class="font-bold text-slate-700 group-hover:text-violet-600 transition">${m.lastName}, ${m.firstName}</div><div class="mt-2 flex flex-wrap gap-2"><span class="text-[9px] px-2 py-0.5 rounded font-bold border border-slate-200 ${m.isAdult ? 'text-slate-500 bg-white' : 'text-violet-500 bg-violet-50'}">${m.isAdult ? 'Adult' : 'Child'}</span></div></button>`).join('')}</div></div>`).join('');
         };
 
         window.viewProfile = (id) => {
             const m = window.members.find(m => m.id === id); if(!m) return;
             window.showTab('profile-view');
-            document.getElementById('profileContent').innerHTML = `<div class="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 pb-6 border-b border-slate-700"><div><h2 class="text-3xl md:text-4xl font-black text-white tracking-tight">${m.firstName} <span class="text-cyan-400">${m.lastName}</span></h2><div class="flex items-center gap-3 mt-3"><span class="text-sm font-bold text-slate-300 border border-slate-600 px-3 py-1 rounded">${m.isAdult ? 'Adult' : 'Child'}</span><span class="text-sm font-bold text-yellow-400 bg-yellow-900/10 px-3 py-1 rounded uppercase">${m.gender || 'Unknown'}</span></div></div></div><div class="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-8 mt-8 text-sm"><div class="space-y-6"><div class="grid grid-cols-2 gap-4"><div><label>Contact</label><div class="text-slate-200 font-bold">${m.cellPhone || '—'}</div></div><div><label>Email</label><div class="text-cyan-400 truncate underline">${m.email || '—'}</div></div></div><div><label>Address</label><div class="text-slate-200 leading-relaxed">${m.address || '—'}</div></div><div class="p-5 bg-fuchsia-900/20 border border-fuchsia-500/30 rounded"><label class="text-fuchsia-400 mb-2 font-black uppercase text-[9px]">Prayers</label><div class="text-fuchsia-100 whitespace-pre-wrap">${m.prayers || 'No records.'}</div></div><div class="p-5 bg-[#1a1c23] border border-slate-700 rounded"><label class="text-slate-400 mb-2 font-black uppercase text-[9px]">Notes</label><div class="text-slate-300 whitespace-pre-wrap">${m.notes || '—'}</div></div></div></div>`;
+            document.getElementById('profileContent').innerHTML = `<div class="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 pb-6 border-b border-slate-100"><div><h2 class="text-3xl md:text-4xl font-black text-slate-900 tracking-tight">${m.firstName} <span class="gradient-text">${m.lastName}</span></h2><div class="flex items-center gap-3 mt-3"><span class="text-sm font-bold text-slate-500 border border-slate-200 bg-slate-50 px-3 py-1 rounded-full">${m.isAdult ? 'Adult' : 'Child'}</span><span class="text-sm font-bold text-violet-600 bg-violet-100 px-3 py-1 rounded-full uppercase">${m.gender || 'Unknown'}</span></div></div></div><div class="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-8 mt-8 text-sm"><div class="space-y-6"><div class="grid grid-cols-2 gap-4"><div><label>Contact</label><div class="text-slate-700 font-bold">${m.cellPhone || '—'}</div></div><div><label>Email</label><div class="text-blue-500 truncate underline">${m.email || '—'}</div></div></div><div><label>Address</label><div class="text-slate-700 leading-relaxed font-medium">${m.address || '—'}</div></div><div class="p-5 bg-fuchsia-50 border border-fuchsia-100 rounded-xl"><label class="text-fuchsia-600 mb-2 font-black uppercase text-[9px]">Prayers</label><div class="text-fuchsia-900 whitespace-pre-wrap font-medium">${m.prayers || 'No records.'}</div></div><div class="p-5 bg-slate-50 border border-slate-200 rounded-xl"><label class="text-slate-400 mb-2 font-black uppercase text-[9px]">Notes</label><div class="text-slate-700 whitespace-pre-wrap font-medium">${m.notes || '—'}</div></div></div></div>`;
             document.getElementById('editBtn').onclick = () => window.openEditForm(m.id);
             document.getElementById('deleteBtn').onclick = () => window.deleteMember(m.id);
             renderPersonalChart(m.id);
@@ -261,7 +448,7 @@
         function renderPersonalChart(mid) {
             const ctx = document.getElementById('personalAttendanceChart').getContext('2d'); if(!ctx) return; if(window.profileChart) window.profileChart.destroy();
             const hist = sundayLabels.map(l => { const rec = window.attendanceRecords.find(r => r.date === l); return rec && rec.attendees && rec.attendees.includes(mid) ? 1 : 0; });
-            window.profileChart = new Chart(ctx, { type: 'bar', data: { labels: sundayLabels, datasets: [{ data: hist, backgroundColor: hist.map(h => h ? '#00d2ff' : 'rgba(71, 85, 105, 0.3)'), borderRadius: 2 }] }, options: { maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { display: false } }, scales: { y: { display: false, max: 1.2 }, x: { grid: { display: false } } } } });
+            window.profileChart = new Chart(ctx, { type: 'bar', data: { labels: sundayLabels, datasets: [{ data: hist, backgroundColor: hist.map(h => h ? '#8b5cf6' : '#f1f5f9'), borderRadius: 4 }] }, options: { maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { display: false } }, scales: { y: { display: false, max: 1.2 }, x: { grid: { display: false } } } } });
         }
 
         window.renderAttendanceList = () => {
@@ -269,11 +456,19 @@
             if (!dateInput.value) { const t = new Date(); t.setDate(t.getDate() - t.getDay()); dateInput.value = t.toISOString().split('T')[0]; }
             const existingRecord = window.attendanceRecords.find(r => r.date === dateInput.value); const checkedIds = existingRecord ? existingRecord.attendees : [];
             const sortedMembers = [...window.members].sort((a, b) => a.lastName.localeCompare(b.lastName));
-            list.innerHTML = sortedMembers.map(m => `<tr class="hover:bg-white/5 transition"><td class="px-6 py-4 text-center"><input type="checkbox" value="${m.id}" ${checkedIds.includes(m.id) ? 'checked' : ''} onchange="window.updateCheckCount()" class="w-5 h-5 cursor-pointer attendee-check accent-cyan-500"></td><td class="px-6 py-4 font-bold text-slate-200">${m.lastName}, ${m.firstName}</td><td class="px-6 py-4 text-center text-[10px] font-black uppercase text-slate-400">${m.isAdult ? 'Adult' : 'Child'}</td></tr>`).join('');
+            list.innerHTML = sortedMembers.map(m => `<tr class="hover:bg-slate-50 transition"><td class="px-6 py-4 text-center"><input type="checkbox" value="${m.id}" ${checkedIds.includes(m.id) ? 'checked' : ''} onchange="window.updateCheckCount()" class="w-5 h-5 cursor-pointer attendee-check accent-violet-600 rounded bg-slate-50 border-slate-300"></td><td class="px-6 py-4 font-bold text-slate-800">${m.lastName}, ${m.firstName}</td><td class="px-6 py-4 text-center text-[10px] font-black uppercase text-slate-400">${m.isAdult ? 'Adult' : 'Child'}</td></tr>`).join('');
             window.updateCheckCount();
         };
 
         window.updateCheckCount = () => { const cnt = document.querySelectorAll('.attendee-check:checked').length; const disp = document.getElementById('currentCheckCount'); if(disp) disp.innerText = `Selected: ${cnt}`; };
+
+        window.openEditForm = (id) => {
+            const m = window.members.find(m => m.id === id); if(!m) return;
+            const form = document.getElementById('editMemberForm'); window.showTab('edit-member');
+            form.id.value = m.id; form.firstName.value = m.firstName; form.lastName.value = m.lastName; form.dob.value = m.dob || ''; form.anniversary.value = m.anniversary || ''; form.gender.value = m.gender || 'Male'; form.homePhone.value = m.homePhone || ''; form.cellPhone.value = m.cellPhone || ''; form.email.value = m.email || ''; form.address.value = m.address || ''; form.joinDate.value = m.joinDate || ''; form.notes.value = m.notes || ''; form.prayers.value = m.prayers || '';
+            form.isAdult.checked = m.isAdult !== false; form.isBaptized.checked = m.isBaptized === true; form.isNonMember.checked = m.isNonMember === true;
+            populateFamilyDropdown(document.getElementById('familySelect'), m.familyId);
+        };
 
         window.verifyAndSaveApiKey = async () => {
             const key = document.getElementById('apiKeyInput').value.trim(); if(!key) return alert("Enter API Key.");
@@ -290,7 +485,7 @@
         window.restoreSettingsOnLoad = async () => {
             if(window.currentApiKey) {
                 document.getElementById('apiKeyInput').value = window.currentApiKey;
-                const statusUI = document.getElementById('aiStatus'); if(statusUI) { statusUI.innerText = "Ready"; statusUI.className = "text-[9px] bg-fuchsia-900 border border-fuchsia-500 text-fuchsia-100 px-2.5 py-1 rounded-sm font-bold tracking-widest"; }
+                const statusUI = document.getElementById('aiStatus'); if(statusUI) { statusUI.innerText = "Ready"; statusUI.className = "text-[9px] bg-violet-100 text-violet-600 px-3 py-1 rounded-full font-bold tracking-widest uppercase"; }
             }
         };
 
@@ -299,19 +494,19 @@
             const query = document.getElementById('geminiInput').value; if(!query) return;
             const chat = document.getElementById('geminiChatDisplay'); const sendBtn = document.getElementById('sendBtn');
             sendBtn.disabled = true; sendBtn.innerHTML = `<span class="loading-spinner"></span>`;
-            const uMsg = document.createElement('div'); uMsg.className = "p-4 bg-cyan-900/30 border border-cyan-500/50 rounded text-cyan-100 text-right self-end max-w-[90%] font-bold"; uMsg.innerText = query; chat.appendChild(uMsg); document.getElementById('geminiInput').value = "";
-            const load = document.createElement('div'); load.className = "p-4 bg-[#1a1c23] border border-slate-700 rounded italic text-slate-400 self-start max-w-[90%] flex items-center gap-3"; load.innerHTML = `<span class="loading-spinner"></span> Analyzing...`; chat.appendChild(load); chat.scrollTop = chat.scrollHeight;
+            const uMsg = document.createElement('div'); uMsg.className = "p-4 gradient-bg rounded-2xl rounded-tr-sm text-white text-right self-end max-w-[90%] font-bold shadow-md"; uMsg.innerText = query; chat.appendChild(uMsg); document.getElementById('geminiInput').value = "";
+            const load = document.createElement('div'); load.className = "p-4 bg-white border border-slate-200 rounded-2xl rounded-tl-sm italic text-slate-400 self-start max-w-[90%] flex items-center gap-3 shadow-sm"; load.innerHTML = `<span class="loading-spinner border-slate-300 border-top-violet-500"></span> Analyzing...`; chat.appendChild(load); chat.scrollTop = chat.scrollHeight;
             try {
                 const dbContext = { totalCount: window.members.length, members: window.members.map(mb => ({ name: `${mb.firstName} ${mb.lastName}`, gender: mb.gender, address: mb.address, email: mb.email, phone: mb.cellPhone, dob: mb.dob, baptized: mb.isBaptized ? 'Yes' : 'No', adult: mb.isAdult ? 'Adult' : 'Child', prayers: mb.prayers, notes: mb.notes })) };
                 const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents: [{ parts: [{ text: `Use database: ${JSON.stringify(dbContext)}. Task: ${query}` }] }] }) });
                 const d = await resp.json(); chat.removeChild(load);
-                const aiMsg = document.createElement('div'); aiMsg.className = "p-4 bg-[#1a1c23] border border-fuchsia-500/50 rounded text-slate-200 self-start max-w-[95%] whitespace-pre-wrap shadow-lg"; aiMsg.innerText = d.candidates[0].content.parts[0].text; chat.appendChild(aiMsg); chat.scrollTop = chat.scrollHeight;
+                const aiMsg = document.createElement('div'); aiMsg.className = "p-4 bg-white border border-slate-200 rounded-2xl rounded-tl-sm text-slate-700 self-start max-w-[95%] whitespace-pre-wrap shadow-sm font-medium"; aiMsg.innerText = d.candidates[0].content.parts[0].text; chat.appendChild(aiMsg); chat.scrollTop = chat.scrollHeight;
             } catch(e) { chat.removeChild(load); alert("AI Fail: " + e.message); } finally { sendBtn.disabled = false; sendBtn.innerHTML = `<svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"/></svg>`; }
         };
 
         // --- Prayer Helper ---
         window.handlePrayerImageChange = (e) => { const f = e.target?.files?.[0]; if (f) { document.getElementById('prayerImgLabel').innerText = f.name; const r = new FileReader(); r.onloadend = () => { window.prayerImageBase64 = r.result.split(',')[1]; }; r.readAsDataURL(f); } };
-        setTimeout(() => { const dz = document.getElementById('prayerDropZone'); if(dz) { ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); e.stopPropagation(); }, false)); ['dragenter', 'dragover'].forEach(ev => dz.addEventListener(ev, () => dz.classList.add('border-cyan-400', 'bg-slate-800'), false)); ['dragleave', 'drop'].forEach(ev => dz.addEventListener(ev, () => dz.classList.remove('border-cyan-400', 'bg-slate-800'), false)); dz.addEventListener('drop', (e) => { if(e.dataTransfer.files.length > 0) { document.getElementById('prayerImageInput').files = e.dataTransfer.files; window.handlePrayerImageChange({ target: document.getElementById('prayerImageInput') }); } }, false); } }, 1000);
+        setTimeout(() => { const dz = document.getElementById('prayerDropZone'); if(dz) { ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); e.stopPropagation(); }, false)); ['dragenter', 'dragover'].forEach(ev => dz.addEventListener(ev, () => dz.classList.add('border-violet-400', 'bg-violet-50'), false)); ['dragleave', 'drop'].forEach(ev => dz.addEventListener(ev, () => dz.classList.remove('border-violet-400', 'bg-violet-50'), false)); dz.addEventListener('drop', (e) => { if(e.dataTransfer.files.length > 0) { document.getElementById('prayerImageInput').files = e.dataTransfer.files; window.handlePrayerImageChange({ target: document.getElementById('prayerImageInput') }); } }, false); } }, 1000);
         window.generatePrayerList = async () => {
             const k = window.currentApiKey; if(!k) return alert("Auth Key in Settings."); const yt = document.getElementById('prayerYoutubeUrl').value; if(!window.prayerImageBase64 && !yt) return alert("Upload sources.");
             const btn = document.getElementById('genPrayerBtn'); const spinner = document.getElementById('prayerSpinner'); const res = document.getElementById('prayerResultText');
@@ -354,7 +549,7 @@ const firebaseConfig = {
             signInAnonymously(auth).then(() => {
                 onAuthStateChanged(auth, (user) => {
                     if (user) {
-                        document.getElementById('cloudStatusIndicator').innerText = "Online"; document.getElementById('cloudStatusIndicator').className = "text-[10px] text-emerald-400 uppercase tracking-widest font-black"; document.getElementById('statusDot').className = "w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-md";
+                        document.getElementById('cloudStatusIndicator').innerText = "Online"; document.getElementById('cloudStatusIndicator').className = "text-[10px] text-emerald-500 uppercase tracking-widest font-black"; document.getElementById('statusDot').className = "w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-md";
                         onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'members'), (snap) => { window.members = snap.docs.map(d => ({ id: d.id, ...d.data() })); window.updateDashboard(); window.renderDirectory(); });
                         onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'attendance'), (snap) => { window.attendanceRecords = snap.docs.map(d => ({ id: d.id, ...d.data() })); window.updateDashboard(); });
                         onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'config', 'system'), (snap) => { if(snap.exists() && snap.data().geminiKey) { window.currentApiKey = snap.data().geminiKey; localStorage.setItem('sumc_gemini_key', window.currentApiKey); window.updateDashboard(); } });
