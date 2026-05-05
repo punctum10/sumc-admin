@@ -71,7 +71,7 @@
                     SUMC Care AI
                 </h1>
                 
-                <!-- 로고 이미지 (동일한 폴더에 파일이 있어야 합니다) -->
+                <!-- 로고 이미지 -->
                 <img src="SUMC%20Logo%20(Color).jpg" alt="SUMC Logo" class="w-full h-auto mx-auto mb-6 rounded shadow-sm object-contain bg-[#1b2336]" onerror="this.src='https://via.placeholder.com/300x150/1b2336/ffffff?text=SUMC+Logo';">
                 
                 <span class="text-xs font-bold tracking-widest uppercase text-slate-500">Secure Admin Portal</span>
@@ -94,10 +94,10 @@
     <!-- MOBILE SIDEBAR OVERLAY -->
     <div id="sidebarOverlay" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 hidden" onclick="window.toggleSidebar()"></div>
 
-    <!-- LEFT SIDEBAR (NAVY THEME) -->
+    <!-- LEFT SIDEBAR -->
     <aside id="sidebar" class="fixed md:relative w-72 flex-shrink-0 flex flex-col z-50 h-full transform -translate-x-full md:translate-x-0 transition-transform duration-300 shadow-[4px_0_24px_rgba(0,0,0,0.1)]" style="background-color: var(--sumc-navy);">
         
-        <!-- Sidebar Header (Clickable to Dashboard) -->
+        <!-- Sidebar Header -->
         <div class="p-6 border-b border-white/10 flex flex-col cursor-pointer hover:bg-white/5 transition" onclick="window.showTab('dashboard', document.querySelectorAll('.nav-btn')[0])">
             <div class="flex justify-between items-start">
                 <h1 class="text-2xl font-black text-white leading-tight">SUMC Care AI</h1>
@@ -107,7 +107,7 @@
             </div>
             <!-- Sidebar 로고 -->
             <img src="SUMC%20Logo%20(Color).jpg" alt="SUMC Logo" class="w-full h-auto mt-5 mb-2 rounded shadow-sm object-contain bg-[#1b2336] border border-white/10" onerror="this.style.display='none';">
-            <span class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mt-2">(v.2.01)</span>
+            <span class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mt-2">(v.3.00)</span>
         </div>
         
         <div class="px-6 py-4 flex items-center gap-2 border-b border-white/5 bg-black/10">
@@ -119,6 +119,7 @@
             <button onclick="window.showTab('dashboard', this)" class="nav-btn active"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>Dashboard</button>
             <button onclick="window.showTab('attendance', this)" class="nav-btn"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>Attendance</button>
             <button onclick="window.showTab('directory', this)" class="nav-btn"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>Directory</button>
+            <button onclick="window.showTab('calendar', this)" class="nav-btn"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>Calendar</button>
             <button onclick="window.showTab('prayer-list', this)" class="nav-btn"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>Prayer List</button>
             <button onclick="window.showTab('data-import', this)" class="nav-btn"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>Bulk Import</button>
             <button onclick="window.showTab('settings-tab', this)" class="nav-btn"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>Settings</button>
@@ -138,11 +139,11 @@
 
     <!-- MAIN AREA -->
     <div class="flex-1 flex flex-col min-w-0 h-screen">
-        <!-- MOBILE HEADER (Clickable to Dashboard) -->
+        <!-- MOBILE HEADER -->
         <header class="md:hidden flex items-center justify-between p-4 bg-white border-b border-slate-200 shadow-sm z-30 cursor-pointer" onclick="window.showTab('dashboard', document.querySelectorAll('.nav-btn')[0])">
             <div class="flex flex-col">
                 <h1 class="text-xl font-black text-[#1b2336] leading-none">SUMC Care AI</h1>
-                <span class="text-[9px] font-bold text-slate-500 tracking-widest mt-1 uppercase">(v.2.01)</span>
+                <span class="text-[9px] font-bold text-slate-500 tracking-widest mt-1 uppercase">(v.3.00)</span>
             </div>
             <button onclick="window.toggleSidebar(); event.stopPropagation();" class="p-2 text-[#1b2336] focus:outline-none bg-slate-100 rounded-lg hover:bg-slate-200 transition"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg></button>
         </header>
@@ -152,6 +153,7 @@
                 
                 <!-- DASHBOARD TAB -->
                 <div id="dashboard" class="tab-content active-tab space-y-6">
+                    <!-- Top Info Cards (Clean White Style) -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
                         <div class="bg-white rounded-2xl p-8 flex flex-col justify-center border border-slate-100 shadow-[0_4px_12px_-2px_rgba(0,0,0,0.04)] hover:shadow-[0_12px_24px_-4px_rgba(0,0,0,0.12)] transition-shadow duration-300">
                             <label class="text-[#1b2336] font-extrabold text-[10px] tracking-widest uppercase">Total Directory</label>
@@ -191,10 +193,26 @@
                                 </div>
                             </div>
                         </div>
-                        <!-- Analytics Chart -->
-                        <div class="card p-8 flex flex-col h-[500px] md:h-[600px] shadow-sm">
-                            <h3 class="text-sm font-extrabold text-[#1b2336] mb-6 uppercase tracking-widest">Attendance Trends</h3>
-                            <div class="flex-1 min-h-[250px] w-full"><canvas id="mainAttendanceChart"></canvas></div>
+                        
+                        <!-- Analytics & Calendar Layout (Stacked) -->
+                        <div class="flex flex-col gap-6 h-[500px] md:h-[600px]">
+                            <!-- Analytics Chart (압축) -->
+                            <div class="card p-6 flex flex-col flex-1 shadow-sm overflow-hidden">
+                                <h3 class="text-sm font-extrabold text-[#1b2336] mb-4 uppercase tracking-widest">Attendance Trends</h3>
+                                <div class="flex-1 w-full relative min-h-0"><canvas id="mainAttendanceChart"></canvas></div>
+                            </div>
+                            <!-- Today's Schedule -->
+                            <div class="card p-6 flex flex-col flex-1 shadow-sm overflow-hidden">
+                                <h3 class="text-sm font-extrabold text-[#1b2336] mb-4 uppercase tracking-widest">Today's Schedule</h3>
+                                <div class="flex-1 w-full bg-slate-50 rounded-xl border border-slate-100 overflow-hidden relative">
+                                    <!-- Google Calendar Embed (Agenda View) -->
+                                    <iframe id="dashCalendarIframe" class="absolute inset-0 w-full h-full hidden" style="border: 0" frameborder="0" scrolling="no"></iframe>
+                                    <div id="dashCalendarPlaceholder" class="absolute inset-0 flex flex-col items-center justify-center text-center p-4">
+                                        <span class="text-3xl mb-2">📅</span>
+                                        <p class="text-xs text-slate-500 font-bold leading-relaxed">No Calendar Connected.<br>Please set your Google Calendar ID in the Settings tab.</p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -210,10 +228,30 @@
                                 <p class="text-xs text-slate-500">This key will be securely synced to your cloud database. You only need to enter this once.</p>
                             </div>
                             <div>
+                                <label class="text-[#1b2336]">Google Calendar ID</label>
+                                <input type="text" id="calendarIdInput" placeholder="e.g., your_email@gmail.com" class="mb-2 border-slate-300 bg-white focus:bg-white">
+                                <p class="text-xs text-slate-500">Find this in Google Calendar Settings -> "Integrate calendar" -> "Calendar ID". Make sure it's public.</p>
+                            </div>
+                            <div>
                                 <label class="text-slate-500">Database Connection ID</label>
                                 <input type="text" id="appIdInput" value="sumc-2026-production-db" readonly class="bg-slate-100 text-slate-500 font-mono border-none cursor-not-allowed">
                             </div>
                             <button onclick="window.verifyAndSaveApiKey()" id="verifyKeyBtn" class="w-full btn-primary py-4 rounded-xl font-bold transition shadow-md uppercase tracking-widest text-sm mt-4">Validate & Sync to Cloud</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 탭: CALENDAR (Full View) -->
+                <div id="calendar" class="tab-content space-y-6">
+                    <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+                        <h2 class="text-3xl font-black text-slate-900 tracking-tight">Church Calendar</h2>
+                    </div>
+                    <div class="card p-2 flex flex-col h-[70vh] shadow-sm border-slate-200 overflow-hidden relative">
+                        <iframe id="mainCalendarIframe" class="absolute inset-0 w-full h-full hidden" style="border: 0" frameborder="0" scrolling="yes"></iframe>
+                        <div id="mainCalendarPlaceholder" class="absolute inset-0 flex flex-col items-center justify-center text-center p-8 bg-slate-50">
+                            <span class="text-5xl mb-4">🗓️</span>
+                            <h3 class="text-lg font-black text-[#1b2336] mb-2">Calendar Not Connected</h3>
+                            <p class="text-sm text-slate-500 font-medium max-w-md">Please navigate to the Settings tab and enter your Google Calendar ID to sync your church schedule.</p>
                         </div>
                     </div>
                 </div>
@@ -374,9 +412,35 @@
         Chart.defaults.color = '#64748b'; Chart.defaults.borderColor = 'rgba(0,0,0,0.05)'; Chart.defaults.font.family = 'Inter'; Chart.register(ChartDataLabels);
         window.members = []; window.attendanceRecords = []; window.mainChart = null; window.profileChart = null;
         window.currentApiKey = localStorage.getItem('sumc_gemini_key') || "";
+        window.currentCalendarId = localStorage.getItem('sumc_calendar_id') || "";
         window.currentAiModel = localStorage.getItem('sumc_gemini_model') || "gemini-1.5-flash-latest"; 
         window.currentDbId = "sumc-2026-production-db"; window.prayerImageBase64 = '';
         const sundayLabels = (function getSundays(count = 12) { let s = []; let c = new Date(); c.setDate(c.getDate() - c.getDay()); for(let i=0; i<count; i++) { s.push(new Date(c).toISOString().split('T')[0]); c.setDate(c.getDate() - 7); } return s.reverse(); })();
+
+        // Calendar Loading Function
+        window.updateCalendarIframes = () => {
+            const calId = window.currentCalendarId;
+            const dashIframe = document.getElementById('dashCalendarIframe');
+            const mainIframe = document.getElementById('mainCalendarIframe');
+            const dashPlaceholder = document.getElementById('dashCalendarPlaceholder');
+            const mainPlaceholder = document.getElementById('mainCalendarPlaceholder');
+
+            if (calId) {
+                const encodedId = encodeURIComponent(calId);
+                // Dashboard Agenda View
+                if(dashIframe) {
+                    dashIframe.src = `https://calendar.google.com/calendar/embed?src=${encodedId}&mode=AGENDA&showNav=0&showDate=0&showPrint=0&showTabs=0&showCalendars=0&showTz=0&bgcolor=%23f8fafc`;
+                    dashIframe.classList.remove('hidden');
+                    if(dashPlaceholder) dashPlaceholder.classList.add('hidden');
+                }
+                // Main Calendar View
+                if(mainIframe) {
+                    mainIframe.src = `https://calendar.google.com/calendar/embed?src=${encodedId}&wkst=America%2FChicago&bgcolor=%23ffffff`;
+                    mainIframe.classList.remove('hidden');
+                    if(mainPlaceholder) mainPlaceholder.classList.add('hidden');
+                }
+            }
+        };
 
         window.showTab = (tabId, btnElement = null) => {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active-tab'));
@@ -414,13 +478,14 @@
             }
             if(window.currentApiKey) { const s = document.getElementById('aiStatus'); if(s) { s.innerText = "Ready"; s.className = "text-[9px] bg-blue-100 text-[#1b2336] px-3 py-1 rounded-full font-bold tracking-widest uppercase"; } }
             renderMainChart();
+            window.updateCalendarIframes(); // 대시보드 업데이트 시 캘린더도 로드 확인
         };
 
         function renderMainChart() {
             const canvas = document.getElementById('mainAttendanceChart'); if(!canvas) return; const ctx = canvas.getContext('2d'); if(window.mainChart) window.mainChart.destroy();
             const data = sundayLabels.map(l => { const rec = window.attendanceRecords.find(r => r.date === l); return rec ? (rec.attendees ? rec.attendees.length : 0) : 0; });
             let gradient = ctx.createLinearGradient(0, 0, 0, 400); gradient.addColorStop(0, 'rgba(27, 35, 54, 0.4)'); gradient.addColorStop(1, 'rgba(27, 35, 54, 0.0)');
-            window.mainChart = new Chart(ctx, { type: 'line', data: { labels: sundayLabels, datasets: [{ label: 'Attendees', data: data, borderColor: '#1b2336', backgroundColor: gradient, fill: true, tension: 0.4, borderWidth: 3, pointBackgroundColor: '#ffffff', pointBorderColor: '#1b2336', pointRadius: 5, pointHoverRadius: 7 }] }, options: { maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { color: '#1b2336', anchor: 'end', align: 'top', font: { weight: 'bold' }, formatter: (v) => v > 0 ? v : '' } }, scales: { y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } }, x: { grid: { display: false } } } } });
+            window.mainChart = new Chart(ctx, { type: 'line', data: { labels: sundayLabels, datasets: [{ label: 'Attendees', data: data, borderColor: '#1b2336', backgroundColor: gradient, fill: true, tension: 0.4, borderWidth: 3, pointBackgroundColor: '#ffffff', pointBorderColor: '#1b2336', pointRadius: 4, pointHoverRadius: 6 }] }, options: { maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { color: '#1b2336', anchor: 'end', align: 'top', font: { weight: 'bold' }, formatter: (v) => v > 0 ? v : '' } }, scales: { y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } }, x: { grid: { display: false } } } } });
         }
 
         window.renderDirectory = () => {
@@ -467,24 +532,32 @@
         };
 
         window.verifyAndSaveApiKey = async () => {
-            const key = document.getElementById('apiKeyInput').value.trim(); if(!key) return alert("Enter API Key.");
+            const key = document.getElementById('apiKeyInput').value.trim(); 
+            const calId = document.getElementById('calendarIdInput').value.trim();
+            if(!key) return alert("Enter Gemini API Key.");
             const btn = document.getElementById('verifyKeyBtn'); btn.innerText = "Syncing..."; btn.disabled = true;
             try {
                 const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${key}`);
                 const d = await r.json(); if(d.error) throw new Error(d.error.message);
                 localStorage.setItem('sumc_gemini_key', key); window.currentApiKey = key;
+                localStorage.setItem('sumc_calendar_id', calId); window.currentCalendarId = calId;
                 
                 // 최신 모델 감지
                 const vm = d.models.filter(m => m.supportedGenerationMethods && m.supportedGenerationMethods.includes("generateContent"));
                 const best = vm.find(m => m.name.includes('gemini-1.5-flash'))?.name.replace('models/', '') || vm[0].name.replace('models/', '');
                 window.currentAiModel = best; localStorage.setItem('sumc_gemini_model', best);
 
-                if(window.saveKeyToCloud) { await window.saveKeyToCloud(key); }
-                alert("AI Validated & Key Synced to Cloud Successfully."); window.updateDashboard();
+                if(window.saveKeyToCloud) { await window.saveKeyToCloud(key, calId); }
+                window.updateCalendarIframes();
+                alert("Settings Validated & Synced to Cloud Successfully."); window.updateDashboard();
             } catch(e) { alert("Failed: " + e.message); } finally { btn.innerText = "Validate & Sync to Cloud"; btn.disabled = false; }
         };
 
         window.restoreSettingsOnLoad = async () => {
+            if(window.currentCalendarId) {
+                document.getElementById('calendarIdInput').value = window.currentCalendarId;
+                window.updateCalendarIframes();
+            }
             if(window.currentApiKey) {
                 document.getElementById('apiKeyInput').value = window.currentApiKey;
                 try {
@@ -512,7 +585,7 @@
                 const sendBtn = document.getElementById('sendBtn');
                 
                 sendBtn.disabled = true; 
-                sendBtn.innerHTML = `<span class="loading-spinner-dark"></span>`;
+                sendBtn.innerHTML = `<span class="loading-spinner"></span>`;
                 
                 const uMsg = document.createElement('div'); uMsg.className = "p-4 btn-primary rounded-2xl rounded-tr-sm text-white text-right self-end max-w-[90%] font-bold shadow-md"; uMsg.innerText = query; chat.appendChild(uMsg); inputEl.value = "";
                 
@@ -611,10 +684,11 @@ const firebaseConfig = {
   appId: "1:50235569152:web:3d708d469624680a3014e5",
   measurementId: "G-BJT0DEGZ36"
 };
+
         if (!firebaseConfig.apiKey.startsWith("여기에")) {
             const app = initializeApp(firebaseConfig); const auth = getAuth(app); const db = getFirestore(app);
             const appId = "sumc-2026-production-db"; 
-            window.saveKeyToCloud = async (key) => { try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'config', 'system'), { geminiKey: key }, { merge: true }); } catch(e) { console.error(e); } };
+            window.saveKeyToCloud = async (key, calId) => { try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'config', 'system'), { geminiKey: key, calendarId: calId || "" }, { merge: true }); } catch(e) { console.error(e); } };
             window.updatePrayerInDb = async (id, p) => { await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'members', id), { prayers: p }); };
             signInAnonymously(auth).then(() => {
                 onAuthStateChanged(auth, (user) => {
@@ -623,9 +697,16 @@ const firebaseConfig = {
                         onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'members'), (snap) => { window.members = snap.docs.map(d => ({ id: d.id, ...d.data() })); window.updateDashboard(); window.renderDirectory(); });
                         onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'attendance'), (snap) => { window.attendanceRecords = snap.docs.map(d => ({ id: d.id, ...d.data() })); window.updateDashboard(); });
                         onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'config', 'system'), (snap) => { 
-                            if(snap.exists() && snap.data().geminiKey) { 
-                                window.currentApiKey = snap.data().geminiKey; 
-                                localStorage.setItem('sumc_gemini_key', window.currentApiKey); 
+                            if(snap.exists()) { 
+                                const data = snap.data();
+                                if(data.geminiKey) {
+                                    window.currentApiKey = data.geminiKey; 
+                                    localStorage.setItem('sumc_gemini_key', window.currentApiKey); 
+                                }
+                                if(data.calendarId) {
+                                    window.currentCalendarId = data.calendarId;
+                                    localStorage.setItem('sumc_calendar_id', window.currentCalendarId);
+                                }
                                 window.restoreSettingsOnLoad();
                                 window.updateDashboard(); 
                             } 
