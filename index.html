@@ -89,25 +89,25 @@
     <div id="sidebarOverlay" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 hidden" onclick="window.toggleSidebar()"></div>
 
     <!-- LEFT SIDEBAR -->
-    <aside id="sidebar" class="fixed md:relative w-72 flex-shrink-0 flex flex-col z-50 h-full transform -translate-x-full md:translate-x-0 transition-transform duration-300 bg-white border-r border-slate-200 shadow-sm">
+    <!-- 모바일 메뉴가 화면 전체(w-full)를 덮고 위에서 아래로(-translate-y-full) 내려오도록 수정 -->
+    <aside id="sidebar" class="fixed md:relative w-full md:w-72 flex-shrink-0 flex flex-col z-50 h-full transform -translate-y-full md:translate-y-0 transition-transform duration-300 bg-white border-r border-slate-200 shadow-sm" style="background-color: var(--sumc-navy);">
         
         <!-- Sidebar Header (가로형 로고 적용) -->
-        <div class="p-6 border-b border-slate-100 flex flex-col cursor-pointer hover:bg-slate-50 transition" onclick="window.showTab('dashboard', document.querySelectorAll('.nav-btn')[0])">
+        <div class="p-6 border-b border-white/10 flex flex-col cursor-pointer hover:bg-white/5 transition" onclick="window.showTab('dashboard', document.querySelectorAll('.nav-btn')[0])">
             <div class="flex justify-between items-start mb-2">
-                <!-- 가로형 로고 (크기 1.8배 확대: h-14 -> h-[100px]) -->
+                <!-- 가로형 로고 -->
                 <img src="SUMC%20Logo%20(%EA%B0%80%EB%A1%9C).png" alt="SUMC Logo" class="h-[100px] w-auto max-w-full object-contain" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                <!-- 이미지 오류 시 대체 텍스트 -->
                 <h1 class="hidden text-2xl font-black text-slate-900 leading-tight">SUMC <span class="text-red-600">Care AI</span></h1>
                 
-                <button class="md:hidden text-slate-400 hover:text-slate-800 p-1 -mt-1" onclick="window.toggleSidebar(); event.stopPropagation();">
+                <button class="md:hidden text-slate-400 hover:text-white p-1 -mt-1" onclick="window.toggleSidebar(); event.stopPropagation();">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
-            <!-- 버전 4.01로 업데이트 -->
-            <span class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mt-1 ml-1">Care AI (v.4.01)</span>
+            <!-- 버전 5.00으로 메이저 업데이트 -->
+            <span class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mt-1 ml-1">Care AI (v.5.00)</span>
         </div>
         
-        <div class="px-6 py-4 flex items-center gap-2 border-b border-slate-50 bg-slate-50/50">
+        <div class="px-6 py-4 flex items-center gap-2 border-b border-white/5 bg-black/10">
             <div class="w-2.5 h-2.5 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]" id="statusDot"></div>
             <span id="cloudStatusIndicator" class="text-[10px] text-red-500 uppercase tracking-widest font-bold">Offline</span>
         </div>
@@ -117,14 +117,14 @@
             <button onclick="window.showTab('attendance', this)" class="nav-btn"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>Attendance</button>
             <button onclick="window.showTab('directory', this)" class="nav-btn"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>Directory</button>
             <button onclick="window.showTab('calendar', this)" class="nav-btn"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>Calendar</button>
+            <!-- 위원회 및 참여 사역 메뉴 추가 -->
+            <button onclick="window.showTab('committees', this)" class="nav-btn"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>위원회 및 참여 사역</button>
             <button onclick="window.showTab('prayer-list', this)" class="nav-btn"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>Prayer List</button>
             <button onclick="window.showTab('data-import', this)" class="nav-btn"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>Bulk Import</button>
             <button onclick="window.showTab('settings-tab', this)" class="nav-btn"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>Settings</button>
         </nav>
 
-        <div class="p-4 border-t border-slate-100 space-y-3 bg-slate-50/50">
-            <button onclick="window.openNewMemberForm()" class="w-full btn-red p-4 rounded-xl font-bold flex items-center justify-center gap-2 shadow-md text-sm transition">
-                <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/></svg>
+        <div class="p-4 border-t border-white/10 space-y-3 bg-black/10">
                 Add New Member
             </button>
             <button onclick="window.handleLogout()" class="w-full text-slate-500 hover:text-slate-800 hover:bg-slate-200 text-sm font-bold py-3 rounded-xl transition flex items-center justify-center gap-2">
@@ -136,14 +136,14 @@
 
     <!-- MAIN AREA -->
     <div class="flex-1 flex flex-col min-w-0 h-screen">
-        <!-- MOBILE HEADER (아이콘 로고 적용) -->
+        <!-- MOBILE HEADER (이름 SUMC Care AI로 변경) -->
         <header class="md:hidden flex items-center justify-between p-4 bg-white border-b border-slate-200 shadow-sm z-30 cursor-pointer" onclick="window.showTab('dashboard', document.querySelectorAll('.nav-btn')[0])">
             <div class="flex items-center gap-3">
                 <img src="SUMC%20Logo%20(%EC%95%84%EC%9D%B4%EC%BD%98).png" alt="Icon" class="h-8 w-auto object-contain">
                 <div class="flex flex-col">
-                    <h1 class="text-lg font-black text-slate-900 leading-none">Care AI</h1>
-                    <!-- 버전 4.01로 업데이트 -->
-                    <span class="text-[9px] font-bold text-slate-500 tracking-widest mt-1 uppercase">(v.4.01)</span>
+                    <h1 class="text-lg font-black text-slate-900 leading-none">SUMC Care AI</h1>
+                    <!-- 버전 5.00으로 업데이트 -->
+                    <span class="text-[9px] font-bold text-slate-500 tracking-widest mt-1 uppercase">(v.5.00)</span>
                 </div>
             </div>
             <button onclick="window.toggleSidebar(); event.stopPropagation();" class="p-2 text-slate-600 focus:outline-none bg-slate-100 rounded-lg hover:bg-slate-200 transition"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg></button>
@@ -253,6 +253,18 @@
                             <h3 class="text-lg font-black text-slate-800 mb-2">Calendar Not Visible</h3>
                             <p class="text-sm text-slate-500 font-medium max-w-md">1. Check if ID is saved in Settings.<br>2. <b>CRITICAL:</b> In Google Calendar settings, you MUST check <b>"Make available to public" (공개 사용 설정)</b> to allow display.</p>
                         </div>
+                    </div>
+                </div>
+                
+                <!-- 탭: COMMITTEES (신설 위원회 및 참여 사역 탭) -->
+                <div id="committees" class="tab-content space-y-6">
+                    <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+                        <h2 class="text-3xl font-black text-slate-900 tracking-tight">위원회 및 참여 사역</h2>
+                    </div>
+                    <div class="card p-10 flex flex-col items-center justify-center text-center shadow-sm border-slate-200 min-h-[50vh]">
+                        <span class="text-5xl mb-4">👥</span>
+                        <h3 class="text-xl font-black text-[#1b2336] mb-2">준비 중인 공간입니다</h3>
+                        <p class="text-sm text-slate-500 font-medium max-w-md">교회 내 다양한 위원회 및 사역팀을 배정하고 관리할 수 있는 통합 행정 기능이 곧 추가될 예정입니다.</p>
                     </div>
                 </div>
 
@@ -404,8 +416,9 @@
         window.handleLogout = () => { localStorage.removeItem('sumc_auth_token'); window.location.reload(); };
         window.toggleSidebar = () => {
             const sb = document.getElementById('sidebar'); const ov = document.getElementById('sidebarOverlay');
-            if(sb.classList.contains('-translate-x-full')) { sb.classList.remove('-translate-x-full'); ov.classList.remove('hidden'); }
-            else { sb.classList.add('-translate-x-full'); ov.classList.add('hidden'); }
+            // 모바일 메뉴 애니메이션 방향을 가로(-translate-x)에서 세로(-translate-y)로 변경
+            if(sb.classList.contains('-translate-y-full')) { sb.classList.remove('-translate-y-full'); ov.classList.remove('hidden'); }
+            else { sb.classList.add('-translate-y-full'); ov.classList.add('hidden'); }
         };
 
         // --- CORE STATE & CHART THEMING ---
@@ -455,7 +468,8 @@
             if(btnElement) { document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active')); btnElement.classList.add('active'); }
             if(tabId === 'attendance') window.renderAttendanceList();
             window.scrollTo(0,0); window.updateDashboard();
-            if(window.innerWidth < 768) { document.getElementById('sidebar').classList.add('-translate-x-full'); document.getElementById('sidebarOverlay').classList.add('hidden'); }
+            // 메뉴 닫힘 애니메이션 방향 수정
+            if(window.innerWidth < 768) { document.getElementById('sidebar').classList.add('-translate-y-full'); document.getElementById('sidebarOverlay').classList.add('hidden'); }
         };
 
         window.openNewMemberForm = () => {
@@ -463,7 +477,8 @@
             document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active-tab'));
             document.getElementById('new-member').classList.add('active-tab');
-            if(window.innerWidth < 768) { document.getElementById('sidebar').classList.add('-translate-x-full'); document.getElementById('sidebarOverlay').classList.add('hidden'); }
+            // 메뉴 닫힘 애니메이션 방향 수정
+            if(window.innerWidth < 768) { document.getElementById('sidebar').classList.add('-translate-y-full'); document.getElementById('sidebarOverlay').classList.add('hidden'); }
         };
 
         function populateFamilyDropdown(sel, selectedValue) {
