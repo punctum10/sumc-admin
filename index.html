@@ -68,9 +68,10 @@
 
     <!-- 🔐 LOGIN OVERLAY -->
     <div id="loginScreen" class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-100/95 backdrop-blur-md transition-opacity duration-500">
-        <div class="card p-10 max-w-sm w-full mx-4 shadow-2xl transform transition-transform text-center border-t-0 border border-slate-200">
-            <!-- 세로형 로고 적용 -->
-            <img src="SUMC%20Logo%20(%EC%84%B8%EB%A1%9C).png" alt="SUMC Care AI" class="w-48 h-auto mx-auto mb-4 object-contain" onerror="this.src='https://via.placeholder.com/200x200/ffffff/1e293b?text=SUMC+Care+AI';">
+        <!-- 로그인 박스 너비를 조금 더 넓게 조정 (max-w-sm -> max-w-md) -->
+        <div class="card p-10 max-w-md w-full mx-4 shadow-2xl transform transition-transform text-center border-t-0 border border-slate-200">
+            <!-- 세로형 로고 적용 (크기 1.5배 확대: w-48 -> w-72) -->
+            <img src="SUMC%20Logo%20(%EC%84%B8%EB%A1%9C).png" alt="SUMC Care AI" class="w-72 h-auto mx-auto mb-4 object-contain" onerror="this.src='https://via.placeholder.com/300x300/ffffff/1e293b?text=SUMC+Care+AI';">
             <span class="text-[10px] font-black tracking-widest uppercase text-slate-400 block mb-8">Secure Admin Portal</span>
             
             <form onsubmit="window.handleLogin(event)" class="space-y-4">
@@ -93,7 +94,8 @@
         <!-- Sidebar Header (가로형 로고 적용) -->
         <div class="p-6 border-b border-slate-100 flex flex-col cursor-pointer hover:bg-slate-50 transition" onclick="window.showTab('dashboard', document.querySelectorAll('.nav-btn')[0])">
             <div class="flex justify-between items-start mb-2">
-                <img src="SUMC%20Logo%20(%EA%B0%80%EB%A1%9C).png" alt="SUMC Logo" class="h-14 w-auto object-contain" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                <!-- 가로형 로고 (크기 1.8배 확대: h-14 -> h-[100px]) -->
+                <img src="SUMC%20Logo%20(%EA%B0%80%EB%A1%9C).png" alt="SUMC Logo" class="h-[100px] w-auto max-w-full object-contain" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
                 <!-- 이미지 오류 시 대체 텍스트 -->
                 <h1 class="hidden text-2xl font-black text-slate-900 leading-tight">SUMC <span class="text-red-600">Care AI</span></h1>
                 
@@ -101,7 +103,8 @@
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
-            <span class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mt-1 ml-1">Care AI (v.4.00)</span>
+            <!-- 버전 4.01로 업데이트 -->
+            <span class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mt-1 ml-1">Care AI (v.4.01)</span>
         </div>
         
         <div class="px-6 py-4 flex items-center gap-2 border-b border-slate-50 bg-slate-50/50">
@@ -139,7 +142,8 @@
                 <img src="SUMC%20Logo%20(%EC%95%84%EC%9D%B4%EC%BD%98).png" alt="Icon" class="h-8 w-auto object-contain">
                 <div class="flex flex-col">
                     <h1 class="text-lg font-black text-slate-900 leading-none">Care AI</h1>
-                    <span class="text-[9px] font-bold text-slate-500 tracking-widest mt-1 uppercase">(v.4.00)</span>
+                    <!-- 버전 4.01로 업데이트 -->
+                    <span class="text-[9px] font-bold text-slate-500 tracking-widest mt-1 uppercase">(v.4.01)</span>
                 </div>
             </div>
             <button onclick="window.toggleSidebar(); event.stopPropagation();" class="p-2 text-slate-600 focus:outline-none bg-slate-100 rounded-lg hover:bg-slate-200 transition"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg></button>
@@ -676,7 +680,6 @@
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, collection, onSnapshot, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        
 const firebaseConfig = {
   apiKey: "AIzaSyAqJPIupZD6ke0ecNLPmJHp-JcndLRIwaU",
   authDomain: "sumc-ai-management-system.firebaseapp.com",
