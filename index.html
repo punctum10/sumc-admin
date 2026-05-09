@@ -89,25 +89,25 @@
     <div id="sidebarOverlay" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 hidden" onclick="window.toggleSidebar()"></div>
 
     <!-- LEFT SIDEBAR -->
-    <!-- 모바일 메뉴가 화면 전체(w-full)를 덮고 위에서 아래로(-translate-y-full) 내려오도록 확실히 고정(top-0 left-0 추가) -->
-    <aside id="sidebar" class="fixed top-0 left-0 md:relative w-full md:w-72 flex-shrink-0 flex flex-col z-50 h-full transform -translate-y-full md:translate-y-0 transition-transform duration-300 bg-white border-r border-slate-200 shadow-sm" style="background-color: var(--sumc-navy);">
+    <!-- 모바일 메뉴가 화면 전체(w-full)를 덮고 위에서 아래로(-translate-y-full) 내려오도록 확실히 고정(top-0 left-0 추가), 잘못된 네이비 배경색 찌꺼기 제거 및 반투명 유리 효과(bg-white/95 backdrop-blur-2xl) 추가 -->
+    <aside id="sidebar" class="fixed top-0 left-0 md:relative w-full md:w-72 flex-shrink-0 flex flex-col z-50 h-full transform -translate-y-full md:translate-y-0 transition-transform duration-300 bg-white/95 md:bg-white backdrop-blur-2xl border-r border-slate-200 shadow-2xl md:shadow-sm">
         
         <!-- Sidebar Header (가로형 로고 적용) -->
-        <div class="p-6 border-b border-white/10 flex flex-col cursor-pointer hover:bg-white/5 transition" onclick="window.showTab('dashboard', document.querySelectorAll('.nav-btn')[0])">
+        <div class="p-6 border-b border-slate-100 flex flex-col cursor-pointer hover:bg-slate-50 transition" onclick="window.showTab('dashboard', document.querySelectorAll('.nav-btn')[0])">
             <div class="flex justify-between items-start mb-2">
                 <!-- 가로형 로고 -->
                 <img src="SUMC%20Logo%20(%EA%B0%80%EB%A1%9C).png" alt="SUMC Logo" class="h-[100px] w-auto max-w-full object-contain" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
                 <h1 class="hidden text-2xl font-black text-slate-900 leading-tight">SUMC <span class="text-red-600">Care AI</span></h1>
                 
-                <button class="md:hidden text-slate-400 hover:text-white p-1 -mt-1" onclick="window.toggleSidebar(); event.stopPropagation();">
+                <button class="md:hidden text-slate-500 hover:text-slate-900 p-2 -mt-1 bg-slate-100 rounded-lg transition" onclick="window.toggleSidebar(); event.stopPropagation();">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
-            <!-- 버전 5.01로 마이너 업데이트 -->
-            <span class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mt-1 ml-1">Care AI (v.5.01)</span>
+            <!-- 버전 5.02로 마이너 업데이트 -->
+            <span class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mt-1 ml-1">Care AI (v.5.02)</span>
         </div>
         
-        <div class="px-6 py-4 flex items-center gap-2 border-b border-white/5 bg-black/10">
+        <div class="px-6 py-4 flex items-center gap-2 border-b border-slate-50 bg-slate-50/50">
             <div class="w-2.5 h-2.5 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]" id="statusDot"></div>
             <span id="cloudStatusIndicator" class="text-[10px] text-red-500 uppercase tracking-widest font-bold">Offline</span>
         </div>
@@ -124,7 +124,9 @@
             <button onclick="window.showTab('settings-tab', this)" class="nav-btn"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>Settings</button>
         </nav>
 
-        <div class="p-4 border-t border-white/10 space-y-3 bg-black/10">
+        <div class="p-4 border-t border-slate-100 space-y-3 bg-slate-50">
+            <button onclick="window.openNewMemberForm()" class="w-full btn-red p-4 rounded-xl font-bold flex items-center justify-center gap-2 shadow-md text-sm transition text-white">
+                <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/></svg>
                 Add New Member
             </button>
             <button onclick="window.handleLogout()" class="w-full text-slate-500 hover:text-slate-800 hover:bg-slate-200 text-sm font-bold py-3 rounded-xl transition flex items-center justify-center gap-2">
@@ -142,8 +144,8 @@
                 <img src="SUMC%20Logo%20(%EC%95%84%EC%9D%B4%EC%BD%98).png" alt="Icon" class="h-8 w-auto object-contain">
                 <div class="flex flex-col">
                     <h1 class="text-lg font-black text-slate-900 leading-none">SUMC Care AI</h1>
-                    <!-- 버전 5.01로 업데이트 -->
-                    <span class="text-[9px] font-bold text-slate-500 tracking-widest mt-1 uppercase">(v.5.01)</span>
+                    <!-- 버전 5.02로 업데이트 -->
+                    <span class="text-[9px] font-bold text-slate-500 tracking-widest mt-1 uppercase">(v.5.02)</span>
                 </div>
             </div>
             <button onclick="window.toggleSidebar(); event.stopPropagation();" class="p-2 text-slate-600 focus:outline-none bg-slate-100 rounded-lg hover:bg-slate-200 transition"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg></button>
