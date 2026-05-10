@@ -103,8 +103,8 @@
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
-            <!-- 버전 5.05로 마이너 업데이트 -->
-            <span class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mt-1 ml-1">Care AI (v.5.05)</span>
+            <!-- 버전 5.06으로 마이너 업데이트 -->
+            <span class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mt-1 ml-1">Care AI (v.5.06)</span>
         </div>
         
         <div class="px-6 py-4 flex items-center gap-2 border-b border-slate-50 bg-slate-50/50">
@@ -144,8 +144,8 @@
                 <img src="SUMC%20Logo%20(%EC%95%84%EC%9D%B4%EC%BD%98).png" alt="Icon" class="h-8 w-auto object-contain">
                 <div class="flex flex-col">
                     <h1 class="text-lg font-black text-slate-900 leading-none">SUMC Care AI</h1>
-                    <!-- 버전 5.05로 업데이트 -->
-                    <span class="text-[9px] font-bold text-slate-500 tracking-widest mt-1 uppercase">(v.5.05)</span>
+                    <!-- 버전 5.06으로 업데이트 -->
+                    <span class="text-[9px] font-bold text-slate-500 tracking-widest mt-1 uppercase">(v.5.06)</span>
                 </div>
             </div>
             <button onclick="window.toggleSidebar(); event.stopPropagation();" class="p-2 text-slate-600 focus:outline-none bg-slate-100 rounded-lg hover:bg-slate-200 transition"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg></button>
@@ -202,7 +202,8 @@
                         <div class="flex flex-col gap-6 h-[500px] md:h-[600px]">
                             <!-- Analytics Chart -->
                             <div class="bg-white rounded-2xl border border-slate-100 shadow-[0_4px_12px_-2px_rgba(0,0,0,0.04)] p-6 flex flex-col flex-1 overflow-hidden">
-                                <h3 class="text-sm font-extrabold text-slate-900 mb-4 uppercase tracking-widest">Attendance Trends</h3>
+                                <!-- 제목에 (Adults) 추가 -->
+                                <h3 class="text-sm font-extrabold text-slate-900 mb-4 uppercase tracking-widest">Attendance Trends (Adults)</h3>
                                 <div class="flex-1 w-full relative min-h-0"><canvas id="mainAttendanceChart"></canvas></div>
                             </div>
                             <!-- Today's Schedule -->
@@ -567,9 +568,20 @@
 
         function renderMainChart() {
             const canvas = document.getElementById('mainAttendanceChart'); if(!canvas) return; const ctx = canvas.getContext('2d'); if(window.mainChart) window.mainChart.destroy();
-            const data = sundayLabels.map(l => { const rec = window.attendanceRecords.find(r => r.date === l); return rec ? (rec.attendees ? rec.attendees.length : 0) : 0; });
+            // 전체 인원이 아닌 성인(Adult)만 카운트하도록 로직 변경
+            const data = sundayLabels.map(l => { 
+                const rec = window.attendanceRecords.find(r => r.date === l); 
+                if (!rec || !rec.attendees) return 0;
+                let adultCount = 0;
+                rec.attendees.forEach(aid => {
+                    const m = window.members.find(x => x.id === aid);
+                    if (m && m.isAdult) adultCount++;
+                });
+                return adultCount;
+            });
             let gradient = ctx.createLinearGradient(0, 0, 0, 400); gradient.addColorStop(0, 'rgba(30, 41, 59, 0.4)'); gradient.addColorStop(1, 'rgba(30, 41, 59, 0.0)');
-            window.mainChart = new Chart(ctx, { type: 'line', data: { labels: sundayLabels, datasets: [{ label: 'Attendees', data: data, borderColor: '#1e293b', backgroundColor: gradient, fill: true, tension: 0.4, borderWidth: 3, pointBackgroundColor: '#ffffff', pointBorderColor: '#dc2626', pointRadius: 5, pointHoverRadius: 7 }] }, options: { maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { color: '#1e293b', anchor: 'end', align: 'top', font: { weight: 'bold' }, formatter: (v) => v > 0 ? v : '' } }, scales: { y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } }, x: { grid: { display: false } } } } });
+            // datalabels 설정을 강화하여 점(Point) 위에 빨간색 숫자가 선명하게 뜨도록 수정 & 레이아웃 패딩 추가
+            window.mainChart = new Chart(ctx, { type: 'line', data: { labels: sundayLabels, datasets: [{ label: 'Adult Attendees', data: data, borderColor: '#1e293b', backgroundColor: gradient, fill: true, tension: 0.4, borderWidth: 3, pointBackgroundColor: '#ffffff', pointBorderColor: '#dc2626', pointRadius: 5, pointHoverRadius: 7 }] }, options: { layout: { padding: { top: 25 } }, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { display: true, color: '#dc2626', anchor: 'end', align: 'top', offset: 4, font: { weight: '900', size: 12 }, formatter: (v) => v > 0 ? v : '' } }, scales: { y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' }, suggestedMax: Math.max(...data) + 5 }, x: { grid: { display: false } } } } });
         }
 
         window.renderDirectory = () => {
