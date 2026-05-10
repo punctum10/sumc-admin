@@ -103,8 +103,8 @@
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
-            <!-- 버전 5.06으로 마이너 업데이트 -->
-            <span class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mt-1 ml-1">Care AI (v.5.06)</span>
+            <!-- 버전 5.08로 업데이트 -->
+            <span class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mt-1 ml-1">Care AI (v.5.08)</span>
         </div>
         
         <div class="px-6 py-4 flex items-center gap-2 border-b border-slate-50 bg-slate-50/50">
@@ -144,8 +144,8 @@
                 <img src="SUMC%20Logo%20(%EC%95%84%EC%9D%B4%EC%BD%98).png" alt="Icon" class="h-8 w-auto object-contain">
                 <div class="flex flex-col">
                     <h1 class="text-lg font-black text-slate-900 leading-none">SUMC Care AI</h1>
-                    <!-- 버전 5.06으로 업데이트 -->
-                    <span class="text-[9px] font-bold text-slate-500 tracking-widest mt-1 uppercase">(v.5.06)</span>
+                    <!-- 버전 5.08로 업데이트 -->
+                    <span class="text-[9px] font-bold text-slate-500 tracking-widest mt-1 uppercase">(v.5.08)</span>
                 </div>
             </div>
             <button onclick="window.toggleSidebar(); event.stopPropagation();" class="p-2 text-slate-600 focus:outline-none bg-slate-100 rounded-lg hover:bg-slate-200 transition"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg></button>
@@ -313,12 +313,29 @@
                             <div class="space-y-6">
                                 <div class="p-6 bg-slate-50 rounded-2xl border border-slate-200"><label class="text-slate-600 font-black">Worship Date</label><input type="date" id="prayerDate" class="bg-white border-slate-300 rounded-xl"></div>
                                 <div class="p-6 bg-slate-50 rounded-2xl border border-slate-200">
-                                    <label class="mb-4 text-[10px] text-slate-500 font-black tracking-widest">Data Sources (Drag & Drop)</label>
-                                    <label id="prayerDropZone" class="flex flex-col items-center justify-center w-full p-10 border-2 border-dashed border-slate-300 bg-white rounded-2xl cursor-pointer hover:bg-slate-100 transition-all text-center">
-                                        <span class="text-5xl mb-3">📷</span><span id="prayerImgLabel" class="text-sm text-slate-700 font-bold">Upload Handwritten Notes</span>
-                                        <input type="file" accept="image/*" id="prayerImageInput" class="hidden" />
-                                    </label>
-                                    <input type="url" id="prayerYoutubeUrl" placeholder="YouTube Link (Optional)" class="mt-4 bg-white border-slate-300 rounded-xl">
+                                    <label class="mb-4 text-[10px] text-slate-500 font-black tracking-widest">Data Sources</label>
+                                    
+                                    <div class="flex flex-col gap-4">
+                                        <!-- 사진 업로드: 이미지 형식 전체 포괄 -->
+                                        <label id="prayerDropZone" class="flex flex-col items-center justify-center w-full p-8 border-2 border-dashed border-slate-300 bg-white rounded-2xl cursor-pointer hover:bg-slate-100 transition-all text-center relative overflow-hidden">
+                                            <div id="prayerImgPreview" class="absolute inset-0 bg-cover bg-center opacity-10 hidden"></div>
+                                            <span class="text-4xl mb-3 z-10" id="prayerImgIcon">📷</span>
+                                            <span id="prayerImgLabel" class="text-sm text-slate-700 font-bold z-10">1. Upload Handwritten Notes</span>
+                                            <span class="text-[10px] text-slate-400 mt-1 z-10">(Supports all images: JPG, PNG, HEIC...)</span>
+                                            <input type="file" accept="image/*" id="prayerImageInput" class="hidden" onchange="window.handlePrayerImageChange(event)" />
+                                        </label>
+                                        
+                                        <!-- 스크립트 파일 업로드 (DOCX, PDF, HTML, TXT 등) -->
+                                        <label class="flex flex-col items-center justify-center w-full p-8 border-2 border-dashed border-slate-300 bg-white rounded-2xl cursor-pointer hover:bg-slate-100 transition-all text-center relative">
+                                            <span class="text-4xl mb-3 z-10" id="transcriptDocIcon">📄</span>
+                                            <span id="transcriptDocLabel" class="text-sm text-slate-700 font-bold z-10">2. Upload Chat/Transcript File</span>
+                                            <span class="text-[10px] text-slate-400 mt-1 z-10">(Supports DOCX, PDF, HTML, TXT)</span>
+                                            <input type="file" accept=".txt,.docx,.pdf,.html,.htm,.csv,.rtf" id="transcriptFileInput" class="hidden" onchange="window.handleTranscriptUpload(event)" />
+                                        </label>
+                                    </div>
+                                    
+                                    <!-- 파싱된 텍스트 확인 및 직접 입력 창 -->
+                                    <textarea id="prayerTranscriptText" placeholder="Parsed text from file will appear here. You can also paste manually..." rows="4" class="mt-4 bg-white border-slate-300 rounded-xl resize-y text-xs text-slate-600 focus:border-slate-800 leading-relaxed"></textarea>
                                 </div>
                             </div>
                             <div class="flex flex-col bg-slate-50 p-6 rounded-2xl border border-slate-200 min-h-[350px]">
@@ -727,45 +744,139 @@
         };
 
         // --- Prayer Helper ---
-        window.handlePrayerImageChange = (e) => { const f = e.target?.files?.[0]; if (f) { document.getElementById('prayerImgLabel').innerText = f.name; const r = new FileReader(); r.onloadend = () => { window.prayerImageBase64 = r.result.split(',')[1]; }; r.readAsDataURL(f); } };
-        setTimeout(() => { const dz = document.getElementById('prayerDropZone'); if(dz) { ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); e.stopPropagation(); }, false)); ['dragenter', 'dragover'].forEach(ev => dz.addEventListener(ev, () => dz.classList.add('border-slate-800', 'bg-slate-100'), false)); ['dragleave', 'drop'].forEach(ev => dz.addEventListener(ev, () => dz.classList.remove('border-slate-800', 'bg-slate-100'), false)); dz.addEventListener('drop', (e) => { if(e.dataTransfer.files.length > 0) { document.getElementById('prayerImageInput').files = e.dataTransfer.files; window.handlePrayerImageChange({ target: document.getElementById('prayerImageInput') }); } }, false); } }, 1000);
+        window.prayerImageBase64 = '';
+        window.prayerImageMimeType = ''; // 이미지 형식(PNG/JPG) 동적 인식
+        
+        window.handlePrayerImageChange = (e) => { 
+            const f = e.target?.files?.[0] || e.dataTransfer?.files?.[0]; 
+            if (f) { 
+                document.getElementById('prayerImgLabel').innerText = f.name; 
+                document.getElementById('prayerImgIcon').innerText = '✅'; 
+                
+                const r = new FileReader(); 
+                r.onloadend = () => { 
+                    window.prayerImageBase64 = r.result.split(',')[1]; 
+                    window.prayerImageMimeType = f.type; 
+                    
+                    const preview = document.getElementById('prayerImgPreview');
+                    if(preview) {
+                        preview.style.backgroundImage = `url(${r.result})`;
+                        preview.classList.remove('hidden');
+                    }
+                }; 
+                r.readAsDataURL(f); 
+            } 
+        };
+
+        // 문서 파일(DOCX, TXT, PDF, HTML 등) 업로드 및 텍스트 자동 추출 로직
+        window.handleTranscriptUpload = async (e) => {
+            const f = e.target.files[0];
+            if (!f) return;
+            
+            document.getElementById('transcriptDocLabel').innerText = f.name;
+            document.getElementById('transcriptDocIcon').innerText = '⏳';
+            const textarea = document.getElementById('prayerTranscriptText');
+            textarea.value = "Extracting text from document... please wait.";
+            
+            try {
+                let text = "";
+                const ext = f.name.split('.').pop().toLowerCase();
+                
+                if (ext === 'docx') {
+                    const arrayBuffer = await f.arrayBuffer();
+                    const result = await mammoth.extractRawText({arrayBuffer: arrayBuffer});
+                    text = result.value;
+                } else if (ext === 'pdf') {
+                    // PDF.js 엔진 동적 설정
+                    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+                    const arrayBuffer = await f.arrayBuffer();
+                    const pdf = await pdfjsLib.getDocument({data: arrayBuffer}).promise;
+                    for (let i = 1; i <= pdf.numPages; i++) {
+                        const page = await pdf.getPage(i);
+                        const content = await page.getTextContent();
+                        text += content.items.map(item => item.str).join(" ") + "\n";
+                    }
+                } else {
+                    // TXT, HTML, CSV 등 일반 텍스트 문서 처리
+                    text = await new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.onload = (ev) => resolve(ev.target.result);
+                        reader.onerror = reject;
+                        reader.readAsText(f);
+                    });
+                    
+                    // HTML 파일일 경우 태그를 제거하고 순수 텍스트만 추출
+                    if (ext === 'html' || ext === 'htm') {
+                        const doc = new DOMParser().parseFromString(text, 'text/html');
+                        text = doc.body.textContent || "";
+                    }
+                }
+                
+                textarea.value = text.trim() || "No readable text found in this document.";
+                document.getElementById('transcriptDocIcon').innerText = '✅';
+            } catch (err) {
+                console.error(err);
+                textarea.value = "Error extracting text: " + err.message;
+                document.getElementById('transcriptDocIcon').innerText = '❌';
+            }
+        };
+        
+        setTimeout(() => { 
+            const dz = document.getElementById('prayerDropZone'); 
+            if(dz) { 
+                ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); e.stopPropagation(); }, false)); 
+                ['dragenter', 'dragover'].forEach(ev => dz.addEventListener(ev, () => dz.classList.add('border-slate-800', 'bg-slate-100'), false)); 
+                ['dragleave', 'drop'].forEach(ev => dz.addEventListener(ev, () => dz.classList.remove('border-slate-800', 'bg-slate-100'), false)); 
+                dz.addEventListener('drop', (e) => { 
+                    if(e.dataTransfer.files.length > 0) { 
+                        window.handlePrayerImageChange(e); 
+                    } 
+                }, false); 
+            } 
+        }, 1000);
         
         window.generatePrayerList = async () => {
             try {
                 const k = window.currentApiKey; if(!k) { alert("API Key is missing! Please authenticate in Settings."); return; }
-                const yt = document.getElementById('prayerYoutubeUrl').value; if(!window.prayerImageBase64 && !yt) { alert("Please upload handwritten notes or provide a YouTube link."); return; }
+                const yt = document.getElementById('prayerTranscriptText').value.trim(); 
+                if(!window.prayerImageBase64 && !yt) { alert("Please upload handwritten notes or a transcript file."); return; }
                 
                 const btn = document.getElementById('genPrayerBtn'); const spinner = document.getElementById('prayerSpinner'); const res = document.getElementById('prayerResultText');
                 btn.disabled = true; spinner.classList.remove('hidden');
                 
-                // 목사님의 세밀한 지침을 영어로 번역 및 구조화하여 완벽한 결과물을 유도
-                const prompt = `You are the 'Intercessory Prayer Organizer Expert' for our church. Your task is to create an accurate and dignified prayer list by combining the liturgist's handwritten notes (image) and the YouTube live stream chat data.
+                let sourceDesc = "";
+                if (window.prayerImageBase64 && yt) sourceDesc = "the provided handwritten notes (image) and the chat transcript (text)";
+                else if (window.prayerImageBase64) sourceDesc = "the provided handwritten notes (image) ONLY";
+                else sourceDesc = "the provided chat transcript (text) ONLY";
+
+                const prompt = `You are the 'Intercessory Prayer Organizer Expert' for our church (UMC context). Your task is to create an accurate and dignified prayer list based STRICTLY and ONLY on ${sourceDesc}.
 
 Tasks & Guidelines:
-1. Image Analysis: Accurately extract names and short keywords from the uploaded handwritten notes.
-2. Chat Analysis: Identify prayer requests and names shared during the "Joys and Concerns" (or prayer) time from the provided YouTube link/data.
-3. Data Integration: Match identical individuals from both sources and merge their content. If the liturgist's notes are unclear, prioritize the highly accurate conversational data from YouTube.
-4. Language & Context: All outputs must be strictly in English, reflecting a US church (UMC) context.
-5. Sentence Refinement: Convert casual colloquial/spoken language into polite, formal written sentences. Start the sentence with "A prayer..." or "A joy...".
-6. Output Format: Strictly output line by line in this format: "- [Name]: [Prayer/Joy content]". 
-   (Example: - Eric Grismer: A prayer for her friend Arlene, who is diagnosed with Parkinson’s disease.)
-7. Strict Verification: Double-check that the summarized content is based ONLY on the video/chat content and the image provided. DO NOT add any arbitrary, guessed, or fabricated details.
+1. Data Extraction: Identify names and prayer requests/joys from the provided sources.
+2. Data Integration: If multiple sources are provided, match identical individuals and merge their content.
+3. Language: All outputs must be strictly in English.
+4. Sentence Refinement: Convert casual colloquial/spoken language into polite, formal written sentences. Start the sentence with "A prayer..." or "A joy...".
+5. Output Format: Strictly output line by line in this format: "- [Name]: [Prayer/Joy content]". 
+   (Example: - Eric Grismer: A prayer for his friend Arlene, who is diagnosed with Parkinson’s disease.)
+6. STRICT VERIFICATION (CRITICAL): DO NOT hallucinate. DO NOT invent names. DO NOT add any arbitrary details. If you cannot extract any valid prayer request from the provided data, output exactly: "No valid prayer requests found in the provided data."
 
-YouTube Link / Chat Data: ${yt || 'N/A'}`;
+Chat Transcript / Provided Text:
+${yt || 'None provided'}`;
 
                 const payload = { 
                     systemInstruction: {
-                        parts: [{ text: "You are a strict intercessory prayer assistant. You MUST NOT hallucinate. Extract only facts from the provided image and text, and format them exactly as requested." }]
+                        parts: [{ text: "You are a strict intercessory prayer assistant. You MUST NOT hallucinate. Extract only facts from the provided image and text, and format them exactly as requested. NEVER invent names or prayer requests." }]
                     },
                     contents: [{ 
                         role: "user", 
                         parts: [
                             { text: prompt }, 
-                            ...(window.prayerImageBase64 ? [{ inlineData: { mimeType: "image/jpeg", data: window.prayerImageBase64 } }] : [])
+                            // 동적으로 MIME Type 할당 (없으면 jpeg 기본)
+                            ...(window.prayerImageBase64 ? [{ inlineData: { mimeType: window.prayerImageMimeType || "image/jpeg", data: window.prayerImageBase64 } }] : [])
                         ] 
                     }],
                     generationConfig: {
-                        temperature: 0.1 // 창의성을 극도로 낮추어 팩트 위주의 정확한 정리만 하도록 강제
+                        temperature: 0.0 // 상상력 0
                     }
                 };
                 
