@@ -103,8 +103,8 @@
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
-            <!-- 버전 5.02로 마이너 업데이트 -->
-            <span class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mt-1 ml-1">Care AI (v.5.02)</span>
+            <!-- 버전 5.03으로 업데이트 -->
+            <span class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mt-1 ml-1">Care AI (v.5.03)</span>
         </div>
         
         <div class="px-6 py-4 flex items-center gap-2 border-b border-slate-50 bg-slate-50/50">
@@ -144,8 +144,8 @@
                 <img src="SUMC%20Logo%20(%EC%95%84%EC%9D%B4%EC%BD%98).png" alt="Icon" class="h-8 w-auto object-contain">
                 <div class="flex flex-col">
                     <h1 class="text-lg font-black text-slate-900 leading-none">SUMC Care AI</h1>
-                    <!-- 버전 5.02로 업데이트 -->
-                    <span class="text-[9px] font-bold text-slate-500 tracking-widest mt-1 uppercase">(v.5.02)</span>
+                    <!-- 버전 5.03으로 업데이트 -->
+                    <span class="text-[9px] font-bold text-slate-500 tracking-widest mt-1 uppercase">(v.5.03)</span>
                 </div>
             </div>
             <button onclick="window.toggleSidebar(); event.stopPropagation();" class="p-2 text-slate-600 focus:outline-none bg-slate-100 rounded-lg hover:bg-slate-200 transition"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg></button>
@@ -666,8 +666,36 @@
                 const btn = document.getElementById('genPrayerBtn'); const spinner = document.getElementById('prayerSpinner'); const res = document.getElementById('prayerResultText');
                 btn.disabled = true; spinner.classList.remove('hidden');
                 
-                const prompt = `Extract prayer requests. Format: FirstName LastName: Prayer sentence. YouTube: ${yt || 'N/A'}`;
-                const payload = { contents: [{ role: "user", parts: [{ text: prompt }, ...(window.prayerImageBase64 ? [{ inlineData: { mimeType: "image/jpeg", data: window.prayerImageBase64 } }] : [])] }] };
+                // 목사님의 세밀한 지침을 영어로 번역 및 구조화하여 완벽한 결과물을 유도
+                const prompt = `You are the 'Intercessory Prayer Organizer Expert' for our church. Your task is to create an accurate and dignified prayer list by combining the liturgist's handwritten notes (image) and the YouTube live stream chat data.
+
+Tasks & Guidelines:
+1. Image Analysis: Accurately extract names and short keywords from the uploaded handwritten notes.
+2. Chat Analysis: Identify prayer requests and names shared during the "Joys and Concerns" (or prayer) time from the provided YouTube link/data.
+3. Data Integration: Match identical individuals from both sources and merge their content. If the liturgist's notes are unclear, prioritize the highly accurate conversational data from YouTube.
+4. Language & Context: All outputs must be strictly in English, reflecting a US church (UMC) context.
+5. Sentence Refinement: Convert casual colloquial/spoken language into polite, formal written sentences. Start the sentence with "A prayer..." or "A joy...".
+6. Output Format: Strictly output line by line in this format: "- [Name]: [Prayer/Joy content]". 
+   (Example: - Eric Grismer: A prayer for her friend Arlene, who is diagnosed with Parkinson’s disease.)
+7. Strict Verification: Double-check that the summarized content is based ONLY on the video/chat content and the image provided. DO NOT add any arbitrary, guessed, or fabricated details.
+
+YouTube Link / Chat Data: ${yt || 'N/A'}`;
+
+                const payload = { 
+                    systemInstruction: {
+                        parts: [{ text: "You are a strict intercessory prayer assistant. You MUST NOT hallucinate. Extract only facts from the provided image and text, and format them exactly as requested." }]
+                    },
+                    contents: [{ 
+                        role: "user", 
+                        parts: [
+                            { text: prompt }, 
+                            ...(window.prayerImageBase64 ? [{ inlineData: { mimeType: "image/jpeg", data: window.prayerImageBase64 } }] : [])
+                        ] 
+                    }],
+                    generationConfig: {
+                        temperature: 0.1 // 창의성을 극도로 낮추어 팩트 위주의 정확한 정리만 하도록 강제
+                    }
+                };
                 
                 const m = window.currentAiModel || "gemini-1.5-flash-latest";
                 const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${k}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
