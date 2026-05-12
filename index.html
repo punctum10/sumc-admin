@@ -103,8 +103,8 @@
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
-            <!-- 버전 5.10으로 마이너 업데이트 -->
-            <span class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mt-1 ml-1">Care AI (v.5.10)</span>
+            <!-- 버전 5.12로 업데이트 -->
+            <span class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mt-1 ml-1">Care AI (v.5.12)</span>
         </div>
         
         <div class="px-6 py-4 flex items-center gap-2 border-b border-slate-50 bg-slate-50/50">
@@ -144,8 +144,8 @@
                 <img src="SUMC%20Logo%20(%EC%95%84%EC%9D%B4%EC%BD%98).png" alt="Icon" class="h-8 w-auto object-contain">
                 <div class="flex flex-col">
                     <h1 class="text-lg font-black text-slate-900 leading-none">SUMC Care AI</h1>
-                    <!-- 버전 5.10으로 업데이트 -->
-                    <span class="text-[9px] font-bold text-slate-500 tracking-widest mt-1 uppercase">(v.5.10)</span>
+                    <!-- 버전 5.12로 업데이트 -->
+                    <span class="text-[9px] font-bold text-slate-500 tracking-widest mt-1 uppercase">(v.5.12)</span>
                 </div>
             </div>
             <button onclick="window.toggleSidebar(); event.stopPropagation();" class="p-2 text-slate-600 focus:outline-none bg-slate-100 rounded-lg hover:bg-slate-200 transition"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg></button>
@@ -637,9 +637,42 @@
         window.renderAttendanceList = () => {
             const list = document.getElementById('attendanceList'); if(!list) return; const dateInput = document.getElementById('attendanceDate');
             if (!dateInput.value) { const t = new Date(); t.setDate(t.getDate() - t.getDay()); dateInput.value = t.toISOString().split('T')[0]; }
-            const existingRecord = window.attendanceRecords.find(r => r.date === dateInput.value); const checkedIds = existingRecord ? existingRecord.attendees : [];
-            const sortedMembers = [...window.members].sort((a, b) => a.lastName.localeCompare(b.lastName));
-            list.innerHTML = sortedMembers.map(m => `<tr class="hover:bg-slate-50 transition"><td class="px-6 py-4 text-center"><input type="checkbox" value="${m.id}" ${checkedIds.includes(m.id) ? 'checked' : ''} onchange="window.updateCheckCount()" class="w-5 h-5 cursor-pointer attendee-check accent-slate-800 rounded bg-slate-50 border-slate-300"></td><td class="px-6 py-4 font-bold text-slate-800">${m.lastName}, ${m.firstName}</td><td class="px-6 py-4 text-center text-[10px] font-black uppercase text-slate-400">${m.isAdult ? 'Adult' : 'Child'}</td></tr>`).join('');
+            
+            const existingRecord = window.attendanceRecords.find(r => r.date === dateInput.value); 
+            const checkedIds = existingRecord ? existingRecord.attendees : [];
+            
+            // 누적 출석 횟수 및 비율(%) 계산 로직
+            const attendanceCounts = {};
+            window.members.forEach(m => attendanceCounts[m.id] = 0);
+            window.attendanceRecords.forEach(record => {
+                if (record.attendees) {
+                    record.attendees.forEach(id => {
+                        if (attendanceCounts[id] !== undefined) attendanceCounts[id]++;
+                    });
+                }
+            });
+
+            const totalWeeks = window.attendanceRecords.length;
+
+            // 정렬 로직 (1순위: 출석률/횟수 내림차순, 2순위: 성(Last Name) 알파벳순)
+            const sortedMembers = [...window.members].sort((a, b) => {
+                const countDiff = attendanceCounts[b.id] - attendanceCounts[a.id];
+                if (countDiff !== 0) return countDiff;
+                const lastNameCmp = a.lastName.localeCompare(b.lastName);
+                if (lastNameCmp !== 0) return lastNameCmp;
+                return a.firstName.localeCompare(b.firstName);
+            });
+
+            list.innerHTML = sortedMembers.map(m => {
+                // 각 성도의 출석률 퍼센테이지 계산
+                const rate = totalWeeks > 0 ? Math.round((attendanceCounts[m.id] / totalWeeks) * 100) : 0;
+                return `<tr class="hover:bg-slate-50 transition">
+                    <td class="px-6 py-4 text-center"><input type="checkbox" value="${m.id}" ${checkedIds.includes(m.id) ? 'checked' : ''} onchange="window.updateCheckCount()" class="w-5 h-5 cursor-pointer attendee-check accent-slate-800 rounded bg-slate-50 border-slate-300"></td>
+                    <td class="px-6 py-4 font-bold text-slate-800">${m.lastName}, ${m.firstName} <span class="text-xs font-semibold text-slate-400 ml-2">(${rate}%)</span></td>
+                    <td class="px-6 py-4 text-center text-[10px] font-black uppercase text-slate-400">${m.isAdult ? 'Adult' : 'Child'}</td>
+                </tr>`;
+            }).join('');
+            
             window.updateCheckCount();
         };
 
