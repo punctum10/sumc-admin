@@ -103,8 +103,8 @@
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
-            <!-- 버전 5.13으로 업데이트 -->
-            <span class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mt-1 ml-1">Care AI (v.5.13)</span>
+            <!-- 버전 5.14로 업데이트 -->
+            <span class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mt-1 ml-1">Care AI (v.5.14)</span>
         </div>
         
         <div class="px-6 py-4 flex items-center gap-2 border-b border-slate-50 bg-slate-50/50">
@@ -144,8 +144,8 @@
                 <img src="SUMC%20Logo%20(%EC%95%84%EC%9D%B4%EC%BD%98).png" alt="Icon" class="h-8 w-auto object-contain">
                 <div class="flex flex-col">
                     <h1 class="text-lg font-black text-slate-900 leading-none">SUMC Care AI</h1>
-                    <!-- 버전 5.13으로 업데이트 -->
-                    <span class="text-[9px] font-bold text-slate-500 tracking-widest mt-1 uppercase">(v.5.13)</span>
+                    <!-- 버전 5.14로 업데이트 -->
+                    <span class="text-[9px] font-bold text-slate-500 tracking-widest mt-1 uppercase">(v.5.14)</span>
                 </div>
             </div>
             <button onclick="window.toggleSidebar(); event.stopPropagation();" class="p-2 text-slate-600 focus:outline-none bg-slate-100 rounded-lg hover:bg-slate-200 transition"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg></button>
@@ -162,8 +162,8 @@
                             <!-- 타이틀을 Total Member로 변경 -->
                             <label class="text-slate-500 font-extrabold text-[10px] tracking-widest uppercase">Total Member</label>
                             <p class="text-5xl font-black text-slate-900 mt-2" id="totalMembers">0</p>
-                            <!-- 세부 브레이크다운 텍스트 수정 -->
-                            <p class="text-xs text-slate-400 mt-2 font-medium" id="memberBreakdown">Member: 0 / Visitor: 0 / Children: 0</p>
+                            <!-- 세부 브레이크다운 텍스트 수정: Registered 포함 -->
+                            <p class="text-[11px] text-slate-400 mt-2 font-medium" id="memberBreakdown">Registered: 0 / Member: 0 / Visitor: 0 / Children: 0</p>
                         </div>
                         <div class="bg-white rounded-2xl p-8 flex flex-col justify-center border border-slate-100 shadow-[0_4px_12px_-2px_rgba(0,0,0,0.04)] hover:shadow-[0_12px_24px_-4px_rgba(0,0,0,0.12)] transition-shadow duration-300">
                             <label id="lastAttendanceTitle" class="text-slate-500 font-extrabold text-[10px] tracking-widest uppercase">Recent Attendance</label>
@@ -522,13 +522,14 @@
         }
 
         window.updateDashboard = () => {
-            // 성인 멤버(정식), 성인 방문자(non-member), 어린이 세분화 로직 추가
+            // 총 인원, 성인 멤버(정식), 성인 방문자(non-member), 어린이 세분화 로직 추가
+            const totalRegistered = window.members.length;
             const adultMembers = window.members.filter(m => m.isAdult && !m.isNonMember).length;
             const visitors = window.members.filter(m => m.isAdult && m.isNonMember).length;
             const children = window.members.filter(m => !m.isAdult).length;
 
             if(document.getElementById('totalMembers')) document.getElementById('totalMembers').innerText = adultMembers;
-            if(document.getElementById('memberBreakdown')) document.getElementById('memberBreakdown').innerText = `Member: ${adultMembers} / Visitor: ${visitors} / Children: ${children}`;
+            if(document.getElementById('memberBreakdown')) document.getElementById('memberBreakdown').innerText = `Registered: ${totalRegistered} / Member: ${adultMembers} / Visitor: ${visitors} / Children: ${children}`;
             
             // 평균 출석 로직 업데이트: 메인은 성인만, 서브텍스트는 전체(with Children)
             const disp = document.getElementById('avgAttendanceDisplay');
