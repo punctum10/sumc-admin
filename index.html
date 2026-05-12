@@ -103,8 +103,8 @@
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
-            <!-- 버전 5.09로 업데이트 -->
-            <span class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mt-1 ml-1">Care AI (v.5.09)</span>
+            <!-- 버전 5.10으로 마이너 업데이트 -->
+            <span class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mt-1 ml-1">Care AI (v.5.10)</span>
         </div>
         
         <div class="px-6 py-4 flex items-center gap-2 border-b border-slate-50 bg-slate-50/50">
@@ -144,8 +144,8 @@
                 <img src="SUMC%20Logo%20(%EC%95%84%EC%9D%B4%EC%BD%98).png" alt="Icon" class="h-8 w-auto object-contain">
                 <div class="flex flex-col">
                     <h1 class="text-lg font-black text-slate-900 leading-none">SUMC Care AI</h1>
-                    <!-- 버전 5.09로 업데이트 -->
-                    <span class="text-[9px] font-bold text-slate-500 tracking-widest mt-1 uppercase">(v.5.09)</span>
+                    <!-- 버전 5.10으로 업데이트 -->
+                    <span class="text-[9px] font-bold text-slate-500 tracking-widest mt-1 uppercase">(v.5.10)</span>
                 </div>
             </div>
             <button onclick="window.toggleSidebar(); event.stopPropagation();" class="p-2 text-slate-600 focus:outline-none bg-slate-100 rounded-lg hover:bg-slate-200 transition"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg></button>
@@ -241,6 +241,15 @@
                                 <input type="text" id="appIdInput" value="sumc-2026-production-db" readonly class="bg-slate-100 text-slate-500 font-mono border-none cursor-not-allowed">
                             </div>
                             <button onclick="window.verifyAndSaveApiKey()" id="verifyKeyBtn" class="w-full btn-primary py-4 rounded-xl font-bold transition shadow-md uppercase tracking-widest text-sm mt-4">Validate & Sync to Cloud</button>
+                        </div>
+                        
+                        <!-- 신규: 데이터베이스 유지보수(중복 기도제목 정리) 버튼 추가 -->
+                        <div class="mt-10 pt-8 border-t border-slate-200">
+                            <h3 class="text-sm font-extrabold text-slate-900 mb-4 uppercase tracking-widest">Database Maintenance</h3>
+                            <button onclick="window.cleanupDuplicatePrayers()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 py-4 rounded-xl font-bold transition shadow-sm text-sm flex items-center justify-center gap-2">
+                                <span>🧹</span> Clean Up Duplicate Prayer Records
+                            </button>
+                            <p class="text-[10px] text-slate-500 mt-3 text-center leading-relaxed">Scans the entire database to find multiple prayer requests logged on the same date for a single person. It will safely remove older duplicates and keep only the latest entry.</p>
                         </div>
                     </div>
                 </div>
@@ -935,6 +944,61 @@ ${yt || 'None provided'}`;
                     } 
                 } 
                 alert(`Profiles updated: ${cnt} matched. (Duplicates overwritten)`); 
+            }
+        };
+
+        // --- 데이터베이스 유지보수 (중복 기도제목 청소) 기능 ---
+        window.cleanupDuplicatePrayers = async () => {
+            if(!confirm("Are you sure you want to clean up existing duplicate prayer records?\nThis will scan all members and keep only the latest prayer entry for any given date.")) return;
+
+            let updatedCount = 0;
+            const btn = document.querySelector('button[onclick="window.cleanupDuplicatePrayers()"]');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = `<span class="loading-spinner-dark"></span> Cleaning...`;
+            btn.disabled = true;
+
+            try {
+                for (const m of window.members) {
+                    if (!m.prayers) continue;
+
+                    const lines = m.prayers.split('\n');
+                    const uniquePrayers = [];
+                    const seenDates = new Set();
+
+                    // 배열을 뒤에서부터(최신부터) 읽어서 중복된 날짜의 예전 기록을 걸러냄
+                    for (let i = lines.length - 1; i >= 0; i--) {
+                        const line = lines[i].trim();
+                        if (!line) continue;
+
+                        const dateMatch = line.match(/\(([\d/]+)\)$/); // 끝에 (MM/DD/YYYY) 형태의 날짜가 있는지 확인
+                        if (dateMatch) {
+                            const dateStr = dateMatch[1];
+                            if (!seenDates.has(dateStr)) {
+                                seenDates.add(dateStr);
+                                uniquePrayers.unshift(line); // 가장 최신 것만 추가 (순서 유지를 위해 unshift 사용)
+                            }
+                        } else {
+                            // 날짜가 안 적힌 오래된 기록이 있다면 그대로 살림
+                            uniquePrayers.unshift(line);
+                        }
+                    }
+
+                    const newPrayers = uniquePrayers.join('\n');
+                    if (newPrayers !== m.prayers) {
+                        if(window.updatePrayerInDb) {
+                            await window.updatePrayerInDb(m.id, newPrayers);
+                            m.prayers = newPrayers; // 로컬 데이터 반영
+                            updatedCount++;
+                        }
+                    }
+                }
+                alert(`Cleanup complete!\nSuccessfully removed duplicates and fixed records for ${updatedCount} member(s).`);
+                window.showTab('directory');
+            } catch(e) {
+                alert("Error during cleanup: " + e.message);
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
             }
         };
     </script>
