@@ -103,8 +103,8 @@
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
-            <!-- 버전 5.08로 업데이트 -->
-            <span class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mt-1 ml-1">Care AI (v.5.08)</span>
+            <!-- 버전 5.09로 업데이트 -->
+            <span class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mt-1 ml-1">Care AI (v.5.09)</span>
         </div>
         
         <div class="px-6 py-4 flex items-center gap-2 border-b border-slate-50 bg-slate-50/50">
@@ -144,8 +144,8 @@
                 <img src="SUMC%20Logo%20(%EC%95%84%EC%9D%B4%EC%BD%98).png" alt="Icon" class="h-8 w-auto object-contain">
                 <div class="flex flex-col">
                     <h1 class="text-lg font-black text-slate-900 leading-none">SUMC Care AI</h1>
-                    <!-- 버전 5.08로 업데이트 -->
-                    <span class="text-[9px] font-bold text-slate-500 tracking-widest mt-1 uppercase">(v.5.08)</span>
+                    <!-- 버전 5.09로 업데이트 -->
+                    <span class="text-[9px] font-bold text-slate-500 tracking-widest mt-1 uppercase">(v.5.09)</span>
                 </div>
             </div>
             <button onclick="window.toggleSidebar(); event.stopPropagation();" class="p-2 text-slate-600 focus:outline-none bg-slate-100 rounded-lg hover:bg-slate-200 transition"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg></button>
@@ -897,9 +897,45 @@ ${yt || 'None provided'}`;
         };
 
         window.savePrayerList = async () => {
-            const dv = document.getElementById('prayerDate').value; const fd = dv ? `${dv.split('-')[1]}/${dv.split('-')[2]}/${dv.split('-')[0]}` : new Date().toLocaleDateString(); const txt = document.getElementById('prayerResultText').value; if(!txt) return alert("Empty Result.");
-            try { const { Document, Paragraph, TextRun, Packer } = docx; const d = new Document({ sections: [{ children: [new Paragraph({ children: [new TextRun({ text: `Prayer List (${fd})`, font: "Times New Roman", size: 28, bold: true })] }), ...txt.split('\n').filter(l => l.trim()).map(line => new Paragraph({ children: [new TextRun({ text: line.trim(), font: "Times New Roman", size: 24 })], spacing: { before: 120 } }))] }] }); const b = await Packer.toBlob(d); saveAs(b, `SUMC_Prayer_List_${fd.replace(/\//g,'_')}.docx`); } catch(e) {}
-            if(window.updatePrayerInDb) { const lines = txt.split('\n'); let cnt = 0; for(let line of lines) { const match = line.match(/^([^:]+):\s*(.*)$/); if(match) { const name = match[1].trim().toLowerCase(); const target = window.members.find(m => name.includes(m.firstName.toLowerCase()) && name.includes(m.lastName.toLowerCase())); if(target) { const log = `- ${match[2].trim()} (${fd})`; await window.updatePrayerInDb(target.id, target.prayers ? `${target.prayers}\n${log}` : log); cnt++; } } } alert(`Profiles updated: ${cnt} matched.`); }
+            const dv = document.getElementById('prayerDate').value; 
+            const fd = dv ? `${dv.split('-')[1]}/${dv.split('-')[2]}/${dv.split('-')[0]}` : new Date().toLocaleDateString(); 
+            const txt = document.getElementById('prayerResultText').value; 
+            if(!txt) return alert("Empty Result.");
+            
+            try { 
+                const { Document, Paragraph, TextRun, Packer } = docx; 
+                const d = new Document({ sections: [{ children: [new Paragraph({ children: [new TextRun({ text: `Prayer List (${fd})`, font: "Times New Roman", size: 28, bold: true })] }), ...txt.split('\n').filter(l => l.trim()).map(line => new Paragraph({ children: [new TextRun({ text: line.trim(), font: "Times New Roman", size: 24 })], spacing: { before: 120 } }))] }] }); 
+                const b = await Packer.toBlob(d); 
+                saveAs(b, `SUMC_Prayer_List_${fd.replace(/\//g,'_')}.docx`); 
+            } catch(e) { console.error("Word Doc Gen Error", e); }
+            
+            if(window.updatePrayerInDb) { 
+                const lines = txt.split('\n'); let cnt = 0; 
+                for(let line of lines) { 
+                    const match = line.match(/^([^:]+):\s*(.*)$/); 
+                    if(match) { 
+                        const name = match[1].trim().toLowerCase(); 
+                        const target = window.members.find(m => name.includes(m.firstName.toLowerCase()) && name.includes(m.lastName.toLowerCase())); 
+                        
+                        if(target) { 
+                            const newLog = `- ${match[2].trim()} (${fd})`; 
+                            let updatedPrayers = newLog;
+                            
+                            // 중복 방지 로직: 기존 기도제목 중 '같은 날짜'로 끝나는 줄이 있다면 필터링하여 삭제
+                            if (target.prayers) {
+                                const filtered = target.prayers.split('\n').filter(p => !p.trim().endsWith(`(${fd})`));
+                                filtered.push(newLog);
+                                updatedPrayers = filtered.join('\n');
+                            }
+                            
+                            await window.updatePrayerInDb(target.id, updatedPrayers); 
+                            target.prayers = updatedPrayers; // 로컬 데이터 즉시 업데이트
+                            cnt++; 
+                        } 
+                    } 
+                } 
+                alert(`Profiles updated: ${cnt} matched. (Duplicates overwritten)`); 
+            }
         };
     </script>
 
