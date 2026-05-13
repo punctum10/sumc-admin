@@ -2,69 +2,48 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SUMC Care AI Portal</title>
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SUMC Care AI</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.21/mammoth.browser.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
-    <script src="https://unpkg.com/tesseract.js@v4.0.1/dist/tesseract.min.js"></script>
-    
-    <script src="https://unpkg.com/docx@7.1.0/build/index.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+    <script src="https://unpkg.com/docx@7.3.0/build/index.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.21/mammoth.browser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+    
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Merriweather:ital,wght@0,400;0,700;1,400&display=swap');
+        :root { --sumc-navy: #1b2336; }
+        body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
+        .font-serif-formatted { font-family: 'Merriweather', serif; }
         
-        /* 로고 기반 메인 컬러 설정 (다크 차콜/네이비 & 불꽃 레드) */
-        :root {
-            --sumc-dark: #1e293b; /* 로고의 텍스트 색상과 유사한 딥 슬레이트 네이비 */
-            --sumc-dark-hover: #0f172a;
-            --sumc-red: #dc2626; /* 로고의 불꽃 레드 */
-            --sumc-bg: #f8fafc;
-        }
-
-        body { font-family: 'Inter', sans-serif; background-color: var(--sumc-bg); color: var(--sumc-dark); overflow: hidden; }
-        .tab-content { display: none; }
-        .active-tab { display: block; animation: fadeIn 0.3s ease-in-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .tab-content { display: none; animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        .active-tab { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
-        /* Clean Professional Cards */
-        .card { background-color: #ffffff; border-radius: 16px; border: 1px solid #f1f5f9; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+        .nav-btn { display: flex; align-items: center; gap: 0.75rem; padding: 0.875rem 1.25rem; border-radius: 0.75rem; color: #94a3b8; font-weight: 700; font-size: 0.875rem; transition: all 0.2s ease; border: 1px solid transparent; }
+        .nav-btn:hover { background-color: rgba(255,255,255,0.05); color: #ffffff; }
+        .nav-btn.active { background-color: rgba(255,255,255,0.1); color: #ffffff; border-color: rgba(255,255,255,0.05); box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); }
         
-        /* Inputs */
-        input, select, textarea { background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 0.875rem 1rem; outline: none; width: 100%; font-size: 0.875rem; color: #1e293b; transition: all 0.2s; }
-        input:focus, select:focus, textarea:focus { border-color: var(--sumc-dark); box-shadow: 0 0 0 3px rgba(30, 41, 59, 0.1); background-color: #ffffff; }
-        ::placeholder { color: #94a3b8; }
-        label { display: block; font-size: 0.75rem; font-weight: 800; color: #64748b; text-transform: uppercase; margin-bottom: 0.4rem; letter-spacing: 0.05em; }
+        .card { background-color: white; border-radius: 1.5rem; }
+        .btn-primary { background-color: #1e293b; color: white; transition: all 0.2s ease; }
+        .btn-primary:hover { background-color: #0f172a; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2); }
+        .btn-red { background-color: #dc2626; color: white; transition: all 0.2s ease; }
+        .btn-red:hover { background-color: #b91c1c; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2); }
         
-        /* Buttons */
-        .btn-primary { background-color: var(--sumc-dark); color: white; transition: all 0.2s; }
-        .btn-primary:hover { background-color: var(--sumc-dark-hover); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2); }
-        .btn-red { background-color: var(--sumc-red); color: white; transition: all 0.2s; }
-        .btn-red:hover { background-color: #b91c1c; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3); }
+        .loading-spinner-dark { display: inline-block; width: 1.25rem; height: 1.25rem; border: 3px solid rgba(0,0,0,0.1); border-radius: 50%; border-top-color: #1e293b; animation: spin 1s ease-in-out infinite; }
+        .loading-spinner-white { display: inline-block; width: 1.25rem; height: 1.25rem; border: 3px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: #ffffff; animation: spin 1s ease-in-out infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
         
+        /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        
-        .loading-spinner { border: 3px solid rgba(0,0,0,0.1); border-top: 3px solid var(--sumc-dark); border-radius: 50%; width: 18px; height: 18px; animation: spin 1s linear infinite; display: inline-block; vertical-align: middle; }
-        .loading-spinner-white { border: 3px solid rgba(255,255,255,0.2); border-top: 3px solid #ffffff; border-radius: 50%; width: 18px; height: 18px; animation: spin 1s linear infinite; display: inline-block; vertical-align: middle; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        
-        /* Navigation Sidebar */
-        .nav-btn { display: flex; align-items: center; gap: 0.875rem; width: 100%; padding: 0.875rem 1.25rem; border-radius: 8px; font-size: 0.9rem; font-weight: 700; color: #64748b; transition: all 0.2s; text-align: left; }
-        .nav-btn:hover { background-color: #f1f5f9; color: var(--sumc-dark); }
-        .nav-btn.active { background-color: #fef2f2; color: var(--sumc-red); border-left: 4px solid var(--sumc-red); border-radius: 0 8px 8px 0;}
-        
-        .font-serif-formatted { font-family: 'Times New Roman', Times, serif; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     </style>
 </head>
-<body class="flex h-screen overflow-hidden relative text-slate-800">
+<body class="flex h-screen overflow-hidden relative text-slate-800 bg-slate-50">
 
     <!-- 📱 QR CODE PUBLIC FORM (성도용 모바일 화면) -->
     <div id="publicApp" class="fixed inset-0 z-[200] bg-slate-100 hidden flex-col items-center justify-start pt-8 px-4 overflow-y-auto pb-10">
@@ -78,18 +57,18 @@
             
             <!-- Message Style Form -->
             <div id="qrFormView" class="p-6 md:p-8 bg-slate-50 flex flex-col gap-5">
-                <div class="bg-white p-4 rounded-2xl rounded-tl-sm border border-slate-200 shadow-sm self-start max-w-[90%] text-sm font-medium text-slate-700">
-                    Hello! 🙏<br>Please leave your prayer requests or joys below. Our pastor and intercessory team will pray for you.
+                <div class="bg-white p-4 rounded-2xl rounded-tl-sm border border-slate-200 shadow-sm self-start max-w-[90%] text-sm font-medium text-slate-700 leading-relaxed">
+                    Hello! 🙏<br>Please leave your prayer requests or joys below. Our pastoral team will pray for you.
                 </div>
                 
                 <form onsubmit="window.submitPublicPrayer(event)" class="flex flex-col gap-4 mt-2">
                     <div>
                         <label class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1 block pl-1">Your Name</label>
-                        <input type="text" id="qrName" required placeholder="e.g., John Doe" class="w-full bg-white border border-slate-300 rounded-2xl px-4 py-3 font-bold text-slate-800 shadow-inner focus:border-slate-800 focus:ring-1 focus:ring-slate-800 transition">
+                        <input type="text" id="qrName" required placeholder="e.g., John Doe" class="w-full bg-white border border-slate-300 rounded-2xl px-4 py-3 font-bold text-slate-800 shadow-inner focus:border-slate-800 focus:ring-1 focus:ring-slate-800 transition outline-none">
                     </div>
                     <div>
                         <label class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1 block pl-1">Prayer / Joy</label>
-                        <textarea id="qrPrayer" required placeholder="Type your message here..." rows="5" class="w-full bg-white border border-slate-300 rounded-2xl px-4 py-3 text-slate-800 shadow-inner focus:border-slate-800 focus:ring-1 focus:ring-slate-800 transition resize-none"></textarea>
+                        <textarea id="qrPrayer" required placeholder="Type your message here..." rows="5" class="w-full bg-white border border-slate-300 rounded-2xl px-4 py-3 text-slate-800 shadow-inner focus:border-slate-800 focus:ring-1 focus:ring-slate-800 transition resize-none outline-none"></textarea>
                     </div>
                     <button type="submit" id="qrSubmitBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-black text-lg py-4 rounded-2xl shadow-lg shadow-blue-600/30 transition flex items-center justify-center gap-2 mt-2">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
@@ -112,48 +91,40 @@
 
     <!-- 🔐 LOGIN OVERLAY -->
     <div id="loginScreen" class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-100/95 backdrop-blur-md transition-opacity duration-500">
-        <!-- 로그인 박스 너비를 조금 더 넓게 조정 (max-w-sm -> max-w-md) -->
-        <div class="card p-10 max-w-md w-full mx-4 shadow-2xl transform transition-transform text-center border-t-0 border border-slate-200">
-            <!-- 세로형 로고 적용 (크기 1.5배 확대: w-48 -> w-72) -->
+        <div class="card p-10 max-w-md w-full mx-4 shadow-2xl transform transition-transform text-center border-t-0 border border-slate-200 bg-white">
             <img src="SUMC%20Logo%20(%EC%84%B8%EB%A1%9C).png" alt="SUMC Care AI" class="w-72 h-auto mx-auto mb-4 object-contain" onerror="this.src='https://via.placeholder.com/300x300/ffffff/1e293b?text=SUMC+Care+AI';">
             <span class="text-[10px] font-black tracking-widest uppercase text-slate-400 block mb-8">Secure Admin Portal</span>
             
             <form onsubmit="window.handleLogin(event)" class="space-y-4">
-                <input type="text" id="loginId" required placeholder="Administrator ID" class="font-mono text-center text-md bg-slate-50 focus:bg-white shadow-inner">
-                <input type="password" id="loginPw" required placeholder="Passcode" class="font-mono text-center text-md tracking-widest bg-slate-50 focus:bg-white shadow-inner">
-                <!-- 변경된 Log In 버튼 -->
-                <button type="submit" class="w-full btn-primary py-4 rounded-xl font-bold uppercase tracking-widest text-sm flex items-center justify-center gap-2 mt-6 shadow-md">
-                    Log In
-                </button>
+                <input type="password" id="adminPassword" placeholder="Enter Admin Password" class="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-slate-800 focus:bg-white transition text-center font-bold tracking-widest text-slate-800 placeholder-slate-400" required>
+                <button type="submit" class="w-full btn-primary py-4 rounded-xl font-bold shadow-md hover:shadow-lg transition">Access System</button>
             </form>
-            <p id="loginError" class="text-red-500 text-xs font-bold text-center mt-6 hidden bg-red-50 border border-red-200 py-3 rounded-lg">Authentication Failed.</p>
+            <p class="text-[10px] text-slate-400 mt-6 uppercase tracking-widest font-bold">Authorized Personnel Only</p>
         </div>
     </div>
 
     <div id="sidebarOverlay" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 hidden" onclick="window.toggleSidebar()"></div>
 
     <!-- LEFT SIDEBAR -->
-    <!-- 모바일 메뉴가 화면 전체(w-full)를 덮고 위에서 아래로(-translate-y-full) 내려오도록 확실히 고정(top-0 left-0 추가), 잘못된 네이비 배경색 찌꺼기 제거 및 반투명 유리 효과(bg-white/95 backdrop-blur-2xl) 추가 -->
-    <aside id="sidebar" class="fixed top-0 left-0 md:relative w-full md:w-72 flex-shrink-0 flex flex-col z-50 h-full transform -translate-y-full md:translate-y-0 transition-transform duration-300 bg-white/95 md:bg-white backdrop-blur-2xl border-r border-slate-200 shadow-2xl md:shadow-sm">
+    <aside id="sidebar" class="fixed top-0 left-0 md:relative w-full md:w-72 flex-shrink-0 flex flex-col z-50 h-full transform -translate-y-full md:translate-y-0 transition-transform duration-300 bg-white/95 md:bg-white backdrop-blur-2xl border-r border-slate-200 shadow-2xl md:shadow-sm" style="background-color: var(--sumc-navy);">
         
-        <!-- Sidebar Header (가로형 로고 적용) -->
-        <div class="p-6 border-b border-slate-100 flex flex-col cursor-pointer hover:bg-slate-50 transition" onclick="window.showTab('dashboard', document.querySelectorAll('.nav-btn')[0])">
+        <!-- Sidebar Header -->
+        <div class="p-6 border-b border-white/10 flex flex-col cursor-pointer hover:bg-white/5 transition" onclick="window.showTab('dashboard', document.querySelectorAll('.nav-btn')[0])">
             <div class="flex justify-between items-start mb-2">
-                <!-- 가로형 로고 -->
                 <img src="SUMC%20Logo%20(%EA%B0%80%EB%A1%9C).png" alt="SUMC Logo" class="h-[100px] w-auto max-w-full object-contain" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                <h1 class="hidden text-2xl font-black text-slate-900 leading-tight">SUMC <span class="text-red-600">Care AI</span></h1>
+                <h1 class="hidden text-2xl font-black text-white leading-tight">SUMC <span class="text-red-500">Care AI</span></h1>
                 
-                <button class="md:hidden text-slate-500 hover:text-slate-900 p-2 -mt-1 bg-slate-100 rounded-lg transition" onclick="window.toggleSidebar(); event.stopPropagation();">
+                <button class="md:hidden text-slate-400 hover:text-white p-2 -mt-1 bg-white/10 rounded-lg transition" onclick="window.toggleSidebar(); event.stopPropagation();">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
-            <!-- 버전 6.00로 업데이트 -->
-            <span class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mt-1 ml-1">Care AI (v.6.00)</span>
+            <span class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mt-1 ml-1">Care AI (v.6.01)</span>
         </div>
         
-        <div class="px-6 py-4 flex items-center gap-2 border-b border-slate-50 bg-slate-50/50">
+        <div class="px-6 py-4 flex items-center gap-2 border-b border-white/5 bg-black/20">
             <div class="w-2.5 h-2.5 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]" id="statusDot"></div>
             <span id="cloudStatusIndicator" class="text-[10px] text-red-500 uppercase tracking-widest font-bold">Offline</span>
+            <span id="aiStatus" class="ml-auto text-[9px] bg-white/10 text-slate-400 px-2 py-0.5 rounded uppercase tracking-widest border border-white/5 font-bold">AI Off</span>
         </div>
 
         <nav class="flex-1 overflow-y-auto p-4 space-y-1">
@@ -163,18 +134,17 @@
             <button onclick="window.showTab('calendar', this)" class="nav-btn"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>Calendar</button>
             <button onclick="window.showTab('committees', this)" class="nav-btn"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>Committees & Ministries</button>
             <button onclick="window.showTab('prayer-list', this)" class="nav-btn"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>Prayer List (AI)</button>
-            <!-- 신규: QR 실시간 기도제목 탭 추가 -->
             <button id="nav-qr-btn" onclick="window.showTab('qr-prayers', this)" class="nav-btn relative"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>Live Prayers (QR)<span id="qrBadge" class="absolute right-4 bg-red-600 text-white text-[9px] font-black px-2 py-0.5 rounded-full hidden">0</span></button>
             <button onclick="window.showTab('data-import', this)" class="nav-btn"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>Bulk Import</button>
             <button onclick="window.showTab('settings-tab', this)" class="nav-btn"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>Settings</button>
         </nav>
 
-        <div class="p-4 border-t border-slate-100 space-y-3 bg-slate-50">
+        <div class="p-4 border-t border-white/10 space-y-3 bg-black/20">
             <button onclick="window.openNewMemberForm()" class="w-full btn-red p-4 rounded-xl font-bold flex items-center justify-center gap-2 shadow-md text-sm transition text-white">
                 <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/></svg>
                 Add New Member
             </button>
-            <button onclick="window.handleLogout()" class="w-full text-slate-500 hover:text-slate-800 hover:bg-slate-200 text-sm font-bold py-3 rounded-xl transition flex items-center justify-center gap-2">
+            <button onclick="window.handleLogout()" class="w-full text-slate-400 hover:text-white hover:bg-white/10 text-sm font-bold py-3 rounded-xl transition flex items-center justify-center gap-2">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
                 Log Out
             </button>
@@ -182,32 +152,29 @@
     </aside>
 
     <!-- MAIN AREA -->
-    <div class="flex-1 flex flex-col min-w-0 h-screen">
+    <div class="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
         <!-- MOBILE HEADER -->
         <header class="md:hidden flex items-center justify-between p-4 bg-white border-b border-slate-200 shadow-sm z-30 cursor-pointer" onclick="window.showTab('dashboard', document.querySelectorAll('.nav-btn')[0])">
             <div class="flex items-center gap-3">
                 <img src="SUMC%20Logo%20(%EC%95%84%EC%9D%B4%EC%BD%98).png" alt="Icon" class="h-8 w-auto object-contain">
                 <div class="flex flex-col">
                     <h1 class="text-lg font-black text-slate-900 leading-none">SUMC Care AI</h1>
-                    <!-- 버전 6.00로 업데이트 -->
-                    <span class="text-[9px] font-bold text-slate-500 tracking-widest mt-1 uppercase">(v.6.00)</span>
+                    <span class="text-[9px] font-bold text-slate-500 tracking-widest mt-1 uppercase">(v.6.01)</span>
                 </div>
             </div>
             <button onclick="window.toggleSidebar(); event.stopPropagation();" class="p-2 text-slate-600 focus:outline-none bg-slate-100 rounded-lg hover:bg-slate-200 transition"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg></button>
         </header>
 
         <main class="flex-1 overflow-y-auto p-4 md:p-8 lg:px-10 z-10 relative">
-            <div class="max-w-6xl mx-auto">
+            <div class="max-w-6xl mx-auto pb-20">
                 
                 <!-- DASHBOARD TAB -->
                 <div id="dashboard" class="tab-content active-tab space-y-6">
                     <!-- Top Info Cards -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
                         <div class="bg-white rounded-2xl p-8 flex flex-col justify-center border border-slate-100 shadow-[0_4px_12px_-2px_rgba(0,0,0,0.04)] hover:shadow-[0_12px_24px_-4px_rgba(0,0,0,0.12)] transition-shadow duration-300">
-                            <!-- 타이틀을 Total Member로 변경 -->
                             <label class="text-slate-500 font-extrabold text-[10px] tracking-widest uppercase">Total Member</label>
                             <p class="text-5xl font-black text-slate-900 mt-2" id="totalMembers">0</p>
-                            <!-- 세부 브레이크다운 텍스트 수정: Registered 포함 -->
                             <p class="text-[11px] text-slate-400 mt-2 font-medium" id="memberBreakdown">Registered: 0 / Member: 0 / Visitor: 0 / Children: 0</p>
                         </div>
                         <div class="bg-white rounded-2xl p-8 flex flex-col justify-center border border-slate-100 shadow-[0_4px_12px_-2px_rgba(0,0,0,0.04)] hover:shadow-[0_12px_24px_-4px_rgba(0,0,0,0.12)] transition-shadow duration-300">
@@ -218,110 +185,86 @@
                         <div class="bg-white rounded-2xl p-8 flex flex-col justify-center border border-slate-100 shadow-[0_4px_12px_-2px_rgba(0,0,0,0.04)] hover:shadow-[0_12px_24px_-4px_rgba(0,0,0,0.12)] transition-shadow duration-300">
                             <label class="text-slate-500 font-extrabold text-[10px] tracking-widest uppercase">Avg. Attendance (Adults)</label>
                             <p class="text-5xl font-black text-slate-900 mt-2" id="avgAttendanceDisplay">0 / 0%</p>
-                            <!-- 어린이를 포함한 평균을 표시하기 위해 id 추가 및 텍스트 수정 -->
                             <p class="text-xs text-slate-400 mt-2 font-medium" id="avgAttendanceSubtext">0 / 0% (with Children)</p>
                         </div>
                     </div>
 
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <!-- AI Chat Box -->
-                        <div class="bg-white rounded-2xl border border-slate-100 shadow-[0_4px_12px_-2px_rgba(0,0,0,0.04)] flex flex-col h-[500px] md:h-[600px] overflow-hidden">
-                            <div class="px-6 py-5 border-b border-slate-100 flex justify-between items-center bg-white">
-                                <h3 class="text-sm font-extrabold flex items-center gap-2 text-slate-900">AI Database Analyst</h3>
-                                <span id="aiStatus" class="text-[9px] bg-slate-100 text-slate-500 px-3 py-1 rounded-full font-bold uppercase tracking-widest">Key Required</span>
-                            </div>
-                            <div id="geminiChatDisplay" class="flex-1 overflow-y-auto p-4 md:p-6 flex flex-col gap-5 text-sm leading-relaxed bg-[#f8fafc]">
-                                <div class="p-5 bg-white border border-slate-200 shadow-sm rounded-2xl rounded-tl-sm text-slate-700 self-start max-w-[90%] font-medium">
-                                    Welcome to SUMC Care AI. I strictly analyze the provided congregation data.<br><br>Ask me to list members, analyze attendance, summarize prayer requests, or filter demographics (e.g., "List members not living in Sussex").
-                                </div>
-                            </div>
-                            <div class="p-4 border-t border-slate-100 bg-white">
-                                <div class="flex items-center gap-3">
-                                    <input type="file" id="aiFileInput" class="hidden" onchange="window.handleFileSelect(event)">
-                                    <button onclick="document.getElementById('aiFileInput').click()" class="p-4 bg-slate-100 hover:bg-slate-200 transition text-slate-500 rounded-xl"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-2.828-6.828l-6.414 6.586a6 6 0 008.485 8.486L20.5 13"/></svg></button>
-                                    <input type="text" id="geminiInput" placeholder="Ask anything about the church data..." class="flex-1 rounded-xl bg-slate-100 border-none focus:ring-2 focus:ring-slate-400 p-4" onkeypress="if(event.key==='Enter') window.askGemini()">
-                                    <button onclick="window.askGemini()" id="sendBtn" class="btn-primary px-6 py-4 rounded-xl font-bold transition flex-shrink-0 shadow-md"><svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"/></svg></button>
-                                </div>
-                            </div>
+                        <!-- Analytics Chart -->
+                        <div class="bg-white rounded-2xl border border-slate-100 shadow-[0_4px_12px_-2px_rgba(0,0,0,0.04)] p-6 flex flex-col h-[400px]">
+                            <h3 class="text-sm font-extrabold text-slate-900 mb-4 uppercase tracking-widest">Attendance Trends (Adults)</h3>
+                            <div class="flex-1 w-full relative min-h-0"><canvas id="mainAttendanceChart"></canvas></div>
                         </div>
                         
-                        <!-- Analytics & Calendar Layout -->
-                        <div class="flex flex-col gap-6 h-[500px] md:h-[600px]">
-                            <!-- Analytics Chart -->
-                            <div class="bg-white rounded-2xl border border-slate-100 shadow-[0_4px_12px_-2px_rgba(0,0,0,0.04)] p-6 flex flex-col flex-1 overflow-hidden">
-                                <!-- 제목에 (Adults) 추가 -->
-                                <h3 class="text-sm font-extrabold text-slate-900 mb-4 uppercase tracking-widest">Attendance Trends (Adults)</h3>
-                                <div class="flex-1 w-full relative min-h-0"><canvas id="mainAttendanceChart"></canvas></div>
-                            </div>
-                            <!-- Today's Schedule -->
-                            <div class="bg-white rounded-2xl border border-slate-100 shadow-[0_4px_12px_-2px_rgba(0,0,0,0.04)] p-6 flex flex-col flex-1 overflow-hidden">
-                                <h3 class="text-sm font-extrabold text-slate-900 mb-4 uppercase tracking-widest">Today's Schedule</h3>
-                                <div class="flex-1 w-full bg-slate-50 rounded-xl border border-slate-100 overflow-hidden relative">
-                                    <iframe id="dashCalendarIframe" class="absolute inset-0 w-full h-full hidden" style="border: 0" frameborder="0" scrolling="no"></iframe>
-                                    <div id="dashCalendarPlaceholder" class="absolute inset-0 flex flex-col items-center justify-center text-center p-4">
-                                        <span class="text-3xl mb-2">📅</span>
-                                        <p class="text-xs text-slate-500 font-bold leading-relaxed">Calendar not visible.<br>Ensure ID is set and Calendar is <b>Public</b>.</p>
-                                    </div>
+                        <!-- Today's Schedule -->
+                        <div class="bg-white rounded-2xl border border-slate-100 shadow-[0_4px_12px_-2px_rgba(0,0,0,0.04)] p-6 flex flex-col h-[400px] overflow-hidden">
+                            <h3 class="text-sm font-extrabold text-slate-900 mb-4 uppercase tracking-widest">Today's Schedule</h3>
+                            <div class="flex-1 w-full bg-slate-50 rounded-xl border border-slate-100 overflow-hidden relative">
+                                <iframe id="dashCalendarIframe" class="absolute inset-0 w-full h-full hidden" style="border: 0" frameborder="0" scrolling="no"></iframe>
+                                <div id="dashCalendarPlaceholder" class="absolute inset-0 flex flex-col items-center justify-center text-center p-4">
+                                    <span class="text-3xl mb-2">📅</span>
+                                    <p class="text-xs text-slate-500 font-bold leading-relaxed">Calendar not visible.<br>Ensure ID is set and Calendar is <b>Public</b>.</p>
                                 </div>
                             </div>
                         </div>
+                    </div>
+                    
+                    <!-- Live QR Prayer Requests -->
+                    <div class="bg-white rounded-2xl border border-slate-100 shadow-[0_4px_12px_-2px_rgba(0,0,0,0.04)] p-6 flex flex-col mt-2">
+                        <div class="flex justify-between items-center mb-6 border-b border-slate-100 pb-4">
+                            <h3 class="text-sm font-extrabold uppercase tracking-widest text-slate-900 flex items-center gap-2">
+                                <span class="animate-pulse w-2.5 h-2.5 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]"></span> 
+                                Live QR Prayer Requests
+                            </h3>
+                            <span id="dashLivePrayerCount" class="bg-slate-100 text-slate-600 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest">0 New</span>
+                        </div>
+                        
+                        <div id="dashLivePrayerList" class="flex-1 overflow-y-auto max-h-60 space-y-3 mb-6 p-4 bg-[#f8fafc] rounded-xl border border-slate-200 shadow-inner">
+                            <p class="text-slate-400 text-xs font-bold text-center mt-4 uppercase tracking-widest">Waiting for incoming requests...</p>
+                        </div>
+                        
+                        <button onclick="window.sendToPrayerTab()" class="btn-primary py-4 rounded-xl font-bold w-full md:w-auto px-10 shadow-md self-end flex items-center justify-center gap-2 text-sm uppercase tracking-widest">
+                            Send to Editor 
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                        </button>
+                    </div>
+                </div>
 
-                        <!-- 신규: Live QR Prayer Requests 대시보드 연동 -->
-                        <div class="bg-white rounded-2xl border border-slate-100 shadow-[0_4px_12px_-2px_rgba(0,0,0,0.04)] p-6 flex flex-col col-span-1 lg:col-span-2 mt-2">
-                            <div class="flex justify-between items-center mb-6 border-b border-slate-100 pb-4">
-                                <h3 class="text-sm font-extrabold uppercase tracking-widest text-slate-900 flex items-center gap-2">
-                                    <span class="animate-pulse w-2.5 h-2.5 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]"></span> 
-                                    Live QR Prayer Requests
-                                </h3>
-                                <span id="dashLivePrayerCount" class="bg-slate-100 text-slate-600 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest">0 New</span>
-                            </div>
-                            
-                            <div id="dashLivePrayerList" class="flex-1 overflow-y-auto max-h-60 space-y-3 mb-6 p-4 bg-[#f8fafc] rounded-xl border border-slate-200 shadow-inner">
-                                <p class="text-slate-400 text-xs font-bold text-center mt-4">Waiting for incoming requests...</p>
-                            </div>
-                            
-                            <button onclick="window.sendToPrayerTab()" class="btn-primary py-4 rounded-xl font-bold w-full md:w-auto px-10 shadow-md self-end flex items-center justify-center gap-2 text-sm uppercase tracking-widest">
-                                Send to Editor 
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                            </button>
+                <!-- 탭: ATTENDANCE -->
+                <div id="attendance" class="tab-content space-y-6">
+                    <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4 border-b border-slate-200 pb-4">
+                        <h2 class="text-3xl font-black text-slate-900 tracking-tight">Sunday Attendance</h2>
+                        <div class="flex items-center gap-3">
+                            <input type="date" id="attendanceDate" class="bg-white border-slate-300 rounded-xl px-4 py-3 font-bold text-slate-700 shadow-sm focus:border-slate-800" onchange="window.renderAttendanceList()">
+                            <button onclick="window.saveAttendance()" class="btn-primary px-8 py-3 rounded-xl font-bold shadow-md">Store to Database</button>
+                        </div>
+                    </div>
+                    <div class="card overflow-hidden shadow-sm border border-slate-200">
+                        <div class="bg-slate-50 p-4 border-b border-slate-200 flex justify-between items-center">
+                            <span class="text-xs font-bold text-slate-500 uppercase tracking-widest">Mark Attendance</span>
+                            <span id="currentCheckCount" class="bg-slate-200 text-slate-700 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest">Selected: 0</span>
+                        </div>
+                        <div class="overflow-x-auto max-h-[60vh]">
+                            <table class="w-full text-left border-collapse">
+                                <tbody id="attendanceList" class="divide-y divide-slate-100"></tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
 
-                <!-- 탭: ⚙️ SETTINGS -->
-                <div id="settings-tab" class="tab-content space-y-6">
-                    <div class="card p-8 max-w-2xl mx-auto border-t-4 border-slate-800 shadow-xl mt-6">
-                        <h2 class="text-2xl font-black text-slate-900 mb-8 flex items-center gap-3">System Configuration</h2>
-                        <div class="space-y-6">
-                            <div>
-                                <label class="text-slate-800">Gemini AI API Key</label>
-                                <input type="password" id="apiKeyInput" placeholder="Enter your Google AI Studio key" class="mb-2 border-slate-300 bg-white focus:bg-white">
-                                <p class="text-xs text-slate-500">This key will be securely synced to your cloud database. You only need to enter this once.</p>
-                            </div>
-                            <div>
-                                <label class="text-slate-800">Google Calendar ID</label>
-                                <input type="text" id="calendarIdInput" placeholder="e.g., your_email@gmail.com" class="mb-2 border-slate-300 bg-white focus:bg-white">
-                                <p class="text-xs text-slate-500">Find this in Google Calendar Settings -> "Integrate calendar" -> "Calendar ID". Make sure it's public.</p>
-                            </div>
-                            <div>
-                                <label class="text-slate-500">Database Connection ID</label>
-                                <input type="text" id="appIdInput" value="sumc-2026-production-db" readonly class="bg-slate-100 text-slate-500 font-mono border-none cursor-not-allowed">
-                            </div>
-                            <button onclick="window.verifyAndSaveApiKey()" id="verifyKeyBtn" class="w-full btn-primary py-4 rounded-xl font-bold transition shadow-md uppercase tracking-widest text-sm mt-4">Validate & Sync to Cloud</button>
-                        </div>
-                        
-                        <!-- 신규: 데이터베이스 유지보수(중복 기도제목 정리) 버튼 추가 -->
-                        <div class="mt-10 pt-8 border-t border-slate-200">
-                            <h3 class="text-sm font-extrabold text-slate-900 mb-4 uppercase tracking-widest">Database Maintenance</h3>
-                            <button onclick="window.cleanupDuplicatePrayers()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 py-4 rounded-xl font-bold transition shadow-sm text-sm flex items-center justify-center gap-2">
-                                <span>🧹</span> Clean Up Duplicate Prayer Records
-                            </button>
-                            <p class="text-[10px] text-slate-500 mt-3 text-center leading-relaxed">Scans the entire database to find multiple prayer requests logged on the same date for a single person. It will safely remove older duplicates and keep only the latest entry.</p>
+                <!-- 탭: DIRECTORY -->
+                <div id="directory" class="tab-content space-y-6">
+                    <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+                        <h2 class="text-3xl font-black text-slate-900 tracking-tight">Church Directory</h2>
+                        <div class="relative w-full md:w-72">
+                            <svg class="w-5 h-5 absolute left-3 top-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                            <input type="text" id="searchInput" placeholder="Search by name..." class="w-full pl-10 pr-4 py-3 bg-white border border-slate-300 rounded-xl shadow-sm focus:outline-none focus:border-slate-800 focus:ring-1 focus:ring-slate-800 transition" onkeyup="window.renderDirectory()">
                         </div>
                     </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" id="directoryGrid"></div>
                 </div>
 
-                <!-- 탭: CALENDAR (Full View) -->
+                <!-- 탭: CALENDAR -->
                 <div id="calendar" class="tab-content space-y-6">
                     <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
                         <h2 class="text-3xl font-black text-slate-900 tracking-tight">Church Calendar</h2>
@@ -335,88 +278,52 @@
                         </div>
                     </div>
                 </div>
-                
-                <!-- 탭: COMMITTEES (신설 위원회 및 참여 사역 탭 영문버전) -->
+
+                <!-- 탭: COMMITTEES -->
                 <div id="committees" class="tab-content space-y-6">
                     <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
                         <h2 class="text-3xl font-black text-slate-900 tracking-tight">Committees & Ministries</h2>
                     </div>
-                    <div class="card p-10 flex flex-col items-center justify-center text-center shadow-sm border-slate-200 min-h-[50vh]">
+                    <div class="card p-10 flex flex-col items-center justify-center text-center shadow-sm border border-slate-200 min-h-[50vh]">
                         <span class="text-5xl mb-4">👥</span>
-                        <h3 class="text-xl font-black text-[#1b2336] mb-2">Coming Soon</h3>
+                        <h3 class="text-xl font-black text-slate-900 mb-2">Coming Soon</h3>
                         <p class="text-sm text-slate-500 font-medium max-w-md">Integrated administration features for assigning and managing various church committees and ministry teams will be added here.</p>
                     </div>
                 </div>
 
-                <!-- 탭: ATTENDANCE -->
-                <div id="attendance" class="tab-content space-y-6">
-                    <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
-                        <h2 class="text-3xl font-black text-slate-900 tracking-tight">Attendance Log</h2>
-                        <div class="w-full md:w-48"><input type="date" id="attendanceDate" onchange="window.renderAttendanceList()" class="font-bold text-slate-800 text-center border-slate-300 bg-white rounded-xl shadow-sm"></div>
-                    </div>
-                    <div class="card overflow-hidden flex flex-col h-[70vh] md:h-auto border-slate-200 shadow-sm">
-                        <div class="flex-1 overflow-y-auto md:max-h-[600px]">
-                            <table class="min-w-full">
-                                <thead class="bg-slate-50 sticky top-0 z-10 border-b border-slate-200">
-                                    <tr><th class="px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase w-20">Status</th><th class="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase">Member Name</th><th class="px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase">Group</th></tr>
-                                </thead>
-                                <tbody id="attendanceList" class="bg-white text-slate-700 divide-y divide-slate-100"></tbody>
-                            </table>
-                        </div>
-                        <div class="p-6 bg-slate-50 border-t border-slate-200 flex justify-between items-center">
-                            <p id="currentCheckCount" class="text-sm text-red-600 font-bold bg-red-50 px-4 py-2 rounded-lg border border-red-100">Selected: 0</p>
-                            <button onclick="window.saveAttendance()" class="btn-primary px-8 py-3 rounded-xl font-bold shadow-md">Store to Database</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 탭: DIRECTORY -->
-                <div id="directory" class="tab-content space-y-6">
-                    <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
-                        <h2 class="text-3xl font-black text-slate-900 tracking-tight">Church Directory</h2>
-                        <div class="relative w-full sm:w-72">
-                            <input type="text" placeholder="Search members by name..." id="dirSearch" onkeyup="window.renderDirectory()" class="pl-10 w-full border-slate-300 bg-white shadow-sm rounded-xl py-3">
-                        </div>
-                    </div>
-                    <div id="memberContainer" class="columns-1 md:columns-2 gap-6 space-y-6 mt-4"></div>
-                </div>
-
-                <!-- 탭: PRAYER LIST -->
+                <!-- 탭: PRAYER LIST (AI) -->
                 <div id="prayer-list" class="tab-content space-y-6">
                     <div class="card p-6 md:p-10 border-t-4 border-slate-800 shadow-xl mt-6">
-                        <h2 class="text-2xl font-black text-slate-900 mb-6 border-b border-slate-100 pb-4">Prayer List Generator</h2>
+                        <h2 class="text-2xl font-black text-slate-900 mb-6 border-b border-slate-100 pb-4">Prayer List Generator (AI)</h2>
                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                             <div class="space-y-6">
-                                <div class="p-6 bg-slate-50 rounded-2xl border border-slate-200"><label class="text-slate-600 font-black">Worship Date</label><input type="date" id="prayerDate" class="bg-white border-slate-300 rounded-xl"></div>
                                 <div class="p-6 bg-slate-50 rounded-2xl border border-slate-200">
-                                    <label class="mb-4 text-[10px] text-slate-500 font-black tracking-widest">Data Sources</label>
-                                    
+                                    <label class="text-slate-600 font-black">Worship Date</label>
+                                    <input type="date" id="prayerDate" class="bg-white border-slate-300 rounded-xl w-full mt-2">
+                                </div>
+                                <div class="p-6 bg-slate-50 rounded-2xl border border-slate-200">
+                                    <label class="mb-4 text-[10px] text-slate-500 font-black tracking-widest uppercase block">Data Sources</label>
                                     <div class="flex flex-col gap-4">
-                                        <!-- 사진 업로드: 이미지 형식 전체 포괄 -->
                                         <label id="prayerDropZone" class="flex flex-col items-center justify-center w-full p-8 border-2 border-dashed border-slate-300 bg-white rounded-2xl cursor-pointer hover:bg-slate-100 transition-all text-center relative overflow-hidden">
                                             <div id="prayerImgPreview" class="absolute inset-0 bg-cover bg-center opacity-10 hidden"></div>
                                             <span class="text-4xl mb-3 z-10" id="prayerImgIcon">📷</span>
                                             <span id="prayerImgLabel" class="text-sm text-slate-700 font-bold z-10">1. Upload Handwritten Notes</span>
-                                            <span class="text-[10px] text-slate-400 mt-1 z-10">(Supports all images: JPG, PNG, HEIC...)</span>
+                                            <span class="text-[10px] text-slate-400 mt-1 z-10">(Supports JPG, PNG, HEIC)</span>
                                             <input type="file" accept="image/*" id="prayerImageInput" class="hidden" onchange="window.handlePrayerImageChange(event)" />
                                         </label>
-                                        
-                                        <!-- 스크립트 파일 업로드 (DOCX, PDF, HTML, TXT 등) -->
                                         <label class="flex flex-col items-center justify-center w-full p-8 border-2 border-dashed border-slate-300 bg-white rounded-2xl cursor-pointer hover:bg-slate-100 transition-all text-center relative">
                                             <span class="text-4xl mb-3 z-10" id="transcriptDocIcon">📄</span>
                                             <span id="transcriptDocLabel" class="text-sm text-slate-700 font-bold z-10">2. Upload Chat/Transcript File</span>
-                                            <span class="text-[10px] text-slate-400 mt-1 z-10">(Supports DOCX, PDF, HTML, TXT)</span>
+                                            <span class="text-[10px] text-slate-400 mt-1 z-10">(DOCX, PDF, HTML, TXT)</span>
                                             <input type="file" accept=".txt,.docx,.pdf,.html,.htm,.csv,.rtf" id="transcriptFileInput" class="hidden" onchange="window.handleTranscriptUpload(event)" />
                                         </label>
                                     </div>
-                                    
-                                    <!-- 파싱된 텍스트 확인 및 직접 입력 창 -->
-                                    <textarea id="prayerTranscriptText" placeholder="Parsed text from file will appear here. You can also paste manually..." rows="4" class="mt-4 bg-white border-slate-300 rounded-xl resize-y text-xs text-slate-600 focus:border-slate-800 leading-relaxed"></textarea>
+                                    <textarea id="prayerTranscriptText" placeholder="Parsed text from file will appear here. You can also paste manually..." rows="4" class="mt-4 bg-white border-slate-300 rounded-xl w-full resize-y text-xs text-slate-600 p-3 outline-none"></textarea>
                                 </div>
                             </div>
                             <div class="flex flex-col bg-slate-50 p-6 rounded-2xl border border-slate-200 min-h-[350px]">
                                 <label class="text-red-600 font-black mb-4 text-[10px] uppercase tracking-widest">AI Extraction Preview</label>
-                                <textarea id="prayerResultText" class="flex-grow bg-white font-serif-formatted text-lg leading-relaxed p-5 resize-none border border-slate-300 rounded-xl focus:border-slate-800 shadow-inner" placeholder="AI results will appear here for editing..."></textarea>
+                                <textarea id="prayerResultText" class="flex-grow bg-white font-serif-formatted text-lg leading-relaxed p-5 resize-none border border-slate-300 rounded-xl focus:border-slate-800 shadow-inner outline-none" placeholder="AI results will appear here..."></textarea>
                             </div>
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-10 pt-8 border-t border-slate-100">
@@ -426,7 +333,7 @@
                     </div>
                 </div>
 
-                <!-- 신규 탭: LIVE PRAYERS (QR 전용 편집창) -->
+                <!-- 탭: LIVE PRAYERS (QR 전용 편집창) -->
                 <div id="qr-prayers" class="tab-content space-y-6">
                     <div class="card p-6 md:p-10 border-t-4 border-red-600 shadow-xl mt-6 relative overflow-hidden">
                         <div class="absolute top-0 right-0 p-8 opacity-5"><svg class="w-32 h-32" fill="currentColor" viewBox="0 0 20 20"><path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"></path></svg></div>
@@ -435,12 +342,12 @@
                         <div class="space-y-6 relative z-10">
                             <div class="w-full md:w-64">
                                 <label class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-2 block">Date of Record</label>
-                                <input type="date" id="qrPrayerDate" class="bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-800 w-full">
+                                <input type="date" id="qrPrayerDate" class="bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-800 w-full outline-none">
                             </div>
                             
                             <div>
                                 <label class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-2 block">Incoming Requests Editor</label>
-                                <textarea id="qrPrayerResultText" rows="12" class="w-full bg-slate-50 font-serif-formatted text-lg leading-relaxed p-6 resize-y border border-slate-200 rounded-2xl focus:border-slate-800 focus:bg-white transition shadow-inner" placeholder="Requests sent from the dashboard will appear here. Edit formatting if necessary before saving..."></textarea>
+                                <textarea id="qrPrayerResultText" rows="12" class="w-full bg-slate-50 font-serif-formatted text-lg leading-relaxed p-6 resize-y border border-slate-200 rounded-2xl focus:border-slate-800 focus:bg-white transition shadow-inner outline-none" placeholder="Requests sent from the dashboard will appear here. Edit formatting if necessary before saving..."></textarea>
                             </div>
                             
                             <div class="pt-6 border-t border-slate-100">
@@ -454,65 +361,78 @@
                     </div>
                 </div>
 
-                <!-- 탭: PROFILE VIEW -->
-                <div id="profile-view" class="tab-content space-y-6">
-                    <button onclick="window.showTab('directory', document.querySelectorAll('.nav-btn')[2])" class="text-sm font-bold text-slate-500 hover:text-slate-900 flex items-center gap-2 mb-4">&larr; Back to Directory</button>
-                    <div class="card p-6 md:p-10 border-t-4 border-slate-800 shadow-xl">
-                        <div id="profileContent"></div>
-                        <div class="mt-12 pt-8 border-t border-slate-100">
-                            <h4 class="text-slate-500 mb-6 text-[10px] font-black uppercase tracking-widest">Attendance History</h4>
-                            <div class="h-48 w-full"><canvas id="personalAttendanceChart"></canvas></div>
-                        </div>
-                        <div class="mt-10 pt-8 flex flex-col md:flex-row gap-4 border-t border-slate-100">
-                            <button id="editBtn" class="bg-slate-100 text-slate-700 px-8 py-4 rounded-xl font-bold hover:bg-slate-200 transition w-full md:w-auto shadow-sm">Edit Member</button>
-                            <button id="deleteBtn" class="bg-red-50 text-red-600 px-8 py-4 rounded-xl font-bold hover:bg-red-100 transition w-full md:w-auto shadow-sm">Remove</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 탭: BULK IMPORT -->
+                <!-- 탭: DATA IMPORT -->
                 <div id="data-import" class="tab-content space-y-6">
-                    <div class="card p-8 md:p-12 max-w-3xl mx-auto border-t-4 border-slate-800 mt-6 shadow-xl">
-                        <h2 class="text-2xl font-black text-slate-900 text-center mb-8 uppercase tracking-widest">Bulk Import</h2>
-                        <textarea id="bulkDataInput" rows="12" class="font-mono text-sm bg-slate-50 border-slate-300 rounded-xl p-6" placeholder='"LastName, FirstName", "Address", "Phone"'></textarea>
-                        <button onclick="window.processBulkImport()" class="w-full btn-primary p-4 rounded-xl font-bold mt-8 shadow-md transition text-lg">Start Batch Process</button>
+                    <div class="card p-10 border border-slate-200">
+                        <h2 class="text-2xl font-black text-slate-900 mb-6">Bulk Import via CSV</h2>
+                        <div class="bg-slate-50 p-6 rounded-2xl mb-6 border border-slate-200">
+                            <p class="text-sm font-medium text-slate-600 leading-relaxed mb-4">Paste CSV data format: <code class="bg-white px-2 py-1 rounded border border-slate-200 text-pink-600 font-bold">"Last, First", "Address", "Phone", "Email"</code></p>
+                            <textarea id="bulkDataInput" rows="10" class="w-full p-4 border border-slate-300 rounded-xl font-mono text-sm shadow-inner focus:outline-none focus:border-slate-800"></textarea>
+                        </div>
+                        <button onclick="window.processBulkImport()" class="btn-primary px-8 py-3 rounded-xl font-bold">Ingest Data</button>
                     </div>
                 </div>
 
-                <!-- 탭: EDIT MEMBER FORM -->
-                <div id="edit-member" class="tab-content">
-                    <div class="card p-6 md:p-10 max-w-3xl mx-auto border-t-4 border-slate-800 shadow-xl mt-6">
-                        <h2 class="text-2xl font-black mb-8 text-slate-900 uppercase">Modify Profile</h2>
-                        <form id="editMemberForm" onsubmit="window.submitEdit(event)" class="space-y-5">
-                            <input type="hidden" name="id">
-                            <div class="grid grid-cols-2 gap-5"><div><label>First Name</label><input type="text" name="firstName" required></div><div><label>Last Name</label><input type="text" name="lastName" required></div></div>
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-5"><div><label>Birthday</label><input type="date" name="dob"></div><div><label>Anniversary</label><input type="date" name="anniversary"></div><div><label>Gender</label><select name="gender"><option value="Male">Male</option><option value="Female">Female</option></select></div></div>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5"><div><label>Cell Phone</label><input type="tel" name="cellPhone"></div><div><label>Home Phone</label><input type="tel" name="homePhone"></div></div>
-                            <div><label>Email</label><input type="email" name="email"></div>
-                            <div><label>Address</label><input type="text" name="address"></div>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5"><div><label>Household</label><select id="familySelect" name="familyId"></select></div><div><label>Join Date</label><input type="date" name="joinDate"></div></div>
-                            <div><label class="text-red-600 uppercase text-[9px] tracking-widest">Prayers</label><textarea name="prayers" rows="4"></textarea></div>
-                            <div><label class="text-slate-500 uppercase text-[9px] tracking-widest">Notes</label><textarea name="notes" rows="4"></textarea></div>
-                            <div class="flex flex-wrap gap-5 border-t border-slate-200 pt-6"><label class="flex items-center gap-2"><input type="checkbox" name="isAdult" class="w-5 h-5 text-slate-800 rounded"><span>Adult</span></label><label class="flex items-center gap-2"><input type="checkbox" name="isBaptized" class="w-5 h-5 text-slate-800 rounded"><span>Baptized</span></label><label class="flex items-center gap-2"><input type="checkbox" name="isNonMember" class="w-5 h-5 text-slate-800 rounded"><span>Non-Member</span></label></div>
-                            <button type="submit" class="w-full btn-primary p-4 rounded-xl font-bold mt-8 shadow-lg text-lg">Save Changes</button>
-                        </form>
+                <!-- 탭: SETTINGS -->
+                <div id="settings-tab" class="tab-content space-y-6">
+                    <div class="card p-8 max-w-2xl mx-auto border-t-4 border-slate-800 shadow-xl mt-6">
+                        <h2 class="text-2xl font-black text-slate-900 mb-8 flex items-center gap-3">System Configuration</h2>
+                        <div class="space-y-6">
+                            <div>
+                                <label class="text-slate-800 font-bold mb-2 block">Gemini AI API Key</label>
+                                <input type="password" id="apiKeyInput" placeholder="Enter your Google AI Studio key" class="w-full px-4 py-3 border border-slate-300 rounded-xl mb-2">
+                                <p class="text-xs text-slate-500">Securely synced to cloud DB.</p>
+                            </div>
+                            <div>
+                                <label class="text-slate-800 font-bold mb-2 block">Google Calendar ID</label>
+                                <input type="text" id="calendarIdInput" placeholder="e.g., your_email@gmail.com" class="w-full px-4 py-3 border border-slate-300 rounded-xl mb-2">
+                            </div>
+                            <div>
+                                <label class="text-slate-500 font-bold mb-2 block">Database Connection ID</label>
+                                <input type="text" id="appIdInput" value="sumc-2026-production-db" readonly class="w-full px-4 py-3 bg-slate-100 text-slate-500 font-mono border-none rounded-xl cursor-not-allowed">
+                            </div>
+                            <button onclick="window.verifyAndSaveApiKey()" id="verifyKeyBtn" class="w-full btn-primary py-4 rounded-xl font-bold shadow-md uppercase tracking-widest text-sm mt-4">Validate & Sync</button>
+                        </div>
+                        
+                        <div class="mt-10 pt-8 border-t border-slate-200">
+                            <h3 class="text-sm font-extrabold text-slate-900 mb-4 uppercase tracking-widest">Database Maintenance</h3>
+                            <button onclick="window.cleanupDuplicatePrayers()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 py-4 rounded-xl font-bold transition shadow-sm text-sm flex items-center justify-center gap-2">
+                                <span>🧹</span> Clean Up Duplicate Prayer Records
+                            </button>
+                            <p class="text-[10px] text-slate-500 mt-3 text-center leading-relaxed">Scans and removes duplicate prayer records logged on the same date.</p>
+                        </div>
                     </div>
                 </div>
 
-                <!-- 탭: NEW MEMBER FORM -->
-                <div id="new-member" class="tab-content">
-                    <div class="card p-6 md:p-10 max-w-3xl mx-auto mt-6 border-t-4 border-slate-800 shadow-xl">
-                        <h2 class="text-2xl font-black mb-8 text-slate-900 uppercase text-center tracking-tight">Add New Member</h2>
-                        <form id="newMemberForm" onsubmit="window.registerNewMember(event)" class="space-y-5">
-                            <div class="grid grid-cols-2 gap-5"><div><label>First Name</label><input type="text" name="firstName" required></div><div><label>Last Name</label><input type="text" name="lastName" required></div></div>
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-5"><div><label>Birthday</label><input type="date" name="dob"></div><div><label>Anniversary</label><input type="date" name="anniversary"></div><div><label>Gender</label><select name="gender"><option value="Male">Male</option><option value="Female">Female</option></select></div></div>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5"><div><label>Cell</label><input type="tel" name="cellPhone"></div><div><label>Home</label><input type="tel" name="homePhone"></div></div>
-                            <div><label>Email</label><input type="email" name="email"></div>
-                            <div><label>Address</label><input type="text" name="address"></div>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5"><div><label>Household</label><select id="newFamilySelect" name="familyId"></select></div><div><label>Join Date</label><input type="date" name="joinDate"></div></div>
-                            <div><label class="text-slate-500 uppercase text-[9px] tracking-widest">Notes</label><textarea name="notes" rows="4"></textarea></div>
-                            <div class="flex flex-wrap gap-5 border-t border-slate-200 pt-6"><label class="flex items-center gap-2"><input type="checkbox" name="isAdult" checked class="w-5 h-5 text-slate-800 rounded"><span>Adult Member</span></label><label class="flex items-center gap-2"><input type="checkbox" name="isBaptized" class="w-5 h-5 text-slate-800 rounded"><span>Baptized</span></label><label class="flex items-center gap-2"><input type="checkbox" name="isNonMember" class="w-5 h-5 text-slate-800 rounded"><span>Non-Member</span></label></div>
-                            <button type="submit" class="w-full btn-primary p-4 rounded-xl font-bold mt-8 shadow-lg text-lg">Register Member</button>
+                <!-- VIEW PROFILE -->
+                <div id="profileView" class="tab-content space-y-6">
+                    <button onclick="window.showTab('directory')" class="text-slate-500 hover:text-slate-800 font-bold flex items-center gap-2 mb-4 transition text-sm uppercase tracking-widest"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>Back to Directory</button>
+                    <div id="profileContent" class="space-y-6"></div>
+                </div>
+
+                <!-- ADD/EDIT FORM -->
+                <div id="new-member" class="tab-content space-y-6">
+                    <div class="card p-8 shadow-xl border-t-4 border-slate-800 max-w-4xl mx-auto mt-6">
+                        <h2 class="text-2xl font-black text-slate-900 mb-8" id="formTitle">Register Member</h2>
+                        <form id="newMemberForm" onsubmit="window.registerNewMember(event)" class="space-y-8">
+                            <input type="hidden" name="id" id="editMemberId">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div><label class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 block">First Name *</label><input type="text" name="firstName" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold focus:border-slate-800 outline-none"></div>
+                                <div><label class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 block">Last Name *</label><input type="text" name="lastName" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold focus:border-slate-800 outline-none"></div>
+                                <div class="md:col-span-2"><label class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 block">Household Link</label><select name="familyId" id="newFamilySelect" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold focus:border-slate-800 outline-none"></select></div>
+                                <div class="md:col-span-2"><label class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 block">Address</label><input type="text" name="address" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold focus:border-slate-800 outline-none"></div>
+                                <div><label class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 block">Cell Phone</label><input type="text" name="cellPhone" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold focus:border-slate-800 outline-none"></div>
+                                <div><label class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 block">Email</label><input type="email" name="email" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold focus:border-slate-800 outline-none"></div>
+                            </div>
+                            
+                            <div class="flex flex-wrap gap-6 bg-slate-50 p-6 rounded-2xl border border-slate-200">
+                                <label class="flex items-center gap-3 cursor-pointer"><input type="checkbox" name="isAdult" checked class="w-5 h-5 accent-slate-800"><span class="font-bold text-slate-700">Adult Member</span></label>
+                                <label class="flex items-center gap-3 cursor-pointer"><input type="checkbox" name="isBaptized" class="w-5 h-5 accent-slate-800"><span class="font-bold text-slate-700">Baptized</span></label>
+                                <label class="flex items-center gap-3 cursor-pointer"><input type="checkbox" name="isNonMember" class="w-5 h-5 accent-slate-800"><span class="font-bold text-slate-700">Non-Member (Visitor)</span></label>
+                            </div>
+                            
+                            <div><label class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 block">Pastoral Notes</label><textarea name="notes" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold focus:border-slate-800 resize-none outline-none"></textarea></div>
+                            <div class="pt-4 border-t border-slate-100 flex justify-end gap-3"><button type="button" onclick="window.showTab('directory')" class="px-6 py-3 font-bold text-slate-500 hover:bg-slate-100 rounded-xl transition">Cancel</button><button type="submit" class="btn-primary px-8 py-3 rounded-xl font-bold shadow-md">Save Record</button></div>
                         </form>
                     </div>
                 </div>
@@ -521,15 +441,14 @@
         </main>
     </div>
 
-    <!-- SCRIPT ENGINE -->
+    <!-- MAIN SCRIPT -->
     <script>
-        // --- 🚀 ROUTING & INITIALIZATION LOGIC ---
+        // --- ROUTING & INIT ---
         const urlParams = new URLSearchParams(window.location.search);
         const isQrMode = urlParams.get('mode') === 'qr';
 
         document.addEventListener("DOMContentLoaded", () => {
             if (isQrMode) {
-                // QR 모드일 경우 앱UI, 로그인 숨기고 폼만 표시
                 document.getElementById('loginScreen').style.display = 'none';
                 document.getElementById('sidebar').style.display = 'none';
                 document.querySelector('main').parentElement.style.display = 'none';
@@ -543,62 +462,59 @@
             }
         });
 
-        // --- 🔐 LOGIN & SIDEBAR LOGIC ---
+        // --- CORE LOGIC ---
+        Chart.defaults.color = '#64748b'; Chart.defaults.borderColor = 'rgba(0,0,0,0.05)'; Chart.defaults.font.family = 'Inter'; Chart.register(ChartDataLabels);
+        window.members = []; window.attendanceRecords = []; window.mainChart = null; window.profileChart = null;
+        window.livePrayers = []; window.processingPrayerIds = [];
+        window.currentApiKey = localStorage.getItem('sumc_gemini_key') || "";
+        window.currentCalendarId = localStorage.getItem('sumc_calendar_id') || "";
+        const sundayLabels = Array.from({length: 6}, (_, i) => { const d = new Date(); d.setDate(d.getDate() - d.getDay() - (5 - i) * 7); return d.toISOString().split('T')[0]; });
+
         window.handleLogin = (e) => {
             e.preventDefault();
-            if (document.getElementById('loginId').value === 'admin' && document.getElementById('loginPw').value === 'admin') {
+            if (document.getElementById('adminPassword').value === '1234') {
                 localStorage.setItem('sumc_auth_token', 'verified');
-                document.getElementById('loginScreen').style.opacity = '0';
-                setTimeout(() => { document.getElementById('loginScreen').classList.add('hidden'); window.restoreSettingsOnLoad(); }, 500);
-            } else { document.getElementById('loginError').classList.remove('hidden'); }
+                document.getElementById('loginScreen').classList.add('hidden');
+                window.restoreSettingsOnLoad();
+            } else { alert("Incorrect password."); }
         };
+
         window.handleLogout = () => { localStorage.removeItem('sumc_auth_token'); window.location.reload(); };
         window.toggleSidebar = () => {
             const sb = document.getElementById('sidebar'); const ov = document.getElementById('sidebarOverlay');
-            // 모바일 메뉴 애니메이션 방향을 가로(-translate-x)에서 세로(-translate-y)로 변경
             if(sb.classList.contains('-translate-y-full')) { sb.classList.remove('-translate-y-full'); ov.classList.remove('hidden'); }
             else { sb.classList.add('-translate-y-full'); ov.classList.add('hidden'); }
         };
 
-        // --- CORE STATE & CHART THEMING ---
-        Chart.defaults.color = '#64748b'; Chart.defaults.borderColor = 'rgba(0,0,0,0.05)'; Chart.defaults.font.family = 'Inter'; Chart.register(ChartDataLabels);
-        window.members = []; window.attendanceRecords = []; window.mainChart = null; window.profileChart = null;
-        window.livePrayers = []; window.processingPrayerIds = []; // 실시간 기도제목 상태 관리
-        window.currentApiKey = localStorage.getItem('sumc_gemini_key') || "";
-        window.currentCalendarId = localStorage.getItem('sumc_calendar_id') || "";
-        window.currentAiModel = localStorage.getItem('sumc_gemini_model') || "gemini-1.5-flash-latest"; 
-        window.currentDbId = "sumc-2026-production-db"; window.prayerImageBase64 = '';
-        const sundayLabels = (function getSundays(count = 12) { let s = []; let c = new Date(); c.setDate(c.getDate() - c.getDay()); for(let i=0; i<count; i++) { s.push(new Date(c).toISOString().split('T')[0]); c.setDate(c.getDate() - 7); } return s.reverse(); })();
+        window.restoreSettingsOnLoad = () => { if(window.currentApiKey) document.getElementById('apiKeyInput').value = window.currentApiKey; if(window.currentCalendarId) document.getElementById('calendarIdInput').value = window.currentCalendarId; window.updateCalendarIframes(); };
+        window.verifyAndSaveApiKey = async () => {
+            const key = document.getElementById('apiKeyInput').value.trim(); const calId = document.getElementById('calendarIdInput').value.trim();
+            if (!key) return alert("Please enter API Key.");
+            const btn = document.getElementById('verifyKeyBtn'); btn.innerHTML = `<span class="loading-spinner-white"></span>`; btn.disabled = true;
+            try {
+                const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents: [{ parts: [{ text: "ping" }] }] }) });
+                if (!r.ok) throw new Error("Invalid Key");
+                window.currentApiKey = key; localStorage.setItem('sumc_gemini_key', key);
+                window.currentCalendarId = calId; localStorage.setItem('sumc_calendar_id', calId);
+                if(window.saveKeyToCloud) await window.saveKeyToCloud(key, calId);
+                window.updateCalendarIframes();
+                alert("Settings Saved successfully.");
+            } catch (e) { alert("Validation failed. Check API Key."); }
+            finally { btn.innerHTML = "Validate & Sync"; btn.disabled = false; }
+        };
 
-        // Calendar Loading Function
         window.updateCalendarIframes = () => {
-            let calId = window.currentCalendarId;
-            const dashIframe = document.getElementById('dashCalendarIframe');
-            const mainIframe = document.getElementById('mainCalendarIframe');
-            const dashPlaceholder = document.getElementById('dashCalendarPlaceholder');
-            const mainPlaceholder = document.getElementById('mainCalendarPlaceholder');
-
-            if (calId) {
-                if (calId.includes('src=')) {
-                    const match = calId.match(/src=([^&"]+)/);
-                    if (match) calId = decodeURIComponent(match[1]);
-                } else if (calId.includes('%40')) {
-                    calId = decodeURIComponent(calId);
-                }
-
-                const encodedId = encodeURIComponent(calId);
-                const tz = encodeURIComponent('America/Chicago');
-                
-                if(dashIframe) {
-                    dashIframe.src = `https://calendar.google.com/calendar/embed?src=${encodedId}&mode=AGENDA&showNav=0&showDate=0&showPrint=0&showTabs=0&showCalendars=0&showTz=0&bgcolor=%23f8fafc&ctz=${tz}`;
-                    dashIframe.classList.remove('hidden');
-                    if(dashPlaceholder) dashPlaceholder.classList.add('hidden');
-                }
-                if(mainIframe) {
-                    mainIframe.src = `https://calendar.google.com/calendar/embed?src=${encodedId}&bgcolor=%23ffffff&ctz=${tz}`;
-                    mainIframe.classList.remove('hidden');
-                    if(mainPlaceholder) mainPlaceholder.classList.add('hidden');
-                }
+            const id = window.currentCalendarId;
+            const if1 = document.getElementById('mainCalendarIframe'); const pl1 = document.getElementById('mainCalendarPlaceholder');
+            const if2 = document.getElementById('dashCalendarIframe'); const pl2 = document.getElementById('dashCalendarPlaceholder');
+            if(id) {
+                const url1 = `https://calendar.google.com/calendar/embed?src=${encodeURIComponent(id)}&ctz=America/New_York&mode=MONTH&showPrint=0&showTabs=1&showCalendars=0&showTz=0`;
+                const url2 = `https://calendar.google.com/calendar/embed?src=${encodeURIComponent(id)}&ctz=America/New_York&mode=AGENDA&showTitle=0&showNav=0&showDate=0&showPrint=0&showTabs=0&showCalendars=0&showTz=0`;
+                if(if1) { if1.src = url1; if1.classList.remove('hidden'); pl1.classList.add('hidden'); }
+                if(if2) { if2.src = url2; if2.classList.remove('hidden'); pl2.classList.add('hidden'); }
+            } else {
+                if(if1) { if1.classList.add('hidden'); pl1.classList.remove('hidden'); }
+                if(if2) { if2.classList.add('hidden'); pl2.classList.remove('hidden'); }
             }
         };
 
@@ -608,16 +524,15 @@
             if(btnElement) { document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active')); btnElement.classList.add('active'); }
             if(tabId === 'attendance') window.renderAttendanceList();
             window.scrollTo(0,0); window.updateDashboard();
-            // 메뉴 닫힘 애니메이션 방향 수정
             if(window.innerWidth < 768) { document.getElementById('sidebar').classList.add('-translate-y-full'); document.getElementById('sidebarOverlay').classList.add('hidden'); }
         };
 
         window.openNewMemberForm = () => {
-            document.getElementById('newMemberForm').reset(); populateFamilyDropdown(document.getElementById('newFamilySelect'), 'new');
+            document.getElementById('newMemberForm').reset(); document.getElementById('editMemberId').value = ""; document.getElementById('formTitle').innerText = "Register Member";
+            populateFamilyDropdown(document.getElementById('newFamilySelect'), 'new');
             document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active-tab'));
             document.getElementById('new-member').classList.add('active-tab');
-            // 메뉴 닫힘 애니메이션 방향 수정
             if(window.innerWidth < 768) { document.getElementById('sidebar').classList.add('-translate-y-full'); document.getElementById('sidebarOverlay').classList.add('hidden'); }
         };
 
@@ -630,7 +545,6 @@
         }
 
         window.updateDashboard = () => {
-            // 총 인원, 성인 멤버(정식), 성인 방문자(non-member), 어린이 세분화 로직 추가
             const totalRegistered = window.members.length;
             const adultMembers = window.members.filter(m => m.isAdult && !m.isNonMember).length;
             const visitors = window.members.filter(m => m.isAdult && m.isNonMember).length;
@@ -639,115 +553,66 @@
             if(document.getElementById('totalMembers')) document.getElementById('totalMembers').innerText = adultMembers;
             if(document.getElementById('memberBreakdown')) document.getElementById('memberBreakdown').innerText = `Registered: ${totalRegistered} / Member: ${adultMembers} / Visitor: ${visitors} / Children: ${children}`;
             
-            // 평균 출석 로직 업데이트: 메인은 성인만, 서브텍스트는 전체(with Children)
             const disp = document.getElementById('avgAttendanceDisplay');
             const subDisp = document.getElementById('avgAttendanceSubtext');
             if(disp && subDisp) {
-                if(window.attendanceRecords.length === 0) {
-                    disp.innerText = "0 / 0%";
-                    subDisp.innerText = "0 / 0% (with Children)";
-                } else {
-                    let totalAdultAttendees = 0;
-                    let totalAttendees = 0;
-                    
+                if(window.attendanceRecords.length === 0) { disp.innerText = "0 / 0%"; subDisp.innerText = "0 / 0% (with Children)"; } 
+                else {
+                    let adultAtt = 0, totalAtt = 0;
                     window.attendanceRecords.forEach(r => {
                         if (r.attendees) {
-                            totalAttendees += r.attendees.length;
-                            r.attendees.forEach(aid => {
-                                const m = window.members.find(x => x.id === aid);
-                                if (m && m.isAdult) totalAdultAttendees++;
-                            });
+                            totalAtt += r.attendees.length;
+                            r.attendees.forEach(aid => { const m = window.members.find(x => x.id === aid); if (m && m.isAdult) adultAtt++; });
                         }
                     });
-
-                    const numRecords = window.attendanceRecords.length;
-                    const avgAdults = Math.round(totalAdultAttendees / numRecords);
-                    const avgTotal = Math.round(totalAttendees / numRecords);
-                    
-                    const adultMembersCount = window.members.filter(m => m.isAdult).length;
-                    const totalMembersCount = window.members.length;
-                    
-                    const adultPct = adultMembersCount > 0 ? Math.round((avgAdults / adultMembersCount) * 100) : 0;
-                    const totalPct = totalMembersCount > 0 ? Math.round((avgTotal / totalMembersCount) * 100) : 0;
-                    
-                    disp.innerText = `${avgAdults} / ${adultPct}%`;
-                    subDisp.innerText = `${avgTotal} / ${totalPct}% (with Children)`;
+                    const len = window.attendanceRecords.length;
+                    const avgAd = Math.round(adultAtt / len); const avgTot = Math.round(totalAtt / len);
+                    const adCnt = window.members.filter(m => m.isAdult).length; const totCnt = window.members.length;
+                    const pctAd = adCnt > 0 ? Math.round((avgAd / adCnt) * 100) : 0; const pctTot = totCnt > 0 ? Math.round((avgTot / totCnt) * 100) : 0;
+                    disp.innerText = `${avgAd} / ${pctAd}%`; subDisp.innerText = `${avgTot} / ${pctTot}% (with Children)`;
                 }
             }
             
-            // 최근 출석일 기준 Adult/Child 세부 카운팅 로직
-            const lastAttTitle = document.getElementById('lastAttendanceTitle');
-            const lastAttCount = document.getElementById('lastAttendanceCount');
-            const lastAttBreakdown = document.getElementById('lastAttendanceBreakdown');
-            if (lastAttTitle && lastAttCount && lastAttBreakdown) {
-                const sortedRecords = [...window.attendanceRecords].sort((a, b) => new Date(b.date) - new Date(a.date));
-                const lastRecord = sortedRecords[0];
-
-                if (lastRecord) {
-                    const dParts = lastRecord.date.split('-');
-                    lastAttTitle.innerText = `${parseInt(dParts[1])}/${parseInt(dParts[2])} Attendance`;
-                    const attendees = lastRecord.attendees || [];
-                    lastAttCount.innerText = attendees.length;
-                    
-                    let ad = 0, ch = 0;
-                    attendees.forEach(aid => {
-                        const m = window.members.find(x => x.id === aid);
-                        if (m) { m.isAdult ? ad++ : ch++; }
-                    });
-                    lastAttBreakdown.innerText = `Adult: ${ad} / Child: ${ch}`;
-                } else {
-                    lastAttTitle.innerText = `Recent Attendance`;
-                    lastAttCount.innerText = "0";
-                    lastAttBreakdown.innerText = `Adult: 0 / Child: 0`;
-                }
+            const latTitle = document.getElementById('lastAttendanceTitle'); const latCount = document.getElementById('lastAttendanceCount'); const latBrk = document.getElementById('lastAttendanceBreakdown');
+            if (latTitle && latCount && latBrk) {
+                const sorted = [...window.attendanceRecords].sort((a, b) => new Date(b.date) - new Date(a.date));
+                const last = sorted[0];
+                if (last) {
+                    const d = last.date.split('-'); latTitle.innerText = `${parseInt(d[1])}/${parseInt(d[2])} Attendance`;
+                    const atts = last.attendees || []; latCount.innerText = atts.length;
+                    let ad = 0, ch = 0; atts.forEach(aid => { const m = window.members.find(x => x.id === aid); if (m) m.isAdult ? ad++ : ch++; });
+                    latBrk.innerText = `Adult: ${ad} / Child: ${ch}`;
+                } else { latTitle.innerText = `Recent Attendance`; latCount.innerText = "0"; latBrk.innerText = `Adult: 0 / Child: 0`; }
             }
 
-            if(window.currentApiKey) { const s = document.getElementById('aiStatus'); if(s) { s.innerText = "Ready"; s.className = "text-[9px] bg-red-50 text-red-600 px-3 py-1 rounded-full font-bold tracking-widest uppercase border border-red-100"; } }
-            renderMainChart();
-            window.updateCalendarIframes();
+            if(window.currentApiKey) { const s = document.getElementById('aiStatus'); if(s) { s.innerText = "Ready"; s.className = "text-[9px] bg-emerald-50 text-emerald-600 px-3 py-1 rounded-full font-bold tracking-widest uppercase border border-emerald-100"; } }
+            renderMainChart(); window.updateCalendarIframes();
         };
 
         function renderMainChart() {
             const canvas = document.getElementById('mainAttendanceChart'); if(!canvas) return; const ctx = canvas.getContext('2d'); if(window.mainChart) window.mainChart.destroy();
-            // 전체 인원이 아닌 성인(Adult)만 카운트하도록 로직 변경
             const data = sundayLabels.map(l => { 
-                const rec = window.attendanceRecords.find(r => r.date === l); 
-                if (!rec || !rec.attendees) return 0;
-                let adultCount = 0;
-                rec.attendees.forEach(aid => {
-                    const m = window.members.find(x => x.id === aid);
-                    if (m && m.isAdult) adultCount++;
-                });
-                return adultCount;
+                const rec = window.attendanceRecords.find(r => r.date === l); if (!rec || !rec.attendees) return 0;
+                let c = 0; rec.attendees.forEach(aid => { const m = window.members.find(x => x.id === aid); if (m && m.isAdult) c++; }); return c;
             });
             let gradient = ctx.createLinearGradient(0, 0, 0, 400); gradient.addColorStop(0, 'rgba(30, 41, 59, 0.4)'); gradient.addColorStop(1, 'rgba(30, 41, 59, 0.0)');
-            // datalabels 설정을 강화하여 점(Point) 위에 빨간색 숫자가 선명하게 뜨도록 수정 & 레이아웃 패딩 추가
-            window.mainChart = new Chart(ctx, { type: 'line', data: { labels: sundayLabels, datasets: [{ label: 'Adult Attendees', data: data, borderColor: '#1e293b', backgroundColor: gradient, fill: true, tension: 0.4, borderWidth: 3, pointBackgroundColor: '#ffffff', pointBorderColor: '#dc2626', pointRadius: 5, pointHoverRadius: 7 }] }, options: { layout: { padding: { top: 25 } }, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { display: true, color: '#dc2626', anchor: 'end', align: 'top', offset: 4, font: { weight: '900', size: 12 }, formatter: (v) => v > 0 ? v : '' } }, scales: { y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' }, suggestedMax: Math.max(...data) + 5 }, x: { grid: { display: false } } } } });
+            window.mainChart = new Chart(ctx, { type: 'line', data: { labels: sundayLabels, datasets: [{ data: data, borderColor: '#1e293b', backgroundColor: gradient, fill: true, tension: 0.4, borderWidth: 3, pointBackgroundColor: '#ffffff', pointBorderColor: '#dc2626', pointRadius: 5, pointHoverRadius: 7 }] }, options: { layout: { padding: { top: 25 } }, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { display: true, color: '#dc2626', anchor: 'end', align: 'top', offset: 4, font: { weight: '900', size: 12 }, formatter: (v) => v > 0 ? v : '' } }, scales: { y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' }, suggestedMax: Math.max(...data) + 5 }, x: { grid: { display: false } } } } });
         }
 
         window.renderDirectory = () => {
-            const container = document.getElementById('memberContainer'); if(!container) return;
-            const search = document.getElementById('dirSearch').value.toLowerCase();
-            const filtered = window.members.filter(m => (m.firstName + " " + m.lastName).toLowerCase().includes(search));
-            const families = {}; filtered.forEach(m => { if(!families[m.familyId]) families[m.familyId] = []; families[m.familyId].push(m); });
-            const sortedFamilies = Object.values(families).sort((a, b) => (a[0].lastName + a[0].firstName).localeCompare(b[0].lastName + b[0].firstName));
-            container.innerHTML = sortedFamilies.map(fam => `<div class="card p-6 break-inside-avoid shadow-sm"><div class="text-[10px] font-black text-slate-400 uppercase mb-4 tracking-widest">${fam[0].lastName} Household</div><div class="space-y-3">${fam.map(m => `<button onclick="window.viewProfile('${m.id}')" class="w-full text-left p-4 rounded-xl bg-slate-50 border border-slate-200 hover:border-slate-800 hover:bg-white transition shadow-sm group"><div class="font-bold text-slate-700 group-hover:text-slate-900 transition">${m.lastName}, ${m.firstName}</div><div class="mt-2 flex flex-wrap gap-2"><span class="text-[9px] px-2 py-0.5 rounded font-bold border border-slate-200 ${m.isAdult ? 'text-slate-500 bg-white' : 'text-red-600 bg-red-50 border-red-100'}">${m.isAdult ? 'Adult' : 'Child'}</span></div></button>`).join('')}</div></div>`).join('');
+            const q = document.getElementById('searchInput').value.toLowerCase(); const grid = document.getElementById('directoryGrid'); if(!grid) return;
+            grid.innerHTML = window.members.filter(m => `${m.firstName} ${m.lastName}`.toLowerCase().includes(q)).sort((a,b) => a.lastName.localeCompare(b.lastName)).map(m => `
+                <div class="card p-6 border border-slate-100 hover:shadow-lg transition cursor-pointer group flex flex-col h-full" onclick="window.viewProfile('${m.id}')">
+                    <div class="flex items-start gap-4 mb-4">
+                        <div class="w-12 h-12 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center font-black text-lg group-hover:bg-slate-800 group-hover:text-white transition">${m.firstName.charAt(0)}${m.lastName.charAt(0)}</div>
+                        <div><h3 class="font-black text-lg text-slate-900 leading-tight">${m.lastName}, ${m.firstName}</h3><span class="text-[10px] font-bold uppercase tracking-widest ${m.isAdult ? 'text-slate-400' : 'text-emerald-500'}">${m.isAdult ? 'Adult' : 'Child/Youth'}</span>${m.isNonMember ? '<span class="ml-2 text-[10px] font-bold uppercase tracking-widest text-amber-500">Visitor</span>' : ''}</div>
+                    </div>
+                    <div class="space-y-1 mt-auto">
+                        ${m.cellPhone ? `<p class="text-sm text-slate-600 flex items-center gap-2"><svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>${m.cellPhone}</p>` : ''}
+                        ${m.email ? `<p class="text-sm text-slate-600 flex items-center gap-2 truncate"><svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>${m.email}</p>` : ''}
+                    </div>
+                </div>`).join('');
         };
-
-        window.viewProfile = (id) => {
-            const m = window.members.find(m => m.id === id); if(!m) return;
-            window.showTab('profile-view');
-            document.getElementById('profileContent').innerHTML = `<div class="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 pb-6 border-b border-slate-100"><div><h2 class="text-3xl md:text-4xl font-black text-slate-900 tracking-tight">${m.firstName} <span class="text-slate-800">${m.lastName}</span></h2><div class="flex items-center gap-3 mt-4"><span class="text-xs font-bold text-slate-500 border border-slate-200 bg-slate-50 px-3 py-1 rounded-full">${m.isAdult ? 'Adult' : 'Child'}</span><span class="text-xs font-bold text-slate-800 bg-slate-100 border border-slate-200 px-3 py-1 rounded-full uppercase">${m.gender || 'Unknown'}</span></div></div></div><div class="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-8 mt-8 text-sm"><div class="space-y-6"><div class="grid grid-cols-2 gap-4"><div><label>Contact</label><div class="text-slate-700 font-bold">${m.cellPhone || '—'}</div></div><div><label>Email</label><div class="text-blue-600 truncate underline font-medium">${m.email || '—'}</div></div></div><div><label>Address</label><div class="text-slate-700 leading-relaxed font-medium">${m.address || '—'}</div></div><div class="p-6 bg-red-50 border border-red-100 rounded-2xl"><label class="text-red-600 mb-2 font-black uppercase text-[9px] tracking-widest">Prayers</label><div class="text-red-900 whitespace-pre-wrap font-medium leading-relaxed">${m.prayers || 'No records.'}</div></div><div class="p-6 bg-slate-50 border border-slate-200 rounded-2xl"><label class="text-slate-500 mb-2 font-black uppercase text-[9px] tracking-widest">Notes</label><div class="text-slate-700 whitespace-pre-wrap font-medium leading-relaxed">${m.notes || '—'}</div></div></div></div>`;
-            document.getElementById('editBtn').onclick = () => window.openEditForm(m.id);
-            document.getElementById('deleteBtn').onclick = () => window.deleteMember(m.id);
-            renderPersonalChart(m.id);
-        };
-
-        function renderPersonalChart(mid) {
-            const ctx = document.getElementById('personalAttendanceChart').getContext('2d'); if(!ctx) return; if(window.profileChart) window.profileChart.destroy();
-            const hist = sundayLabels.map(l => { const rec = window.attendanceRecords.find(r => r.date === l); return rec && rec.attendees && rec.attendees.includes(mid) ? 1 : 0; });
-            window.profileChart = new Chart(ctx, { type: 'bar', data: { labels: sundayLabels, datasets: [{ data: hist, backgroundColor: hist.map(h => h ? '#1e293b' : '#f1f5f9'), borderRadius: 6 }] }, options: { maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { display: false } }, scales: { y: { display: false, max: 1.2 }, x: { grid: { display: false } } } } });
-        }
 
         window.renderAttendanceList = () => {
             const list = document.getElementById('attendanceList'); if(!list) return; const dateInput = document.getElementById('attendanceDate');
@@ -756,531 +621,195 @@
             const existingRecord = window.attendanceRecords.find(r => r.date === dateInput.value); 
             const checkedIds = existingRecord ? existingRecord.attendees : [];
             
-            // 누적 출석 횟수 및 비율(%) 계산 로직
-            const attendanceCounts = {};
-            window.members.forEach(m => attendanceCounts[m.id] = 0);
-            window.attendanceRecords.forEach(record => {
-                if (record.attendees) {
-                    record.attendees.forEach(id => {
-                        if (attendanceCounts[id] !== undefined) attendanceCounts[id]++;
-                    });
-                }
-            });
+            const counts = {}; window.members.forEach(m => counts[m.id] = 0);
+            window.attendanceRecords.forEach(r => { if(r.attendees) r.attendees.forEach(id => { if(counts[id]!==undefined) counts[id]++; }); });
+            const wks = window.attendanceRecords.length;
 
-            const totalWeeks = window.attendanceRecords.length;
-
-            // 정렬 로직 (1순위: 출석률/횟수 내림차순, 2순위: 성(Last Name) 알파벳순)
-            const sortedMembers = [...window.members].sort((a, b) => {
-                const countDiff = attendanceCounts[b.id] - attendanceCounts[a.id];
-                if (countDiff !== 0) return countDiff;
-                const lastNameCmp = a.lastName.localeCompare(b.lastName);
-                if (lastNameCmp !== 0) return lastNameCmp;
+            const sorted = [...window.members].sort((a, b) => {
+                const cd = counts[b.id] - counts[a.id]; if(cd !== 0) return cd;
+                const lc = a.lastName.localeCompare(b.lastName); if(lc !== 0) return lc;
                 return a.firstName.localeCompare(b.firstName);
             });
 
-            list.innerHTML = sortedMembers.map(m => {
-                // 각 성도의 출석률 퍼센테이지 계산
-                const rate = totalWeeks > 0 ? Math.round((attendanceCounts[m.id] / totalWeeks) * 100) : 0;
-                return `<tr class="hover:bg-slate-50 transition">
-                    <td class="px-6 py-4 text-center"><input type="checkbox" value="${m.id}" ${checkedIds.includes(m.id) ? 'checked' : ''} onchange="window.updateCheckCount()" class="w-5 h-5 cursor-pointer attendee-check accent-slate-800 rounded bg-slate-50 border-slate-300"></td>
-                    <td class="px-6 py-4 font-bold text-slate-800">${m.lastName}, ${m.firstName} <span class="text-xs font-semibold text-slate-400 ml-2">(${rate}%)</span></td>
-                    <td class="px-6 py-4 text-center text-[10px] font-black uppercase text-slate-400">${m.isAdult ? 'Adult' : 'Child'}</td>
-                </tr>`;
+            list.innerHTML = sorted.map(m => {
+                const rt = wks > 0 ? Math.round((counts[m.id] / wks) * 100) : 0;
+                return `<tr class="hover:bg-slate-50 transition"><td class="px-6 py-4 text-center"><input type="checkbox" value="${m.id}" ${checkedIds.includes(m.id) ? 'checked' : ''} onchange="window.updateCheckCount()" class="w-5 h-5 cursor-pointer attendee-check accent-slate-800 rounded"></td><td class="px-6 py-4 font-bold text-slate-800">${m.lastName}, ${m.firstName} <span class="text-xs font-semibold text-slate-400 ml-2">(${rt}%)</span></td><td class="px-6 py-4 text-center text-[10px] font-black uppercase text-slate-400">${m.isAdult ? 'Adult' : 'Child'}</td></tr>`;
             }).join('');
-            
             window.updateCheckCount();
         };
 
         window.updateCheckCount = () => { const cnt = document.querySelectorAll('.attendee-check:checked').length; const disp = document.getElementById('currentCheckCount'); if(disp) disp.innerText = `Selected: ${cnt}`; };
 
+        window.viewProfile = (id) => {
+            const m = window.members.find(x => x.id === id); if(!m) return;
+            const fam = window.members.filter(x => x.familyId === m.familyId && x.id !== m.id);
+            const counts = {}; window.attendanceRecords.forEach(r => { if(r.attendees) r.attendees.forEach(aid => { counts[aid] = (counts[aid]||0)+1; }); });
+            const rt = window.attendanceRecords.length > 0 ? Math.round(((counts[m.id]||0) / window.attendanceRecords.length) * 100) : 0;
+
+            document.getElementById('profileContent').innerHTML = `
+                <div class="card p-8 shadow-xl border-t-4 border-slate-800 flex flex-col md:flex-row gap-8 items-start">
+                    <div class="w-24 h-24 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center font-black text-4xl flex-shrink-0">${m.firstName.charAt(0)}${m.lastName.charAt(0)}</div>
+                    <div class="flex-1 w-full">
+                        <div class="flex flex-col md:flex-row justify-between items-start gap-4">
+                            <div><h2 class="text-3xl font-black text-slate-900">${m.firstName} ${m.lastName}</h2><div class="flex gap-2 mt-2"><span class="bg-slate-100 text-slate-500 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">${m.isAdult ? 'Adult' : 'Child/Youth'}</span>${m.isBaptized ? '<span class="bg-blue-50 text-blue-600 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">Baptized</span>' : ''}${m.isNonMember ? '<span class="bg-amber-50 text-amber-600 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">Visitor</span>' : ''}</div></div>
+                            <div class="flex gap-2"><button onclick="window.openEditForm('${m.id}')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-lg font-bold text-sm transition">Edit</button><button onclick="window.deleteMember('${m.id}')" class="bg-red-50 hover:bg-red-100 text-red-600 px-4 py-2 rounded-lg font-bold text-sm transition">Delete</button></div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+                            <div class="space-y-4">
+                                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest border-b border-slate-100 pb-2">Contact</h3>
+                                ${m.cellPhone ? `<p class="flex items-center gap-3 text-slate-700 font-medium"><svg class="w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>${m.cellPhone}</p>` : ''}
+                                ${m.email ? `<p class="flex items-center gap-3 text-slate-700 font-medium"><svg class="w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>${m.email}</p>` : ''}
+                                ${m.address ? `<p class="flex items-center gap-3 text-slate-700 font-medium"><svg class="w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>${m.address}</p>` : ''}
+                            </div>
+                            <div class="space-y-4">
+                                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest border-b border-slate-100 pb-2">Household</h3>
+                                ${fam.length ? fam.map(f => `<div class="cursor-pointer hover:bg-slate-50 p-2 -ml-2 rounded transition flex items-center gap-3 text-slate-700 font-bold" onclick="window.viewProfile('${f.id}')"><div class="w-8 h-8 bg-slate-200 rounded-full flex items-center justify-center text-xs">${f.firstName.charAt(0)}</div>${f.firstName} ${f.lastName} <span class="text-[9px] text-slate-400 uppercase tracking-widest">${f.isAdult?'Adult':'Child'}</span></div>`).join('') : '<p class="text-sm text-slate-400 italic">No other members linked.</p>'}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+                    <div class="lg:col-span-2 card p-8 shadow-sm border border-slate-200"><h3 class="text-sm font-extrabold text-slate-900 mb-4 uppercase tracking-widest flex justify-between">Pastoral Notes & Prayers <span class="text-[10px] text-slate-400 font-normal">Auto-saved</span></h3><textarea class="w-full h-48 bg-slate-50 border border-slate-100 rounded-xl p-4 font-serif-formatted text-slate-700 leading-relaxed resize-none focus:bg-white focus:border-slate-300 focus:ring-0 transition" onchange="window.updateNotes('${m.id}', this.value)">${m.notes || ''}</textarea><div class="mt-4"><h4 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Prayer Requests (History)</h4><textarea class="w-full h-40 bg-slate-50 border border-slate-100 rounded-xl p-4 font-serif-formatted text-slate-700 leading-relaxed resize-none focus:bg-white focus:border-slate-300 focus:ring-0 transition" onchange="window.updatePrayerInDb('${m.id}', this.value)">${m.prayers || ''}</textarea></div></div>
+                    <div class="card p-8 shadow-sm border border-slate-200 flex flex-col"><div class="flex justify-between items-end mb-6"><h3 class="text-sm font-extrabold text-slate-900 uppercase tracking-widest">Attendance</h3><span class="text-2xl font-black text-slate-800">${rt}%</span></div><div class="flex-1 w-full min-h-[150px] relative"><canvas id="personalAttendanceChart"></canvas></div><p class="text-xs text-center text-slate-400 mt-4 font-medium">Recent 6 weeks</p></div>
+                </div>`;
+            window.showTab('profileView'); setTimeout(() => renderPersonalChart(m.id), 100);
+        };
+
         window.openEditForm = (id) => {
-            const m = window.members.find(m => m.id === id); if(!m) return;
-            const form = document.getElementById('editMemberForm'); window.showTab('edit-member');
-            form.id.value = m.id; form.firstName.value = m.firstName; form.lastName.value = m.lastName; form.dob.value = m.dob || ''; form.anniversary.value = m.anniversary || ''; form.gender.value = m.gender || 'Male'; form.homePhone.value = m.homePhone || ''; form.cellPhone.value = m.cellPhone || ''; form.email.value = m.email || ''; form.address.value = m.address || ''; form.joinDate.value = m.joinDate || ''; form.notes.value = m.notes || ''; form.prayers.value = m.prayers || '';
-            form.isAdult.checked = m.isAdult !== false; form.isBaptized.checked = m.isBaptized === true; form.isNonMember.checked = m.isNonMember === true;
-            populateFamilyDropdown(document.getElementById('familySelect'), m.familyId);
+            const m = window.members.find(x => x.id === id); if(!m) return;
+            const form = document.getElementById('newMemberForm'); form.reset();
+            document.getElementById('editMemberId').value = m.id; document.getElementById('formTitle').innerText = "Edit Member";
+            populateFamilyDropdown(document.getElementById('newFamilySelect'), m.familyId);
+            form.elements['firstName'].value = m.firstName; form.elements['lastName'].value = m.lastName;
+            form.elements['address'].value = m.address || ''; form.elements['cellPhone'].value = m.cellPhone || '';
+            form.elements['email'].value = m.email || ''; form.elements['notes'].value = m.notes || '';
+            form.elements['isAdult'].checked = m.isAdult; form.elements['isBaptized'].checked = !!m.isBaptized; form.elements['isNonMember'].checked = !!m.isNonMember;
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active-tab'));
+            document.getElementById('new-member').classList.add('active-tab');
         };
 
-        window.verifyAndSaveApiKey = async () => {
-            const key = document.getElementById('apiKeyInput').value.trim(); 
-            const calId = document.getElementById('calendarIdInput').value.trim();
-            if(!key) return alert("Enter API Key.");
-            const btn = document.getElementById('verifyKeyBtn'); btn.innerText = "Syncing..."; btn.disabled = true;
-            try {
-                const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${key}`);
-                const d = await r.json(); if(d.error) throw new Error(d.error.message);
-                localStorage.setItem('sumc_gemini_key', key); window.currentApiKey = key;
-                localStorage.setItem('sumc_calendar_id', calId); window.currentCalendarId = calId;
-                
-                const vm = d.models.filter(m => m.supportedGenerationMethods && m.supportedGenerationMethods.includes("generateContent"));
-                const best = vm.find(m => m.name.includes('gemini-1.5-flash'))?.name.replace('models/', '') || vm[0].name.replace('models/', '');
-                window.currentAiModel = best; localStorage.setItem('sumc_gemini_model', best);
+        function renderPersonalChart(mid) {
+            const ctx = document.getElementById('personalAttendanceChart').getContext('2d'); if(!ctx) return; if(window.profileChart) window.profileChart.destroy();
+            const hist = sundayLabels.map(l => { const rec = window.attendanceRecords.find(r => r.date === l); return rec && rec.attendees && rec.attendees.includes(mid) ? 1 : 0; });
+            window.profileChart = new Chart(ctx, { type: 'bar', data: { labels: sundayLabels, datasets: [{ data: hist, backgroundColor: hist.map(h => h ? '#1e293b' : '#f1f5f9'), borderRadius: 6 }] }, options: { maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { display: false } }, scales: { y: { display: false, max: 1.2 }, x: { grid: { display: false } } } } });
+        }
 
-                if(window.saveKeyToCloud) { await window.saveKeyToCloud(key, calId); }
-                window.updateCalendarIframes();
-                alert("Settings Validated & Synced to Cloud Successfully."); window.updateDashboard();
-            } catch(e) { alert("Failed: " + e.message); } finally { btn.innerText = "Validate & Sync to Cloud"; btn.disabled = false; }
-        };
+        window.updateNotes = async (id, val) => { if(window.updatePrayerInDb) { await window.updatePrayerInDb(id, val); } };
 
-        window.restoreSettingsOnLoad = async () => {
-            if(window.currentCalendarId) {
-                document.getElementById('calendarIdInput').value = window.currentCalendarId;
-                window.updateCalendarIframes();
-            }
-            if(window.currentApiKey) {
-                document.getElementById('apiKeyInput').value = window.currentApiKey;
-                try {
-                    const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${window.currentApiKey}`);
-                    const d = await r.json();
-                    if(d.models) {
-                        const vm = d.models.filter(m => m.supportedGenerationMethods && m.supportedGenerationMethods.includes("generateContent"));
-                        const best = vm.find(m => m.name.includes('gemini-1.5-flash'))?.name.replace('models/', '') || vm[0].name.replace('models/', '');
-                        window.currentAiModel = best; localStorage.setItem('sumc_gemini_model', best);
-                        const statusUI = document.getElementById('aiStatus'); if(statusUI) { statusUI.innerText = "Ready"; statusUI.className = "text-[9px] bg-red-50 text-red-600 px-3 py-1 rounded-full font-bold tracking-widest uppercase border border-red-100"; }
-                    }
-                } catch(e) {}
-            }
-        };
-
-        // 🔥 AI Erorr Fix 및 환각 방지 유지 🔥
-        window.askGemini = async () => {
-            try {
-                const key = window.currentApiKey; if(!key) { alert("API Key is missing! Please authenticate in Settings."); return; }
-                const inputEl = document.getElementById('geminiInput');
-                if(!inputEl) return;
-                const query = inputEl.value.trim(); if(!query) return;
-
-                const chat = document.getElementById('geminiChatDisplay'); 
-                const sendBtn = document.getElementById('sendBtn');
-                
-                sendBtn.disabled = true; 
-                sendBtn.innerHTML = `<span class="loading-spinner-white"></span>`;
-                
-                const uMsg = document.createElement('div'); uMsg.className = "p-4 btn-primary rounded-2xl rounded-tr-sm text-white text-right self-end max-w-[90%] font-bold shadow-md"; uMsg.innerText = query; chat.appendChild(uMsg); inputEl.value = "";
-                
-                const load = document.createElement('div'); load.className = "p-4 bg-white border border-slate-200 rounded-2xl rounded-tl-sm italic text-slate-400 self-start max-w-[90%] flex items-center gap-3 shadow-sm"; load.innerHTML = `<span class="loading-spinner-dark"></span> Analyzing...`; chat.appendChild(load); chat.scrollTop = chat.scrollHeight;
-
-                const dbContext = { totalCount: window.members.length, members: window.members.map(mb => ({ name: `${mb.firstName} ${mb.lastName}`, gender: mb.gender, address: mb.address, email: mb.email, phone: mb.cellPhone, dob: mb.dob, baptized: mb.isBaptized ? 'Yes' : 'No', adult: mb.isAdult ? 'Adult' : 'Child', prayers: mb.prayers, notes: mb.notes })) };
-                
-                const m = window.currentAiModel || "gemini-1.5-flash-latest";
-                
-                const payload = {
-                    systemInstruction: {
-                        parts: [{ text: "You are the strict database analyst for Sussex United Methodist Church. You MUST answer based ONLY on the provided JSON data. NEVER guess, hallucinate, or make up names. When filtering by location/address, perform a strict text match on the 'address' field. If the exact word is not there, strictly state the facts." }]
-                    },
-                    contents: [{
-                        parts: [{ text: `JSON Database:\n${JSON.stringify(dbContext)}\n\nUser Query: ${query}` }]
-                    }],
-                    generationConfig: {
-                        temperature: 0.1 
-                    }
-                };
-                
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${key}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-                
-                const d = await response.json(); 
-                
-                if (chat.contains(load)) chat.removeChild(load);
-                
-                if (d.error) throw new Error(d.error.message);
-                
-                const ansText = d.candidates?.[0]?.content?.parts?.[0]?.text || "No response generated.";
-                const aiMsg = document.createElement('div'); aiMsg.className = "p-4 bg-white border border-slate-200 rounded-2xl rounded-tl-sm text-slate-700 self-start max-w-[95%] whitespace-pre-wrap shadow-sm font-medium"; aiMsg.innerText = ansText; chat.appendChild(aiMsg); chat.scrollTop = chat.scrollHeight;
-                
-            } catch(e) { 
-                console.error(e);
-                const chat = document.getElementById('geminiChatDisplay');
-                if(chat.lastChild && chat.lastChild.innerHTML.includes('Analyzing')) chat.removeChild(chat.lastChild);
-                alert("AI Operation Failed: " + e.message); 
-            } finally { 
-                const sendBtn = document.getElementById('sendBtn');
-                if(sendBtn) {
-                    sendBtn.disabled = false; sendBtn.innerHTML = `<svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"/></svg>`; 
-                }
-            }
-        };
-
-        // --- Prayer Helper ---
-        window.prayerImageBase64 = '';
-        window.prayerImageMimeType = ''; // 이미지 형식(PNG/JPG) 동적 인식
-        
+        // --- PRAYER AI LOGIC ---
+        window.prayerImageBase64 = ''; window.prayerImageMimeType = '';
         window.handlePrayerImageChange = (e) => { 
             const f = e.target?.files?.[0] || e.dataTransfer?.files?.[0]; 
             if (f) { 
-                document.getElementById('prayerImgLabel').innerText = f.name; 
-                document.getElementById('prayerImgIcon').innerText = '✅'; 
-                
-                const r = new FileReader(); 
-                r.onloadend = () => { 
-                    window.prayerImageBase64 = r.result.split(',')[1]; 
-                    window.prayerImageMimeType = f.type; 
-                    
-                    const preview = document.getElementById('prayerImgPreview');
-                    if(preview) {
-                        preview.style.backgroundImage = `url(${r.result})`;
-                        preview.classList.remove('hidden');
-                    }
-                }; 
-                r.readAsDataURL(f); 
+                document.getElementById('prayerImgLabel').innerText = f.name; document.getElementById('prayerImgIcon').innerText = '✅'; 
+                const r = new FileReader(); r.onloadend = () => { window.prayerImageBase64 = r.result.split(',')[1]; window.prayerImageMimeType = f.type; const p = document.getElementById('prayerImgPreview'); if(p) { p.style.backgroundImage = `url(${r.result})`; p.classList.remove('hidden'); } }; r.readAsDataURL(f); 
             } 
         };
-
-        // 문서 파일(DOCX, TXT, PDF, HTML 등) 업로드 및 텍스트 자동 추출 로직
         window.handleTranscriptUpload = async (e) => {
-            const f = e.target.files[0];
-            if (!f) return;
-            
-            document.getElementById('transcriptDocLabel').innerText = f.name;
-            document.getElementById('transcriptDocIcon').innerText = '⏳';
-            const textarea = document.getElementById('prayerTranscriptText');
-            textarea.value = "Extracting text from document... please wait.";
-            
+            const f = e.target.files[0]; if (!f) return;
+            document.getElementById('transcriptDocLabel').innerText = f.name; document.getElementById('transcriptDocIcon').innerText = '⏳';
+            const ta = document.getElementById('prayerTranscriptText'); ta.value = "Extracting text... please wait.";
             try {
-                let text = "";
-                const ext = f.name.split('.').pop().toLowerCase();
-                
-                if (ext === 'docx') {
-                    const arrayBuffer = await f.arrayBuffer();
-                    const result = await mammoth.extractRawText({arrayBuffer: arrayBuffer});
-                    text = result.value;
-                } else if (ext === 'pdf') {
-                    // PDF.js 엔진 동적 설정
-                    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
-                    const arrayBuffer = await f.arrayBuffer();
-                    const pdf = await pdfjsLib.getDocument({data: arrayBuffer}).promise;
-                    for (let i = 1; i <= pdf.numPages; i++) {
-                        const page = await pdf.getPage(i);
-                        const content = await page.getTextContent();
-                        text += content.items.map(item => item.str).join(" ") + "\n";
-                    }
-                } else {
-                    // TXT, HTML, CSV 등 일반 텍스트 문서 처리
-                    text = await new Promise((resolve, reject) => {
-                        const reader = new FileReader();
-                        reader.onload = (ev) => resolve(ev.target.result);
-                        reader.onerror = reject;
-                        reader.readAsText(f);
-                    });
-                    
-                    // HTML 파일일 경우 태그를 제거하고 순수 텍스트만 추출
-                    if (ext === 'html' || ext === 'htm') {
-                        const doc = new DOMParser().parseFromString(text, 'text/html');
-                        text = doc.body.textContent || "";
-                    }
-                }
-                
-                textarea.value = text.trim() || "No readable text found in this document.";
-                document.getElementById('transcriptDocIcon').innerText = '✅';
-            } catch (err) {
-                console.error(err);
-                textarea.value = "Error extracting text: " + err.message;
-                document.getElementById('transcriptDocIcon').innerText = '❌';
-            }
+                let text = ""; const ext = f.name.split('.').pop().toLowerCase();
+                if (ext === 'docx') { const ab = await f.arrayBuffer(); const res = await mammoth.extractRawText({arrayBuffer: ab}); text = res.value; } 
+                else if (ext === 'pdf') { pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js'; const ab = await f.arrayBuffer(); const pdf = await pdfjsLib.getDocument({data: ab}).promise; for(let i=1; i<=pdf.numPages; i++) { const page = await pdf.getPage(i); const content = await page.getTextContent(); text += content.items.map(item => item.str).join(" ") + "\n"; } } 
+                else { text = await new Promise((res, rej) => { const r = new FileReader(); r.onload = (ev) => res(ev.target.result); r.onerror = rej; r.readAsText(f); }); if(ext==='html'||ext==='htm') { const doc = new DOMParser().parseFromString(text, 'text/html'); text = doc.body.textContent || ""; } }
+                ta.value = text.trim() || "No readable text found."; document.getElementById('transcriptDocIcon').innerText = '✅';
+            } catch (err) { ta.value = "Error: " + err.message; document.getElementById('transcriptDocIcon').innerText = '❌'; }
         };
-        
-        setTimeout(() => { 
-            const dz = document.getElementById('prayerDropZone'); 
-            if(dz) { 
-                ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); e.stopPropagation(); }, false)); 
-                ['dragenter', 'dragover'].forEach(ev => dz.addEventListener(ev, () => dz.classList.add('border-slate-800', 'bg-slate-100'), false)); 
-                ['dragleave', 'drop'].forEach(ev => dz.addEventListener(ev, () => dz.classList.remove('border-slate-800', 'bg-slate-100'), false)); 
-                dz.addEventListener('drop', (e) => { 
-                    if(e.dataTransfer.files.length > 0) { 
-                        window.handlePrayerImageChange(e); 
-                    } 
-                }, false); 
-            } 
-        }, 1000);
         
         window.generatePrayerList = async () => {
             try {
                 const k = window.currentApiKey; if(!k) { alert("API Key is missing! Please authenticate in Settings."); return; }
-                const yt = document.getElementById('prayerTranscriptText').value.trim(); 
-                if(!window.prayerImageBase64 && !yt) { alert("Please upload handwritten notes or a transcript file."); return; }
-                
-                const btn = document.getElementById('genPrayerBtn'); const spinner = document.getElementById('prayerSpinner'); const res = document.getElementById('prayerResultText');
-                btn.disabled = true; spinner.classList.remove('hidden');
-                
-                let sourceDesc = "";
-                if (window.prayerImageBase64 && yt) sourceDesc = "the provided handwritten notes (image) and the chat transcript (text)";
-                else if (window.prayerImageBase64) sourceDesc = "the provided handwritten notes (image) ONLY";
-                else sourceDesc = "the provided chat transcript (text) ONLY";
-
-                const prompt = `You are the 'Intercessory Prayer Organizer Expert' for our church (UMC context). Your task is to create an accurate and dignified prayer list based STRICTLY and ONLY on ${sourceDesc}.
-
-Tasks & Guidelines:
-1. Data Extraction: Identify names and prayer requests/joys from the provided sources.
-2. Data Integration: If multiple sources are provided, match identical individuals and merge their content.
-3. Language: All outputs must be strictly in English.
-4. Sentence Refinement: Convert casual colloquial/spoken language into polite, formal written sentences. Start the sentence with "A prayer..." or "A joy...".
-5. Output Format: Strictly output line by line in this format: "- [Name]: [Prayer/Joy content]". 
-   (Example: - Eric Grismer: A prayer for his friend Arlene, who is diagnosed with Parkinson’s disease.)
-6. STRICT VERIFICATION (CRITICAL): DO NOT hallucinate. DO NOT invent names. DO NOT add any arbitrary details. If you cannot extract any valid prayer request from the provided data, output exactly: "No valid prayer requests found in the provided data."
-
-Chat Transcript / Provided Text:
-${yt || 'None provided'}`;
-
-                const payload = { 
-                    systemInstruction: {
-                        parts: [{ text: "You are a strict intercessory prayer assistant. You MUST NOT hallucinate. Extract only facts from the provided image and text, and format them exactly as requested. NEVER invent names or prayer requests." }]
-                    },
-                    contents: [{ 
-                        role: "user", 
-                        parts: [
-                            { text: prompt }, 
-                            // 동적으로 MIME Type 할당 (없으면 jpeg 기본)
-                            ...(window.prayerImageBase64 ? [{ inlineData: { mimeType: window.prayerImageMimeType || "image/jpeg", data: window.prayerImageBase64 } }] : [])
-                        ] 
-                    }],
-                    generationConfig: {
-                        temperature: 0.0 // 상상력 0
-                    }
-                };
-                
-                const m = window.currentAiModel || "gemini-1.5-flash-latest";
-                const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${k}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-                const d = await r.json(); 
-                
-                if (d.error) throw new Error(d.error.message);
+                const yt = document.getElementById('prayerTranscriptText').value.trim(); if(!window.prayerImageBase64 && !yt) { alert("Please upload notes or a file."); return; }
+                const btn = document.getElementById('genPrayerBtn'); const sp = document.getElementById('prayerSpinner'); const res = document.getElementById('prayerResultText');
+                btn.disabled = true; sp.classList.remove('hidden');
+                let srcDesc = (window.prayerImageBase64 && yt) ? "notes (image) and transcript (text)" : (window.prayerImageBase64 ? "notes (image) ONLY" : "transcript (text) ONLY");
+                const prompt = `You are the 'Intercessory Prayer Organizer Expert' for our church (UMC context). Create an accurate and dignified prayer list based STRICTLY and ONLY on ${srcDesc}.
+Guidelines:
+1. Extract names and prayer requests/joys. Match identical individuals if multiple sources.
+2. English ONLY. Convert colloquial language into polite, formal written sentences ("A prayer...", "A joy...").
+3. Format: "- [Name]: [Prayer/Joy content]". 
+4. DO NOT hallucinate. DO NOT invent names. Output "No valid prayer requests found" if none exist.
+Text: ${yt || 'None'}`;
+                const payload = { systemInstruction: { parts: [{ text: "Strict intercessory assistant. Fact extraction only. No hallucination." }] }, contents: [{ role: "user", parts: [{ text: prompt }, ...(window.prayerImageBase64 ? [{ inlineData: { mimeType: window.prayerImageMimeType || "image/jpeg", data: window.prayerImageBase64 } }] : [])] }], generationConfig: { temperature: 0.0 } };
+                const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${k}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                const d = await r.json(); if (d.error) throw new Error(d.error.message);
                 res.value = d.candidates?.[0]?.content?.parts?.[0]?.text || "No text extracted.";
-                
-            } catch(e) { 
-                console.error(e);
-                alert("AI Extraction Failed: " + e.message); 
-            } finally { 
-                const btn = document.getElementById('genPrayerBtn'); const spinner = document.getElementById('prayerSpinner');
-                if(btn) btn.disabled = false; if(spinner) spinner.classList.add('hidden'); 
-            }
+            } catch(e) { alert("AI Failed: " + e.message); } 
+            finally { const btn = document.getElementById('genPrayerBtn'); const sp = document.getElementById('prayerSpinner'); if(btn) btn.disabled = false; if(sp) sp.classList.add('hidden'); }
         };
 
         window.savePrayerList = async () => {
-            const dv = document.getElementById('prayerDate').value; 
-            const fd = dv ? `${dv.split('-')[1]}/${dv.split('-')[2]}/${dv.split('-')[0]}` : new Date().toLocaleDateString(); 
-            const txt = document.getElementById('prayerResultText').value; 
-            if(!txt) return alert("Empty Result.");
-            
-            try { 
-                const { Document, Paragraph, TextRun, Packer } = docx; 
-                const d = new Document({ sections: [{ children: [new Paragraph({ children: [new TextRun({ text: `Prayer List (${fd})`, font: "Times New Roman", size: 28, bold: true })] }), ...txt.split('\n').filter(l => l.trim()).map(line => new Paragraph({ children: [new TextRun({ text: line.trim(), font: "Times New Roman", size: 24 })], spacing: { before: 120 } }))] }] }); 
-                const b = await Packer.toBlob(d); 
-                saveAs(b, `SUMC_Prayer_List_${fd.replace(/\//g,'_')}.docx`); 
-            } catch(e) { console.error("Word Doc Gen Error", e); }
-            
+            const dv = document.getElementById('prayerDate').value; const fd = dv ? `${dv.split('-')[1]}/${dv.split('-')[2]}/${dv.split('-')[0]}` : new Date().toLocaleDateString(); const txt = document.getElementById('prayerResultText').value; if(!txt) return alert("Empty Result.");
+            try { const { Document, Paragraph, TextRun, Packer } = docx; const d = new Document({ sections: [{ children: [new Paragraph({ children: [new TextRun({ text: `Prayer List (${fd})`, font: "Times New Roman", size: 28, bold: true })] }), ...txt.split('\n').filter(l => l.trim()).map(line => new Paragraph({ children: [new TextRun({ text: line.trim(), font: "Times New Roman", size: 24 })], spacing: { before: 120 } }))] }] }); const b = await Packer.toBlob(d); saveAs(b, `SUMC_Prayer_List_${fd.replace(/\//g,'_')}.docx`); } catch(e) { console.error("Word Doc Gen Error", e); }
             if(window.updatePrayerInDb) { 
                 const lines = txt.split('\n'); let cnt = 0; 
                 for(let line of lines) { 
-                    const match = line.match(/^([^:]+):\s*(.*)$/); 
-                    if(match) { 
-                        const name = match[1].trim().toLowerCase(); 
-                        const target = window.members.find(m => name.includes(m.firstName.toLowerCase()) && name.includes(m.lastName.toLowerCase())); 
-                        
-                        if(target) { 
-                            const newLog = `- ${match[2].trim()} (${fd})`; 
-                            let updatedPrayers = newLog;
-                            
-                            // 중복 방지 로직: 기존 기도제목 중 '같은 날짜'로 끝나는 줄이 있다면 필터링하여 삭제
-                            if (target.prayers) {
-                                const filtered = target.prayers.split('\n').filter(p => !p.trim().endsWith(`(${fd})`));
-                                filtered.push(newLog);
-                                updatedPrayers = filtered.join('\n');
-                            }
-                            
-                            await window.updatePrayerInDb(target.id, updatedPrayers); 
-                            target.prayers = updatedPrayers; // 로컬 데이터 즉시 업데이트
-                            cnt++; 
-                        } 
+                    const m = line.match(/^([^:]+):\s*(.*)$/); 
+                    if(m) { 
+                        const name = m[1].trim().toLowerCase(); const t = window.members.find(x => name.includes(x.firstName.toLowerCase()) && name.includes(x.lastName.toLowerCase())); 
+                        if(t) { const nl = `- ${m[2].trim()} (${fd})`; let up = nl; if (t.prayers) { const f = t.prayers.split('\n').filter(p => !p.trim().endsWith(`(${fd})`)); f.push(nl); up = f.join('\n'); } await window.updatePrayerInDb(t.id, up); t.prayers = up; cnt++; } 
                     } 
                 } 
                 alert(`Profiles updated: ${cnt} matched. (Duplicates overwritten)`); 
             }
         };
 
-        // --- 데이터베이스 유지보수 (중복 기도제목 청소) 기능 ---
-        window.cleanupDuplicatePrayers = async () => {
-            if(!confirm("Are you sure you want to clean up existing duplicate prayer records?\nThis will scan all members and keep only the latest prayer entry for any given date.")) return;
-
-            let updatedCount = 0;
-            const btn = document.querySelector('button[onclick="window.cleanupDuplicatePrayers()"]');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = `<span class="loading-spinner-dark"></span> Cleaning...`;
-            btn.disabled = true;
-
-            try {
-                for (const m of window.members) {
-                    if (!m.prayers) continue;
-
-                    const lines = m.prayers.split('\n');
-                    const uniquePrayers = [];
-                    const seenDates = new Set();
-
-                    // 배열을 뒤에서부터(최신부터) 읽어서 중복된 날짜의 예전 기록을 걸러냄
-                    for (let i = lines.length - 1; i >= 0; i--) {
-                        const line = lines[i].trim();
-                        if (!line) continue;
-
-                        const dateMatch = line.match(/\(([\d/]+)\)$/); // 끝에 (MM/DD/YYYY) 형태의 날짜가 있는지 확인
-                        if (dateMatch) {
-                            const dateStr = dateMatch[1];
-                            if (!seenDates.has(dateStr)) {
-                                seenDates.add(dateStr);
-                                uniquePrayers.unshift(line); // 가장 최신 것만 추가 (순서 유지를 위해 unshift 사용)
-                            }
-                        } else {
-                            // 날짜가 안 적힌 오래된 기록이 있다면 그대로 살림
-                            uniquePrayers.unshift(line);
-                        }
-                    }
-
-                    const newPrayers = uniquePrayers.join('\n');
-                    if (newPrayers !== m.prayers) {
-                        if(window.updatePrayerInDb) {
-                            await window.updatePrayerInDb(m.id, newPrayers);
-                            m.prayers = newPrayers; // 로컬 데이터 반영
-                            updatedCount++;
-                        }
-                    }
-                }
-                alert(`Cleanup complete!\nSuccessfully removed duplicates and fixed records for ${updatedCount} member(s).`);
-                window.showTab('directory');
-            } catch(e) {
-                alert("Error during cleanup: " + e.message);
-            } finally {
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-            }
-        };
-
-        // --- 실시간 모바일 폼(QR) 접수 & 대시보드 연동 함수 ---
+        // --- QR LIVE PRAYERS LOGIC ---
         window.submitPublicPrayer = async (e) => {
-            e.preventDefault();
-            const name = document.getElementById('qrName').value.trim();
-            const content = document.getElementById('qrPrayer').value.trim();
-            if(!name || !content) return;
-            
-            const btn = document.getElementById('qrSubmitBtn');
-            btn.disabled = true; btn.innerHTML = `<span class="loading-spinner-white"></span> Sending...`;
-            
-            try {
-                if(window.addPublicPrayerToDb) {
-                    await window.addPublicPrayerToDb({
-                        name: name,
-                        content: content,
-                        status: 'new',
-                        timestamp: Date.now(),
-                        dateStr: new Date().toLocaleDateString()
-                    });
-                    document.getElementById('qrFormView').classList.add('hidden');
-                    document.getElementById('qrSuccessView').classList.remove('hidden');
-                } else {
-                    alert("System loading. Please try again in a few seconds.");
-                    btn.disabled = false; btn.innerHTML = `Send Request`;
-                }
-            } catch(err) {
-                alert("Error submitting request: " + err.message);
-                btn.disabled = false; btn.innerHTML = `Send Request`;
-            }
+            e.preventDefault(); const name = document.getElementById('qrName').value.trim(); const content = document.getElementById('qrPrayer').value.trim(); if(!name || !content) return;
+            const btn = document.getElementById('qrSubmitBtn'); btn.disabled = true; btn.innerHTML = `<span class="loading-spinner-white"></span> Sending...`;
+            try { if(window.addPublicPrayerToDb) { await window.addPublicPrayerToDb({ name: name, content: content, status: 'new', timestamp: Date.now(), dateStr: new Date().toLocaleDateString() }); document.getElementById('qrFormView').classList.add('hidden'); document.getElementById('qrSuccessView').classList.remove('hidden'); } else { alert("System loading."); btn.disabled = false; btn.innerHTML = `Send Request`; } } catch(err) { alert("Error: " + err.message); btn.disabled = false; btn.innerHTML = `Send Request`; }
         };
 
         window.updateLivePrayerDashboard = () => {
-            const count = window.livePrayers.length;
-            const dashCount = document.getElementById('dashLivePrayerCount');
-            const badge = document.getElementById('qrBadge');
-            const list = document.getElementById('dashLivePrayerList');
-            
-            if(dashCount) dashCount.innerText = `${count} New`;
-            if(badge) {
-                badge.innerText = count;
-                if(count > 0) badge.classList.remove('hidden'); else badge.classList.add('hidden');
-            }
-            
+            const c = window.livePrayers.length; const dc = document.getElementById('dashLivePrayerCount'); const bdg = document.getElementById('qrBadge'); const list = document.getElementById('dashLivePrayerList');
+            if(dc) dc.innerText = `${c} New`; if(bdg) { bdg.innerText = c; if(c>0) bdg.classList.remove('hidden'); else bdg.classList.add('hidden'); }
             if(list) {
-                if(count === 0) {
-                    list.innerHTML = `<p class="text-slate-400 text-xs font-bold text-center mt-4 uppercase tracking-widest">Waiting for incoming requests...</p>`;
-                } else {
-                    list.innerHTML = window.livePrayers.map(p => `
-                        <div class="bg-white p-4 border border-slate-200 rounded-xl shadow-[0_2px_4px_rgba(0,0,0,0.02)]">
-                            <div class="flex justify-between items-center mb-2">
-                                <span class="font-black text-sm text-slate-800">${p.name}</span>
-                                <span class="text-[9px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded uppercase">${new Date(p.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
-                            </div>
-                            <p class="text-sm text-slate-600 font-medium leading-relaxed">${p.content}</p>
-                        </div>
-                    `).join('');
-                }
+                if(c===0) list.innerHTML = `<p class="text-slate-400 text-xs font-bold text-center mt-4 uppercase tracking-widest">Waiting for incoming requests...</p>`;
+                else list.innerHTML = window.livePrayers.map(p => `<div class="bg-white p-4 border border-slate-200 rounded-xl shadow-[0_2px_4px_rgba(0,0,0,0.02)]"><div class="flex justify-between items-center mb-2"><span class="font-black text-sm text-slate-800">${p.name}</span><span class="text-[9px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded uppercase">${new Date(p.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span></div><p class="text-sm text-slate-600 font-medium leading-relaxed">${p.content}</p></div>`).join('');
             }
         };
 
         window.sendToPrayerTab = () => {
             if(window.livePrayers.length === 0) return alert("No new requests to process.");
-            
-            // 날짜 기본값 세팅
-            const dateInput = document.getElementById('qrPrayerDate');
-            if (!dateInput.value) dateInput.value = new Date().toISOString().split('T')[0];
-            
-            // 텍스트 합치기 및 포맷팅 (AI 결과물과 동일한 양식)
-            const formattedText = window.livePrayers.map(p => `- ${p.name}: ${p.content}`).join('\n');
-            document.getElementById('qrPrayerResultText').value = formattedText;
-            
-            // 처리할 ID 임시 저장 (저장 누를 때 상태 변경용)
+            const d = document.getElementById('qrPrayerDate'); if (!d.value) d.value = new Date().toISOString().split('T')[0];
+            document.getElementById('qrPrayerResultText').value = window.livePrayers.map(p => `- ${p.name}: ${p.content}`).join('\n');
             window.processingPrayerIds = window.livePrayers.map(p => p.id);
-            
             window.showTab('qr-prayers', document.getElementById('nav-qr-btn'));
         };
 
         window.saveQRPrayerList = async () => {
-            const dv = document.getElementById('qrPrayerDate').value; 
-            const fd = dv ? `${dv.split('-')[1]}/${dv.split('-')[2]}/${dv.split('-')[0]}` : new Date().toLocaleDateString(); 
-            const txt = document.getElementById('qrPrayerResultText').value; 
-            if(!txt.trim()) return alert("List is empty.");
-            
-            // 1. 구글 드라이브 업로드용 워드(.docx) 파일 생성 및 다운로드 (웹앱 보안상 직접 동기화의 유일하고 완벽한 대안)
-            try { 
-                const { Document, Paragraph, TextRun, Packer } = docx; 
-                const d = new Document({ sections: [{ children: [new Paragraph({ children: [new TextRun({ text: `Online Prayer Requests (${fd})`, font: "Times New Roman", size: 28, bold: true })] }), ...txt.split('\n').filter(l => l.trim()).map(line => new Paragraph({ children: [new TextRun({ text: line.trim(), font: "Times New Roman", size: 24 })], spacing: { before: 120 } }))] }] }); 
-                const b = await Packer.toBlob(d); 
-                saveAs(b, `SUMC_Online_Prayers_${fd.replace(/\//g,'_')}.docx`); 
-            } catch(e) { console.error("Word Doc Gen Error", e); }
-            
-            // 2. 디렉토리 프로필 업데이트 및 큐(Queue) 비우기
-            if(window.updatePrayerInDb && window.markPrayerAsProcessed) { 
+            const dv = document.getElementById('qrPrayerDate').value; const fd = dv ? `${dv.split('-')[1]}/${dv.split('-')[2]}/${dv.split('-')[0]}` : new Date().toLocaleDateString(); const txt = document.getElementById('qrPrayerResultText').value; if(!txt.trim()) return alert("List is empty.");
+            try { const { Document, Paragraph, TextRun, Packer } = docx; const d = new Document({ sections: [{ children: [new Paragraph({ children: [new TextRun({ text: `Online Prayer Requests (${fd})`, font: "Times New Roman", size: 28, bold: true })] }), ...txt.split('\n').filter(l => l.trim()).map(line => new Paragraph({ children: [new TextRun({ text: line.trim(), font: "Times New Roman", size: 24 })], spacing: { before: 120 } }))] }] }); const b = await Packer.toBlob(d); saveAs(b, `SUMC_Online_Prayers_${fd.replace(/\//g,'_')}.docx`); } catch(e) { console.error("Word Doc Gen Error", e); }
+            if(window.updatePrayerInDb && window.deletePublicPrayerFromDb) { 
                 const lines = txt.split('\n'); let cnt = 0; 
-                
-                // 멤버 데이터베이스 갱신
                 for(let line of lines) { 
-                    const match = line.match(/^([^:]+):\s*(.*)$/); 
-                    if(match) { 
-                        const name = match[1].trim().toLowerCase(); 
-                        const target = window.members.find(m => name.includes(m.firstName.toLowerCase()) && name.includes(m.lastName.toLowerCase())); 
-                        
-                        if(target) { 
-                            const newLog = `- ${match[2].trim()} (${fd})`; 
-                            let updatedPrayers = newLog;
-                            
-                            if (target.prayers) {
-                                const filtered = target.prayers.split('\n').filter(p => !p.trim().endsWith(`(${fd})`));
-                                filtered.push(newLog);
-                                updatedPrayers = filtered.join('\n');
-                            }
-                            
-                            await window.updatePrayerInDb(target.id, updatedPrayers); 
-                            target.prayers = updatedPrayers;
-                            cnt++; 
-                        } 
+                    const m = line.match(/^([^:]+):\s*(.*)$/); 
+                    if(m) { 
+                        const name = m[1].trim().toLowerCase(); const t = window.members.find(x => name.includes(x.firstName.toLowerCase()) && name.includes(x.lastName.toLowerCase())); 
+                        if(t) { const nl = `- ${m[2].trim()} (${fd})`; let up = nl; if (t.prayers) { const f = t.prayers.split('\n').filter(p => !p.trim().endsWith(`(${fd})`)); f.push(nl); up = f.join('\n'); } await window.updatePrayerInDb(t.id, up); t.prayers = up; cnt++; } 
                     } 
                 }
-                
-                // 대기열 비우기 (Firebase 상태를 'processed'로 변경)
-                for(let pid of window.processingPrayerIds) {
-                    await window.markPrayerAsProcessed(pid);
-                }
-                window.processingPrayerIds = [];
-                document.getElementById('qrPrayerResultText').value = '';
-                
-                alert(`Saved! Profiles updated: ${cnt} matched.\nA document file has been downloaded. Please drag and drop it into your Google Drive.`); 
-                window.showTab('dashboard', document.querySelectorAll('.nav-btn')[0]);
+                for(let pid of window.processingPrayerIds) { await window.deletePublicPrayerFromDb(pid); }
+                window.processingPrayerIds = []; document.getElementById('qrPrayerResultText').value = '';
+                alert(`Saved! Profiles updated: ${cnt} matched.\nA document file has been downloaded.`); window.showTab('dashboard', document.querySelectorAll('.nav-btn')[0]);
             }
         };
 
+        window.cleanupDuplicatePrayers = async () => {
+            if(!confirm("Clean up existing duplicate prayer records?")) return;
+            let uc = 0; const btn = document.querySelector('button[onclick="window.cleanupDuplicatePrayers()"]'); const ot = btn.innerHTML; btn.innerHTML = `<span class="loading-spinner-dark"></span>`; btn.disabled = true;
+            try {
+                for (const m of window.members) {
+                    if (!m.prayers) continue; const lines = m.prayers.split('\n'); const uq = []; const sd = new Set();
+                    for (let i = lines.length - 1; i >= 0; i--) { const l = lines[i].trim(); if (!l) continue; const dm = l.match(/\(([\d/]+)\)$/); if (dm) { const d = dm[1]; if (!sd.has(d)) { sd.add(d); uq.unshift(l); } } else { uq.unshift(l); } }
+                    const np = uq.join('\n'); if (np !== m.prayers) { if(window.updatePrayerInDb) { await window.updatePrayerInDb(m.id, np); m.prayers = np; uc++; } }
+                }
+                alert(`Cleanup complete! Fixed ${uc} member(s).`); window.showTab('directory');
+            } catch(e) { alert("Error: " + e.message); } finally { btn.innerHTML = ot; btn.disabled = false; }
+        };
     </script>
 
     <script type="module">
@@ -1302,39 +831,24 @@ const firebaseConfig = {
             const app = initializeApp(firebaseConfig); const auth = getAuth(app); const db = getFirestore(app);
             const appId = "sumc-2026-production-db"; 
             
-            // 데이터베이스 통신 함수 연결
             window.saveKeyToCloud = async (key, calId) => { try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'config', 'system'), { geminiKey: key, calendarId: calId || "" }, { merge: true }); } catch(e) { console.error(e); } };
             window.updatePrayerInDb = async (id, p) => { await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'members', id), { prayers: p }); };
-            
-            // 신규: 모바일 폼 데이터 저장 및 상태 변경
             window.addPublicPrayerToDb = async (data) => { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'online_prayers', data.timestamp.toString()), data); };
-            window.markPrayerAsProcessed = async (pid) => { await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'online_prayers', pid), { status: 'processed' }); };
+            window.deletePublicPrayerFromDb = async (pid) => { await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'online_prayers', pid)); };
 
             signInAnonymously(auth).then(() => {
                 onAuthStateChanged(auth, (user) => {
                     if (user) {
-                        // Admin 접속일 경우 (QR 모드가 아닐 때만 UI 반영)
-                        if(!urlParams.get('mode')) {
-                            document.getElementById('cloudStatusIndicator').innerText = "Online"; document.getElementById('cloudStatusIndicator').className = "text-[10px] text-emerald-500 uppercase tracking-widest font-black"; document.getElementById('statusDot').className = "w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]";
-                        }
+                        if(!urlParams.get('mode')) { document.getElementById('cloudStatusIndicator').innerText = "Online"; document.getElementById('cloudStatusIndicator').className = "text-[10px] text-emerald-500 uppercase tracking-widest font-black"; document.getElementById('statusDot').className = "w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"; }
                         
                         onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'members'), (snap) => { window.members = snap.docs.map(d => ({ id: d.id, ...d.data() })); if(!urlParams.get('mode')) { window.updateDashboard(); window.renderDirectory(); } });
                         onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'attendance'), (snap) => { window.attendanceRecords = snap.docs.map(d => ({ id: d.id, ...d.data() })); if(!urlParams.get('mode')) window.updateDashboard(); });
                         
-                        // 신규: 실시간 기도제목 수신 (status 가 'new' 인 것만)
                         const q = query(collection(db, 'artifacts', appId, 'public', 'data', 'online_prayers'), where('status', '==', 'new'));
-                        onSnapshot(q, (snap) => {
-                            window.livePrayers = snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a,b) => a.timestamp - b.timestamp);
-                            if(!urlParams.get('mode')) window.updateLivePrayerDashboard();
-                        });
+                        onSnapshot(q, (snap) => { window.livePrayers = snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a,b) => a.timestamp - b.timestamp); if(!urlParams.get('mode')) window.updateLivePrayerDashboard(); });
 
                         onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'config', 'system'), (snap) => { 
-                            if(snap.exists()) { 
-                                const data = snap.data();
-                                if(data.geminiKey) { window.currentApiKey = data.geminiKey; localStorage.setItem('sumc_gemini_key', window.currentApiKey); }
-                                if(data.calendarId) { window.currentCalendarId = data.calendarId; localStorage.setItem('sumc_calendar_id', window.currentCalendarId); }
-                                if(!urlParams.get('mode')) { window.restoreSettingsOnLoad(); window.updateDashboard(); }
-                            } 
+                            if(snap.exists()) { const data = snap.data(); if(data.geminiKey) { window.currentApiKey = data.geminiKey; localStorage.setItem('sumc_gemini_key', window.currentApiKey); } if(data.calendarId) { window.currentCalendarId = data.calendarId; localStorage.setItem('sumc_calendar_id', window.currentCalendarId); } if(!urlParams.get('mode')) { window.restoreSettingsOnLoad(); window.updateDashboard(); } } 
                         });
                     }
                 });
