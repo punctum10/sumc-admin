@@ -66,6 +66,50 @@
 </head>
 <body class="flex h-screen overflow-hidden relative text-slate-800">
 
+    <!-- 📱 QR CODE PUBLIC FORM (성도용 모바일 화면) -->
+    <div id="publicApp" class="fixed inset-0 z-[200] bg-slate-100 hidden flex-col items-center justify-start pt-8 px-4 overflow-y-auto pb-10">
+        <div class="max-w-md w-full bg-white rounded-3xl shadow-xl overflow-hidden border border-slate-200">
+            <!-- Header -->
+            <div class="bg-slate-900 px-6 py-5 text-center relative">
+                <img src="SUMC%20Logo%20(%EC%95%84%EC%9D%B4%EC%BD%98).png" alt="Logo" class="h-10 mx-auto mb-2 object-contain" onerror="this.style.display='none';">
+                <h1 class="text-white font-black tracking-tight text-xl">SUMC Care</h1>
+                <p class="text-slate-400 text-xs font-bold uppercase tracking-widest mt-1">Digital Prayer Request</p>
+            </div>
+            
+            <!-- Message Style Form -->
+            <div id="qrFormView" class="p-6 md:p-8 bg-slate-50 flex flex-col gap-5">
+                <div class="bg-white p-4 rounded-2xl rounded-tl-sm border border-slate-200 shadow-sm self-start max-w-[90%] text-sm font-medium text-slate-700">
+                    Hello! 🙏<br>Please leave your prayer requests or joys below. Our pastor and intercessory team will pray for you.
+                </div>
+                
+                <form onsubmit="window.submitPublicPrayer(event)" class="flex flex-col gap-4 mt-2">
+                    <div>
+                        <label class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1 block pl-1">Your Name</label>
+                        <input type="text" id="qrName" required placeholder="e.g., John Doe" class="w-full bg-white border border-slate-300 rounded-2xl px-4 py-3 font-bold text-slate-800 shadow-inner focus:border-slate-800 focus:ring-1 focus:ring-slate-800 transition">
+                    </div>
+                    <div>
+                        <label class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1 block pl-1">Prayer / Joy</label>
+                        <textarea id="qrPrayer" required placeholder="Type your message here..." rows="5" class="w-full bg-white border border-slate-300 rounded-2xl px-4 py-3 text-slate-800 shadow-inner focus:border-slate-800 focus:ring-1 focus:ring-slate-800 transition resize-none"></textarea>
+                    </div>
+                    <button type="submit" id="qrSubmitBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-black text-lg py-4 rounded-2xl shadow-lg shadow-blue-600/30 transition flex items-center justify-center gap-2 mt-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+                        Send Request
+                    </button>
+                </form>
+            </div>
+            
+            <!-- Success Screen -->
+            <div id="qrSuccessView" class="hidden p-10 bg-white flex-col items-center justify-center text-center h-[400px]">
+                <div class="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mb-6">
+                    <span class="text-4xl">🕊️</span>
+                </div>
+                <h2 class="text-2xl font-black text-slate-900 mb-3">Sent Successfully</h2>
+                <p class="text-sm font-medium text-slate-500 leading-relaxed">Thank you. Your request has been securely delivered to the pastoral team.</p>
+                <button onclick="location.reload()" class="mt-8 text-xs font-bold text-slate-400 hover:text-slate-700 uppercase tracking-widest underline">Submit Another</button>
+            </div>
+        </div>
+    </div>
+
     <!-- 🔐 LOGIN OVERLAY -->
     <div id="loginScreen" class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-100/95 backdrop-blur-md transition-opacity duration-500">
         <!-- 로그인 박스 너비를 조금 더 넓게 조정 (max-w-sm -> max-w-md) -->
@@ -103,8 +147,8 @@
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
-            <!-- 버전 5.14로 업데이트 -->
-            <span class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mt-1 ml-1">Care AI (v.5.14)</span>
+            <!-- 버전 5.15로 업데이트 -->
+            <span class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mt-1 ml-1">Care AI (v.5.15)</span>
         </div>
         
         <div class="px-6 py-4 flex items-center gap-2 border-b border-slate-50 bg-slate-50/50">
@@ -117,9 +161,10 @@
             <button onclick="window.showTab('attendance', this)" class="nav-btn"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>Attendance</button>
             <button onclick="window.showTab('directory', this)" class="nav-btn"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>Directory</button>
             <button onclick="window.showTab('calendar', this)" class="nav-btn"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>Calendar</button>
-            <!-- 위원회 및 참여 사역 메뉴 영어로 변경 -->
             <button onclick="window.showTab('committees', this)" class="nav-btn"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>Committees & Ministries</button>
-            <button onclick="window.showTab('prayer-list', this)" class="nav-btn"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>Prayer List</button>
+            <button onclick="window.showTab('prayer-list', this)" class="nav-btn"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>Prayer List (AI)</button>
+            <!-- 신규: QR 실시간 기도제목 탭 추가 -->
+            <button id="nav-qr-btn" onclick="window.showTab('qr-prayers', this)" class="nav-btn relative"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>Live Prayers (QR)<span id="qrBadge" class="absolute right-4 bg-red-600 text-white text-[9px] font-black px-2 py-0.5 rounded-full hidden">0</span></button>
             <button onclick="window.showTab('data-import', this)" class="nav-btn"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>Bulk Import</button>
             <button onclick="window.showTab('settings-tab', this)" class="nav-btn"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>Settings</button>
         </nav>
@@ -144,8 +189,8 @@
                 <img src="SUMC%20Logo%20(%EC%95%84%EC%9D%B4%EC%BD%98).png" alt="Icon" class="h-8 w-auto object-contain">
                 <div class="flex flex-col">
                     <h1 class="text-lg font-black text-slate-900 leading-none">SUMC Care AI</h1>
-                    <!-- 버전 5.14로 업데이트 -->
-                    <span class="text-[9px] font-bold text-slate-500 tracking-widest mt-1 uppercase">(v.5.14)</span>
+                    <!-- 버전 5.15로 업데이트 -->
+                    <span class="text-[9px] font-bold text-slate-500 tracking-widest mt-1 uppercase">(v.5.15)</span>
                 </div>
             </div>
             <button onclick="window.toggleSidebar(); event.stopPropagation();" class="p-2 text-slate-600 focus:outline-none bg-slate-100 rounded-lg hover:bg-slate-200 transition"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg></button>
@@ -219,6 +264,26 @@
                                     </div>
                                 </div>
                             </div>
+                        </div>
+
+                        <!-- 신규: Live QR Prayer Requests 대시보드 연동 -->
+                        <div class="bg-white rounded-2xl border border-slate-100 shadow-[0_4px_12px_-2px_rgba(0,0,0,0.04)] p-6 flex flex-col col-span-1 lg:col-span-2 mt-2">
+                            <div class="flex justify-between items-center mb-6 border-b border-slate-100 pb-4">
+                                <h3 class="text-sm font-extrabold uppercase tracking-widest text-slate-900 flex items-center gap-2">
+                                    <span class="animate-pulse w-2.5 h-2.5 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]"></span> 
+                                    Live QR Prayer Requests
+                                </h3>
+                                <span id="dashLivePrayerCount" class="bg-slate-100 text-slate-600 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest">0 New</span>
+                            </div>
+                            
+                            <div id="dashLivePrayerList" class="flex-1 overflow-y-auto max-h-60 space-y-3 mb-6 p-4 bg-[#f8fafc] rounded-xl border border-slate-200 shadow-inner">
+                                <p class="text-slate-400 text-xs font-bold text-center mt-4">Waiting for incoming requests...</p>
+                            </div>
+                            
+                            <button onclick="window.sendToPrayerTab()" class="btn-primary py-4 rounded-xl font-bold w-full md:w-auto px-10 shadow-md self-end flex items-center justify-center gap-2 text-sm uppercase tracking-widest">
+                                Send to Editor 
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -361,6 +426,34 @@
                     </div>
                 </div>
 
+                <!-- 신규 탭: LIVE PRAYERS (QR 전용 편집창) -->
+                <div id="qr-prayers" class="tab-content space-y-6">
+                    <div class="card p-6 md:p-10 border-t-4 border-red-600 shadow-xl mt-6 relative overflow-hidden">
+                        <div class="absolute top-0 right-0 p-8 opacity-5"><svg class="w-32 h-32" fill="currentColor" viewBox="0 0 20 20"><path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"></path></svg></div>
+                        <h2 class="text-2xl font-black text-slate-900 mb-6 border-b border-slate-100 pb-4 relative z-10">Live Digital Prayers</h2>
+                        
+                        <div class="space-y-6 relative z-10">
+                            <div class="w-full md:w-64">
+                                <label class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-2 block">Date of Record</label>
+                                <input type="date" id="qrPrayerDate" class="bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-800 w-full">
+                            </div>
+                            
+                            <div>
+                                <label class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-2 block">Incoming Requests Editor</label>
+                                <textarea id="qrPrayerResultText" rows="12" class="w-full bg-slate-50 font-serif-formatted text-lg leading-relaxed p-6 resize-y border border-slate-200 rounded-2xl focus:border-slate-800 focus:bg-white transition shadow-inner" placeholder="Requests sent from the dashboard will appear here. Edit formatting if necessary before saving..."></textarea>
+                            </div>
+                            
+                            <div class="pt-6 border-t border-slate-100">
+                                <button onclick="window.saveQRPrayerList()" class="btn-primary w-full py-4 rounded-xl font-bold shadow-md text-base flex items-center justify-center gap-2">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
+                                    Save to Profiles & Download for Drive
+                                </button>
+                                <p class="text-center text-slate-400 text-[10px] mt-4 uppercase tracking-widest font-bold">This will automatically clear the dashboard queue.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- 탭: PROFILE VIEW -->
                 <div id="profile-view" class="tab-content space-y-6">
                     <button onclick="window.showTab('directory', document.querySelectorAll('.nav-btn')[2])" class="text-sm font-bold text-slate-500 hover:text-slate-900 flex items-center gap-2 mb-4">&larr; Back to Directory</button>
@@ -430,13 +523,27 @@
 
     <!-- SCRIPT ENGINE -->
     <script>
-        // --- 🔐 LOGIN & SIDEBAR LOGIC ---
+        // --- 🚀 ROUTING & INITIALIZATION LOGIC ---
+        const urlParams = new URLSearchParams(window.location.search);
+        const isQrMode = urlParams.get('mode') === 'qr';
+
         document.addEventListener("DOMContentLoaded", () => {
-            if (localStorage.getItem('sumc_auth_token') === 'verified') {
-                document.getElementById('loginScreen').classList.add('hidden');
-                window.restoreSettingsOnLoad();
+            if (isQrMode) {
+                // QR 모드일 경우 앱UI, 로그인 숨기고 폼만 표시
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('sidebar').style.display = 'none';
+                document.querySelector('main').parentElement.style.display = 'none';
+                document.getElementById('publicApp').classList.remove('hidden');
+                document.body.classList.remove('overflow-hidden'); 
+            } else {
+                if (localStorage.getItem('sumc_auth_token') === 'verified') {
+                    document.getElementById('loginScreen').classList.add('hidden');
+                    window.restoreSettingsOnLoad();
+                }
             }
         });
+
+        // --- 🔐 LOGIN & SIDEBAR LOGIC ---
         window.handleLogin = (e) => {
             e.preventDefault();
             if (document.getElementById('loginId').value === 'admin' && document.getElementById('loginPw').value === 'admin') {
@@ -456,6 +563,7 @@
         // --- CORE STATE & CHART THEMING ---
         Chart.defaults.color = '#64748b'; Chart.defaults.borderColor = 'rgba(0,0,0,0.05)'; Chart.defaults.font.family = 'Inter'; Chart.register(ChartDataLabels);
         window.members = []; window.attendanceRecords = []; window.mainChart = null; window.profileChart = null;
+        window.livePrayers = []; window.processingPrayerIds = []; // 실시간 기도제목 상태 관리
         window.currentApiKey = localStorage.getItem('sumc_gemini_key') || "";
         window.currentCalendarId = localStorage.getItem('sumc_calendar_id') || "";
         window.currentAiModel = localStorage.getItem('sumc_gemini_model') || "gemini-1.5-flash-latest"; 
@@ -1041,12 +1149,144 @@ ${yt || 'None provided'}`;
                 btn.disabled = false;
             }
         };
+
+        // --- 실시간 모바일 폼(QR) 접수 & 대시보드 연동 함수 ---
+        window.submitPublicPrayer = async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('qrName').value.trim();
+            const content = document.getElementById('qrPrayer').value.trim();
+            if(!name || !content) return;
+            
+            const btn = document.getElementById('qrSubmitBtn');
+            btn.disabled = true; btn.innerHTML = `<span class="loading-spinner-white"></span> Sending...`;
+            
+            try {
+                if(window.addPublicPrayerToDb) {
+                    await window.addPublicPrayerToDb({
+                        name: name,
+                        content: content,
+                        status: 'new',
+                        timestamp: Date.now(),
+                        dateStr: new Date().toLocaleDateString()
+                    });
+                    document.getElementById('qrFormView').classList.add('hidden');
+                    document.getElementById('qrSuccessView').classList.remove('hidden');
+                } else {
+                    alert("System loading. Please try again in a few seconds.");
+                    btn.disabled = false; btn.innerHTML = `Send Request`;
+                }
+            } catch(err) {
+                alert("Error submitting request: " + err.message);
+                btn.disabled = false; btn.innerHTML = `Send Request`;
+            }
+        };
+
+        window.updateLivePrayerDashboard = () => {
+            const count = window.livePrayers.length;
+            const dashCount = document.getElementById('dashLivePrayerCount');
+            const badge = document.getElementById('qrBadge');
+            const list = document.getElementById('dashLivePrayerList');
+            
+            if(dashCount) dashCount.innerText = `${count} New`;
+            if(badge) {
+                badge.innerText = count;
+                if(count > 0) badge.classList.remove('hidden'); else badge.classList.add('hidden');
+            }
+            
+            if(list) {
+                if(count === 0) {
+                    list.innerHTML = `<p class="text-slate-400 text-xs font-bold text-center mt-4 uppercase tracking-widest">Waiting for incoming requests...</p>`;
+                } else {
+                    list.innerHTML = window.livePrayers.map(p => `
+                        <div class="bg-white p-4 border border-slate-200 rounded-xl shadow-[0_2px_4px_rgba(0,0,0,0.02)]">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="font-black text-sm text-slate-800">${p.name}</span>
+                                <span class="text-[9px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded uppercase">${new Date(p.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                            </div>
+                            <p class="text-sm text-slate-600 font-medium leading-relaxed">${p.content}</p>
+                        </div>
+                    `).join('');
+                }
+            }
+        };
+
+        window.sendToPrayerTab = () => {
+            if(window.livePrayers.length === 0) return alert("No new requests to process.");
+            
+            // 날짜 기본값 세팅
+            const dateInput = document.getElementById('qrPrayerDate');
+            if (!dateInput.value) dateInput.value = new Date().toISOString().split('T')[0];
+            
+            // 텍스트 합치기 및 포맷팅 (AI 결과물과 동일한 양식)
+            const formattedText = window.livePrayers.map(p => `- ${p.name}: ${p.content}`).join('\n');
+            document.getElementById('qrPrayerResultText').value = formattedText;
+            
+            // 처리할 ID 임시 저장 (저장 누를 때 상태 변경용)
+            window.processingPrayerIds = window.livePrayers.map(p => p.id);
+            
+            window.showTab('qr-prayers', document.getElementById('nav-qr-btn'));
+        };
+
+        window.saveQRPrayerList = async () => {
+            const dv = document.getElementById('qrPrayerDate').value; 
+            const fd = dv ? `${dv.split('-')[1]}/${dv.split('-')[2]}/${dv.split('-')[0]}` : new Date().toLocaleDateString(); 
+            const txt = document.getElementById('qrPrayerResultText').value; 
+            if(!txt.trim()) return alert("List is empty.");
+            
+            // 1. 구글 드라이브 업로드용 워드(.docx) 파일 생성 및 다운로드 (웹앱 보안상 직접 동기화의 유일하고 완벽한 대안)
+            try { 
+                const { Document, Paragraph, TextRun, Packer } = docx; 
+                const d = new Document({ sections: [{ children: [new Paragraph({ children: [new TextRun({ text: `Online Prayer Requests (${fd})`, font: "Times New Roman", size: 28, bold: true })] }), ...txt.split('\n').filter(l => l.trim()).map(line => new Paragraph({ children: [new TextRun({ text: line.trim(), font: "Times New Roman", size: 24 })], spacing: { before: 120 } }))] }] }); 
+                const b = await Packer.toBlob(d); 
+                saveAs(b, `SUMC_Online_Prayers_${fd.replace(/\//g,'_')}.docx`); 
+            } catch(e) { console.error("Word Doc Gen Error", e); }
+            
+            // 2. 디렉토리 프로필 업데이트 및 큐(Queue) 비우기
+            if(window.updatePrayerInDb && window.markPrayerAsProcessed) { 
+                const lines = txt.split('\n'); let cnt = 0; 
+                
+                // 멤버 데이터베이스 갱신
+                for(let line of lines) { 
+                    const match = line.match(/^([^:]+):\s*(.*)$/); 
+                    if(match) { 
+                        const name = match[1].trim().toLowerCase(); 
+                        const target = window.members.find(m => name.includes(m.firstName.toLowerCase()) && name.includes(m.lastName.toLowerCase())); 
+                        
+                        if(target) { 
+                            const newLog = `- ${match[2].trim()} (${fd})`; 
+                            let updatedPrayers = newLog;
+                            
+                            if (target.prayers) {
+                                const filtered = target.prayers.split('\n').filter(p => !p.trim().endsWith(`(${fd})`));
+                                filtered.push(newLog);
+                                updatedPrayers = filtered.join('\n');
+                            }
+                            
+                            await window.updatePrayerInDb(target.id, updatedPrayers); 
+                            target.prayers = updatedPrayers;
+                            cnt++; 
+                        } 
+                    } 
+                }
+                
+                // 대기열 비우기 (Firebase 상태를 'processed'로 변경)
+                for(let pid of window.processingPrayerIds) {
+                    await window.markPrayerAsProcessed(pid);
+                }
+                window.processingPrayerIds = [];
+                document.getElementById('qrPrayerResultText').value = '';
+                
+                alert(`Saved! Profiles updated: ${cnt} matched.\nA document file has been downloaded. Please drag and drop it into your Google Drive.`); 
+                window.showTab('dashboard', document.querySelectorAll('.nav-btn')[0]);
+            }
+        };
+
     </script>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, collection, onSnapshot, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, collection, onSnapshot, updateDoc, deleteDoc, query, where, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAqJPIupZD6ke0ecNLPmJHp-JcndLRIwaU",
@@ -1061,27 +1301,39 @@ const firebaseConfig = {
         if (!firebaseConfig.apiKey.startsWith("여기에")) {
             const app = initializeApp(firebaseConfig); const auth = getAuth(app); const db = getFirestore(app);
             const appId = "sumc-2026-production-db"; 
+            
+            // 데이터베이스 통신 함수 연결
             window.saveKeyToCloud = async (key, calId) => { try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'config', 'system'), { geminiKey: key, calendarId: calId || "" }, { merge: true }); } catch(e) { console.error(e); } };
             window.updatePrayerInDb = async (id, p) => { await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'members', id), { prayers: p }); };
+            
+            // 신규: 모바일 폼 데이터 저장 및 상태 변경
+            window.addPublicPrayerToDb = async (data) => { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'online_prayers', data.timestamp.toString()), data); };
+            window.markPrayerAsProcessed = async (pid) => { await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'online_prayers', pid), { status: 'processed' }); };
+
             signInAnonymously(auth).then(() => {
                 onAuthStateChanged(auth, (user) => {
                     if (user) {
-                        document.getElementById('cloudStatusIndicator').innerText = "Online"; document.getElementById('cloudStatusIndicator').className = "text-[10px] text-emerald-500 uppercase tracking-widest font-black"; document.getElementById('statusDot').className = "w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]";
-                        onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'members'), (snap) => { window.members = snap.docs.map(d => ({ id: d.id, ...d.data() })); window.updateDashboard(); window.renderDirectory(); });
-                        onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'attendance'), (snap) => { window.attendanceRecords = snap.docs.map(d => ({ id: d.id, ...d.data() })); window.updateDashboard(); });
+                        // Admin 접속일 경우 (QR 모드가 아닐 때만 UI 반영)
+                        if(!urlParams.get('mode')) {
+                            document.getElementById('cloudStatusIndicator').innerText = "Online"; document.getElementById('cloudStatusIndicator').className = "text-[10px] text-emerald-500 uppercase tracking-widest font-black"; document.getElementById('statusDot').className = "w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]";
+                        }
+                        
+                        onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'members'), (snap) => { window.members = snap.docs.map(d => ({ id: d.id, ...d.data() })); if(!urlParams.get('mode')) { window.updateDashboard(); window.renderDirectory(); } });
+                        onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'attendance'), (snap) => { window.attendanceRecords = snap.docs.map(d => ({ id: d.id, ...d.data() })); if(!urlParams.get('mode')) window.updateDashboard(); });
+                        
+                        // 신규: 실시간 기도제목 수신 (status 가 'new' 인 것만)
+                        const q = query(collection(db, 'artifacts', appId, 'public', 'data', 'online_prayers'), where('status', '==', 'new'));
+                        onSnapshot(q, (snap) => {
+                            window.livePrayers = snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a,b) => a.timestamp - b.timestamp);
+                            if(!urlParams.get('mode')) window.updateLivePrayerDashboard();
+                        });
+
                         onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'config', 'system'), (snap) => { 
                             if(snap.exists()) { 
                                 const data = snap.data();
-                                if(data.geminiKey) {
-                                    window.currentApiKey = data.geminiKey; 
-                                    localStorage.setItem('sumc_gemini_key', window.currentApiKey); 
-                                }
-                                if(data.calendarId) {
-                                    window.currentCalendarId = data.calendarId;
-                                    localStorage.setItem('sumc_calendar_id', window.currentCalendarId);
-                                }
-                                window.restoreSettingsOnLoad();
-                                window.updateDashboard(); 
+                                if(data.geminiKey) { window.currentApiKey = data.geminiKey; localStorage.setItem('sumc_gemini_key', window.currentApiKey); }
+                                if(data.calendarId) { window.currentCalendarId = data.calendarId; localStorage.setItem('sumc_calendar_id', window.currentCalendarId); }
+                                if(!urlParams.get('mode')) { window.restoreSettingsOnLoad(); window.updateDashboard(); }
                             } 
                         });
                     }
