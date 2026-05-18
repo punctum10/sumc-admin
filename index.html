@@ -112,14 +112,14 @@
         <div class="p-6 border-b border-white/10 flex flex-col cursor-pointer hover:bg-white/5 transition" onclick="window.showTab('dashboard', document.querySelectorAll('.nav-btn')[0])">
             <div class="flex justify-between items-start mb-2">
                 <img src="SUMC%20Logo%20(%EA%B0%80%EB%A1%9C).png" alt="SUMC Logo" class="h-[100px] w-auto max-w-full object-contain" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                <h1 class="hidden text-2xl font-black text-white leading-tight">SUMC <span class="text-red-500">Care AI</span></h1>
+                <h1 class="hidden text-2xl font-black text-white leading-tight">SUMC <span class="text-red-600">Care AI</span></h1>
                 
                 <button class="md:hidden text-slate-400 hover:text-white p-2 -mt-1 bg-white/10 rounded-lg transition" onclick="window.toggleSidebar(); event.stopPropagation();">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
-            <!-- 버전 6.05로 업데이트 -->
-            <span class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mt-1 ml-1">Care AI (v.6.05)</span>
+            <!-- 버전 6.06 업데이트 -->
+            <span class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mt-1 ml-1">Care AI (v.6.06)</span>
         </div>
         
         <div class="px-6 py-4 flex items-center gap-2 border-b border-white/5 bg-black/20">
@@ -137,7 +137,7 @@
             <button onclick="window.showTab('prayer-list', this)" class="nav-btn"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>Prayer List (AI)</button>
             <button id="nav-qr-btn" onclick="window.showTab('qr-prayers', this)" class="nav-btn relative"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>Live Prayers (QR)<span id="qrBadge" class="absolute right-4 bg-red-600 text-white text-[9px] font-black px-2 py-0.5 rounded-full hidden">0</span></button>
             <button onclick="window.showTab('data-import', this)" class="nav-btn"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>Bulk Import</button>
-            <button onclick="window.showTab('settings-tab', this)" class="nav-btn"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>Settings</button>
+            <button onclick="window.showTab('settings-tab', this)" class="nav-btn"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31(2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>Settings</button>
         </nav>
 
         <div class="p-4 border-t border-white/10 space-y-3 bg-black/20">
@@ -160,8 +160,8 @@
                 <img src="SUMC%20Logo%20(%EC%95%84%EC%9D%B4%EC%BD%98).png" alt="Icon" class="h-8 w-auto object-contain">
                 <div class="flex flex-col">
                     <h1 class="text-lg font-black text-slate-900 leading-none">SUMC Care AI</h1>
-                    <!-- 버전 6.05로 업데이트 -->
-                    <span class="text-[9px] font-bold text-slate-500 tracking-widest mt-1 uppercase">(v.6.05)</span>
+                    <!-- 버전 6.06 업데이트 -->
+                    <span class="text-[9px] font-bold text-slate-500 tracking-widest mt-1 uppercase">(v.6.06)</span>
                 </div>
             </div>
             <button onclick="window.toggleSidebar(); event.stopPropagation();" class="p-2 text-slate-600 focus:outline-none bg-slate-100 rounded-lg hover:bg-slate-200 transition"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg></button>
@@ -231,7 +231,7 @@
                         </button>
                     </div>
 
-                    <!-- 신규: Pastoral AI Assistant (대화창 복원) -->
+                    <!-- Pastoral AI Assistant (대화창) -->
                     <div class="bg-white rounded-2xl border border-slate-100 shadow-[0_4px_12px_-2px_rgba(0,0,0,0.04)] p-6 flex flex-col mt-6 h-[500px]">
                         <div class="flex justify-between items-center mb-4 border-b border-slate-100 pb-4">
                             <h3 class="text-sm font-extrabold uppercase tracking-widest text-slate-900 flex items-center gap-2">
@@ -514,13 +514,14 @@
         };
 
         window.restoreSettingsOnLoad = () => { if(window.currentApiKey) document.getElementById('apiKeyInput').value = window.currentApiKey; if(window.currentCalendarId) document.getElementById('calendarIdInput').value = window.currentCalendarId; window.updateCalendarIframes(); };
+        
+        // 🔒 [v.6.06 지정 패치] 이 환경에서 유일하게 지원되는 'gemini-2.5-flash-preview-09-2025' 모델로 키 검증 주소 고정
         window.verifyAndSaveApiKey = async () => {
             const key = document.getElementById('apiKeyInput').value.trim(); const calId = document.getElementById('calendarIdInput').value.trim();
             if (!key) return alert("Please enter API Key.");
             const btn = document.getElementById('verifyKeyBtn'); btn.innerHTML = `<span class="loading-spinner-white"></span>`; btn.disabled = true;
             try {
-                // 꼬리표를 뗀 자동 업데이트 명칭(gemini-1.5-flash)으로 적용
-                const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents: [{ parts: [{ text: "ping" }] }] }) });
+                const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${key}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents: [{ parts: [{ text: "ping" }] }] }) });
                 if (!r.ok) throw new Error("Invalid Key");
                 window.currentApiKey = key; localStorage.setItem('sumc_gemini_key', key);
                 window.currentCalendarId = calId; localStorage.setItem('sumc_calendar_id', calId);
@@ -746,6 +747,7 @@
             } catch (err) { ta.value = "Error: " + err.message; document.getElementById('transcriptDocIcon').innerText = '❌'; }
         };
         
+        // 🔒 [v.6.06 지정 패치] 'gemini-2.5-flash-preview-09-2025' 전용 모델로 API 엔드포인트 고정
         window.generatePrayerList = async () => {
             try {
                 const k = window.currentApiKey; if(!k) { alert("API Key is missing! Please authenticate in Settings."); return; }
@@ -761,8 +763,9 @@ Guidelines:
 4. DO NOT hallucinate. DO NOT invent names. Output "No valid prayer requests found" if none exist.
 Text: ${yt || 'None'}`;
                 const payload = { systemInstruction: { parts: [{ text: "Strict intercessory assistant. Fact extraction only. No hallucination." }] }, contents: [{ role: "user", parts: [{ text: prompt }, ...(window.prayerImageBase64 ? [{ inlineData: { mimeType: window.prayerImageMimeType || "image/jpeg", data: window.prayerImageBase64 } }] : [])] }], generationConfig: { temperature: 0.0 } };
-                // 꼬리표를 뗀 자동 업데이트 명칭(gemini-1.5-flash)으로 적용
-                const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${k}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                
+                // 샌드박스 보안 규칙에 맞춰 모델명을 2.5 flash preview로 하드코딩
+                const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${k}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
                 const d = await r.json(); if (d.error) throw new Error(d.error.message);
                 res.value = d.candidates?.[0]?.content?.parts?.[0]?.text || "No text extracted.";
             } catch(e) { alert("AI Failed: " + e.message); } 
@@ -841,6 +844,7 @@ Text: ${yt || 'None'}`;
         };
 
         // --- PASTORAL AI CHAT LOGIC ---
+        // 🔒 [v.6.06 지정 패치] Pastoral Assistant의 모델 역시 'gemini-2.5-flash-preview-09-2025'로 완벽 교체
         window.sendAiChatMessage = async (e) => {
             e.preventDefault();
             const input = document.getElementById('aiChatInput');
@@ -860,11 +864,12 @@ Text: ${yt || 'None'}`;
                 
                 // 목회 상황을 반영하기 위해 현재 DB 데이터를 간추려 컨텍스트로 전달
                 const contextData = { members: window.members.map(m => ({ name: m.firstName + ' ' + m.lastName, isAdult: m.isAdult, visitor: m.isNonMember, prayers: m.prayers })), attendance: window.attendanceRecords };
-                const sysPrompt = `You are a pastoral assistant AI for a UMC church in the US. Answer the pastor's questions based on the database context. Be concise, polite, and pastoral. Do NOT hallucinate names. DB Context: ${JSON.stringify(contextData).substring(0, 50000)}`;
+                const sysPrompt = `You are a pastoral assistant AI for Sussex United Methodist Church (UMC) in the US. Answer the pastor's questions based on the database context. Be concise, polite, and pastoral. Do NOT hallucinate names. DB Context: ${JSON.stringify(contextData).substring(0, 50000)}`;
 
                 const payload = { systemInstruction: { parts: [{ text: sysPrompt }] }, contents: [...window.chatHistory, { role: "user", parts: [{ text: msg }] }], generationConfig: { temperature: 0.3 } };
-                // 꼬리표를 뗀 자동 업데이트 명칭(gemini-1.5-flash)으로 적용
-                const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${k}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                
+                // 샌드박스에서 안정적으로 반응하는 프리뷰 엔드포인트 호출
+                const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${k}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
                 const d = await r.json(); if (d.error) throw new Error(d.error.message);
                 
                 const reply = d.candidates?.[0]?.content?.parts?.[0]?.text || "No response.";
@@ -900,7 +905,6 @@ const firebaseConfig = {
   appId: "1:50235569152:web:3d708d469624680a3014e5",
   measurementId: "G-BJT0DEGZ36"
 };
-
         if (!firebaseConfig.apiKey.startsWith("여기에")) {
             const app = initializeApp(firebaseConfig); const auth = getAuth(app); const db = getFirestore(app);
             const appId = "sumc-2026-production-db"; 
