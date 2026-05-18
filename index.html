@@ -118,8 +118,8 @@
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
-            <!-- 버전 6.02로 업데이트 -->
-            <span class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mt-1 ml-1">Care AI (v.6.02)</span>
+            <!-- 버전 6.03으로 업데이트 -->
+            <span class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mt-1 ml-1">Care AI (v.6.03)</span>
         </div>
         
         <div class="px-6 py-4 flex items-center gap-2 border-b border-white/5 bg-black/20">
@@ -160,8 +160,8 @@
                 <img src="SUMC%20Logo%20(%EC%95%84%EC%9D%B4%EC%BD%98).png" alt="Icon" class="h-8 w-auto object-contain">
                 <div class="flex flex-col">
                     <h1 class="text-lg font-black text-slate-900 leading-none">SUMC Care AI</h1>
-                    <!-- 버전 6.02로 업데이트 -->
-                    <span class="text-[9px] font-bold text-slate-500 tracking-widest mt-1 uppercase">(v.6.02)</span>
+                    <!-- 버전 6.03으로 업데이트 -->
+                    <span class="text-[9px] font-bold text-slate-500 tracking-widest mt-1 uppercase">(v.6.03)</span>
                 </div>
             </div>
             <button onclick="window.toggleSidebar(); event.stopPropagation();" class="p-2 text-slate-600 focus:outline-none bg-slate-100 rounded-lg hover:bg-slate-200 transition"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg></button>
@@ -519,7 +519,7 @@
             if (!key) return alert("Please enter API Key.");
             const btn = document.getElementById('verifyKeyBtn'); btn.innerHTML = `<span class="loading-spinner-white"></span>`; btn.disabled = true;
             try {
-                const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents: [{ parts: [{ text: "ping" }] }] }) });
+                const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${key}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents: [{ parts: [{ text: "ping" }] }] }) });
                 if (!r.ok) throw new Error("Invalid Key");
                 window.currentApiKey = key; localStorage.setItem('sumc_gemini_key', key);
                 window.currentCalendarId = calId; localStorage.setItem('sumc_calendar_id', calId);
@@ -760,7 +760,7 @@ Guidelines:
 4. DO NOT hallucinate. DO NOT invent names. Output "No valid prayer requests found" if none exist.
 Text: ${yt || 'None'}`;
                 const payload = { systemInstruction: { parts: [{ text: "Strict intercessory assistant. Fact extraction only. No hallucination." }] }, contents: [{ role: "user", parts: [{ text: prompt }, ...(window.prayerImageBase64 ? [{ inlineData: { mimeType: window.prayerImageMimeType || "image/jpeg", data: window.prayerImageBase64 } }] : [])] }], generationConfig: { temperature: 0.0 } };
-                const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${k}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${k}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
                 const d = await r.json(); if (d.error) throw new Error(d.error.message);
                 res.value = d.candidates?.[0]?.content?.parts?.[0]?.text || "No text extracted.";
             } catch(e) { alert("AI Failed: " + e.message); } 
@@ -861,7 +861,7 @@ Text: ${yt || 'None'}`;
                 const sysPrompt = `You are a pastoral assistant AI for a UMC church in the US. Answer the pastor's questions based on the database context. Be concise, polite, and pastoral. Do NOT hallucinate names. DB Context: ${JSON.stringify(contextData).substring(0, 50000)}`;
 
                 const payload = { systemInstruction: { parts: [{ text: sysPrompt }] }, contents: [...window.chatHistory, { role: "user", parts: [{ text: msg }] }], generationConfig: { temperature: 0.3 } };
-                const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${k}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${k}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
                 const d = await r.json(); if (d.error) throw new Error(d.error.message);
                 
                 const reply = d.candidates?.[0]?.content?.parts?.[0]?.text || "No response.";
