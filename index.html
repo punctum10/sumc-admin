@@ -118,7 +118,8 @@
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
-            <span class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mt-1 ml-1">Care AI (v.6.01)</span>
+            <!-- 버전 6.02로 업데이트 -->
+            <span class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mt-1 ml-1">Care AI (v.6.02)</span>
         </div>
         
         <div class="px-6 py-4 flex items-center gap-2 border-b border-white/5 bg-black/20">
@@ -159,7 +160,8 @@
                 <img src="SUMC%20Logo%20(%EC%95%84%EC%9D%B4%EC%BD%98).png" alt="Icon" class="h-8 w-auto object-contain">
                 <div class="flex flex-col">
                     <h1 class="text-lg font-black text-slate-900 leading-none">SUMC Care AI</h1>
-                    <span class="text-[9px] font-bold text-slate-500 tracking-widest mt-1 uppercase">(v.6.01)</span>
+                    <!-- 버전 6.02로 업데이트 -->
+                    <span class="text-[9px] font-bold text-slate-500 tracking-widest mt-1 uppercase">(v.6.02)</span>
                 </div>
             </div>
             <button onclick="window.toggleSidebar(); event.stopPropagation();" class="p-2 text-slate-600 focus:outline-none bg-slate-100 rounded-lg hover:bg-slate-200 transition"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg></button>
@@ -228,6 +230,31 @@
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                         </button>
                     </div>
+
+                    <!-- 신규: Pastoral AI Assistant (대화창 복원) -->
+                    <div class="bg-white rounded-2xl border border-slate-100 shadow-[0_4px_12px_-2px_rgba(0,0,0,0.04)] p-6 flex flex-col mt-6 h-[500px]">
+                        <div class="flex justify-between items-center mb-4 border-b border-slate-100 pb-4">
+                            <h3 class="text-sm font-extrabold uppercase tracking-widest text-slate-900 flex items-center gap-2">
+                                <span class="text-xl">✨</span> Pastoral AI Assistant
+                            </h3>
+                            <button onclick="window.chatHistory=[]; document.getElementById('aiChatHistory').innerHTML='<div class=\'flex gap-3\'><div class=\'w-8 h-8 rounded-full bg-slate-800 text-white flex items-center justify-center flex-shrink-0\'>AI</div><div class=\'bg-white p-3 rounded-2xl rounded-tl-none shadow-sm text-sm text-slate-700 border border-slate-100\'>Hello Pastor! I\\'m your Care AI. Ask me anything about the congregation, attendance trends, or pastoral care suggestions based on our database.</div></div>';" class="text-xs text-slate-400 hover:text-slate-600 font-bold uppercase tracking-widest transition">Clear Chat</button>
+                        </div>
+                        <div id="aiChatHistory" class="flex-1 overflow-y-auto space-y-4 mb-4 p-4 bg-[#f8fafc] rounded-xl border border-slate-200 shadow-inner">
+                            <div class="flex gap-3">
+                                <div class="w-8 h-8 rounded-full bg-slate-800 text-white flex items-center justify-center flex-shrink-0">AI</div>
+                                <div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm text-sm text-slate-700 border border-slate-100 leading-relaxed">
+                                    Hello Pastor! I'm your Care AI. Ask me anything about the congregation, attendance trends, or pastoral care suggestions based on our database.
+                                </div>
+                            </div>
+                        </div>
+                        <form onsubmit="window.sendAiChatMessage(event)" class="flex gap-3 mt-auto">
+                            <input type="text" id="aiChatInput" placeholder="e.g., Who hasn't attended recently?" class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-slate-800 focus:bg-white outline-none transition shadow-inner">
+                            <button type="submit" class="bg-slate-800 hover:bg-slate-900 text-white px-6 py-3 rounded-xl font-bold transition shadow-md flex items-center justify-center gap-2">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+                            </button>
+                        </form>
+                    </div>
+
                 </div>
 
                 <!-- 탭: ATTENDANCE -->
@@ -465,7 +492,7 @@
         // --- CORE LOGIC ---
         Chart.defaults.color = '#64748b'; Chart.defaults.borderColor = 'rgba(0,0,0,0.05)'; Chart.defaults.font.family = 'Inter'; Chart.register(ChartDataLabels);
         window.members = []; window.attendanceRecords = []; window.mainChart = null; window.profileChart = null;
-        window.livePrayers = []; window.processingPrayerIds = [];
+        window.livePrayers = []; window.processingPrayerIds = []; window.chatHistory = [];
         window.currentApiKey = localStorage.getItem('sumc_gemini_key') || "";
         window.currentCalendarId = localStorage.getItem('sumc_calendar_id') || "";
         const sundayLabels = Array.from({length: 6}, (_, i) => { const d = new Date(); d.setDate(d.getDate() - d.getDay() - (5 - i) * 7); return d.toISOString().split('T')[0]; });
@@ -809,6 +836,49 @@ Text: ${yt || 'None'}`;
                 }
                 alert(`Cleanup complete! Fixed ${uc} member(s).`); window.showTab('directory');
             } catch(e) { alert("Error: " + e.message); } finally { btn.innerHTML = ot; btn.disabled = false; }
+        };
+
+        // --- PASTORAL AI CHAT LOGIC ---
+        window.sendAiChatMessage = async (e) => {
+            e.preventDefault();
+            const input = document.getElementById('aiChatInput');
+            const msg = input.value.trim();
+            if (!msg) return;
+
+            const chatContainer = document.getElementById('aiChatHistory');
+            chatContainer.innerHTML += `<div class="flex gap-3 justify-end"><div class="bg-slate-800 text-white p-3 rounded-2xl rounded-tr-none shadow-sm text-sm">${msg}</div><div class="w-8 h-8 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center flex-shrink-0 font-bold">Me</div></div>`;
+            input.value = ''; chatContainer.scrollTop = chatContainer.scrollHeight;
+
+            const loadId = 'loading-' + Date.now();
+            chatContainer.innerHTML += `<div id="${loadId}" class="flex gap-3"><div class="w-8 h-8 rounded-full bg-slate-800 text-white flex items-center justify-center flex-shrink-0">AI</div><div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm text-sm text-slate-700 border border-slate-100 flex items-center gap-2"><span class="loading-spinner-dark" style="width: 1rem; height: 1rem; border-width: 2px;"></span> Thinking...</div></div>`;
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+
+            try {
+                const k = window.currentApiKey; if(!k) throw new Error("API Key is missing. Check Settings.");
+                
+                // 목회 상황을 반영하기 위해 현재 DB 데이터를 간추려 컨텍스트로 전달
+                const contextData = { members: window.members.map(m => ({ name: m.firstName + ' ' + m.lastName, isAdult: m.isAdult, visitor: m.isNonMember, prayers: m.prayers })), attendance: window.attendanceRecords };
+                const sysPrompt = `You are a pastoral assistant AI for a UMC church in the US. Answer the pastor's questions based on the database context. Be concise, polite, and pastoral. Do NOT hallucinate names. DB Context: ${JSON.stringify(contextData).substring(0, 50000)}`;
+
+                const payload = { systemInstruction: { parts: [{ text: sysPrompt }] }, contents: [...window.chatHistory, { role: "user", parts: [{ text: msg }] }], generationConfig: { temperature: 0.3 } };
+                const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${k}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                const d = await r.json(); if (d.error) throw new Error(d.error.message);
+                
+                const reply = d.candidates?.[0]?.content?.parts?.[0]?.text || "No response.";
+                document.getElementById(loadId).remove();
+                
+                // 볼드체 등 간단한 마크다운 처리
+                const htmlReply = reply.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>').replace(/\n/g, '<br>');
+                chatContainer.innerHTML += `<div class="flex gap-3"><div class="w-8 h-8 rounded-full bg-slate-800 text-white flex items-center justify-center flex-shrink-0">AI</div><div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm text-sm text-slate-700 border border-slate-100 leading-relaxed">${htmlReply}</div></div>`;
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+
+                window.chatHistory.push({ role: "user", parts: [{ text: msg }] });
+                window.chatHistory.push({ role: "model", parts: [{ text: reply }] });
+            } catch (err) {
+                document.getElementById(loadId).remove();
+                chatContainer.innerHTML += `<div class="flex gap-3"><div class="w-8 h-8 rounded-full bg-red-100 text-red-600 flex items-center justify-center flex-shrink-0 font-bold">!</div><div class="bg-red-50 p-3 rounded-2xl rounded-tl-none shadow-sm text-sm text-red-600 border border-red-100">Error: ${err.message}</div></div>`;
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }
         };
     </script>
 
