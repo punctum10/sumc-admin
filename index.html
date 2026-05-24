@@ -840,16 +840,18 @@ Text: ${yt || 'None'}`;
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, collection, onSnapshot, updateDoc, deleteDoc, query, where, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyAqJPIupZD6ke0ecNLPmJHp-JcndLRIwaU",
-  authDomain: "sumc-ai-management-system.firebaseapp.com",
-  databaseURL: "https://sumc-ai-management-system-default-rtdb.firebaseio.com",
-  projectId: "sumc-ai-management-system",
-  storageBucket: "sumc-ai-management-system.firebasestorage.app",
-  messagingSenderId: "50235569152",
-  appId: "1:50235569152:web:3d708d469624680a3014e5",
-  measurementId: "G-BJT0DEGZ36"
-};
+        // 🔥 목사님의 Firebase 정보 🔥
+        const firebaseConfig = {
+          apiKey: "AIzaSyAqJPIupZD6ke0ecNLPmJHp-JcndLRIwaU",
+          authDomain: "sumc-ai-management-system.firebaseapp.com",
+          databaseURL: "https://sumc-ai-management-system-default-rtdb.firebaseio.com",
+          projectId: "sumc-ai-management-system",
+          storageBucket: "sumc-ai-management-system.firebasestorage.app",
+          messagingSenderId: "50235569152",
+          appId: "1:50235569152:web:3d708d469624680a3014e5",
+          measurementId: "G-BJT0DEGZ36"
+        };
+
         if (!firebaseConfig.apiKey.startsWith("여기에")) {
             const app = initializeApp(firebaseConfig); const auth = getAuth(app); const db = getFirestore(app);
             const appId = "sumc-2026-production-db"; 
