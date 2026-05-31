@@ -118,7 +118,7 @@
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
-            <span class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mt-1 ml-1">Care AI (v.6.11)</span>
+            <span class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mt-1 ml-1">Care AI (v.6.12)</span>
         </div>
         
         <div class="px-6 py-4 flex items-center gap-2 border-b border-white/5 bg-black/20">
@@ -159,7 +159,7 @@
                 <img src="SUMC%20Logo%20(%EC%95%84%EC%9D%B4%EC%BD%98).png" alt="Icon" class="h-8 w-auto object-contain">
                 <div class="flex flex-col">
                     <h1 class="text-lg font-black text-slate-900 leading-none">SUMC Care AI</h1>
-                    <span class="text-[9px] font-bold text-slate-500 tracking-widest mt-1 uppercase">(v.6.11)</span>
+                    <span class="text-[9px] font-bold text-slate-500 tracking-widest mt-1 uppercase">(v.6.12)</span>
                 </div>
             </div>
             <button onclick="window.toggleSidebar(); event.stopPropagation();" class="p-2 text-slate-600 focus:outline-none bg-slate-100 rounded-lg hover:bg-slate-200 transition"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg></button>
@@ -867,8 +867,8 @@ Text: ${yt || 'None'}`;
                     if (user) {
                         if(!urlParams.get('mode')) { document.getElementById('cloudStatusIndicator').innerText = "Online"; document.getElementById('cloudStatusIndicator').className = "text-[10px] text-emerald-500 uppercase tracking-widest font-black"; document.getElementById('statusDot').className = "w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"; }
                         
-                        onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'members'), (snap) => { window.members = snap.docs.map(d => ({ id: d.id, ...d.data() })); if(!urlParams.get('mode')) { window.updateDashboard(); window.renderDirectory(); } });
-                        onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'attendance'), (snap) => { window.attendanceRecords = snap.docs.map(d => ({ id: d.id, ...d.data() })); if(!urlParams.get('mode')) window.updateDashboard(); });
+                        onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'members'), (snap) => { window.members = snap.docs.map(d => ({ ...d.data(), id: d.id })); if(!urlParams.get('mode')) { window.updateDashboard(); window.renderDirectory(); } });
+                        onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'attendance'), (snap) => { window.attendanceRecords = snap.docs.map(d => ({ ...d.data(), id: d.id })); if(!urlParams.get('mode')) window.updateDashboard(); });
                         
                         const q = query(collection(db, 'artifacts', appId, 'public', 'data', 'online_prayers'), where('status', '==', 'new'));
                         onSnapshot(q, (snap) => { window.livePrayers = snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a,b) => a.timestamp - b.timestamp); if(!urlParams.get('mode')) window.updateLivePrayerDashboard(); });
