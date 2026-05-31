@@ -118,7 +118,7 @@
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
-            <span class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mt-1 ml-1">Care AI (v.6.12)</span>
+            <span class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mt-1 ml-1">Care AI (v.6.13)</span>
         </div>
         
         <div class="px-6 py-4 flex items-center gap-2 border-b border-white/5 bg-black/20">
@@ -159,7 +159,7 @@
                 <img src="SUMC%20Logo%20(%EC%95%84%EC%9D%B4%EC%BD%98).png" alt="Icon" class="h-8 w-auto object-contain">
                 <div class="flex flex-col">
                     <h1 class="text-lg font-black text-slate-900 leading-none">SUMC Care AI</h1>
-                    <span class="text-[9px] font-bold text-slate-500 tracking-widest mt-1 uppercase">(v.6.12)</span>
+                    <span class="text-[9px] font-bold text-slate-500 tracking-widest mt-1 uppercase">(v.6.13)</span>
                 </div>
             </div>
             <button onclick="window.toggleSidebar(); event.stopPropagation();" class="p-2 text-slate-600 focus:outline-none bg-slate-100 rounded-lg hover:bg-slate-200 transition"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg></button>
@@ -928,6 +928,37 @@ Text: ${yt || 'None'}`;
                 }
             };
             window.processBulkImport = async () => { const input = document.getElementById('bulkDataInput').value; if(!input) return; const lines = input.split('\n'); let cnt = 0; for(let line of lines) { const matches = [...line.matchAll(/"([^"]*)"/g)].map(m => m[1]); if (matches.length >= 1) { const nameParts = matches[0].split(',').map(n => n.trim()); const data = { lastName: nameParts[0], firstName: nameParts[1] || '', address: matches[1] || '', cellPhone: matches[2] || '', email: matches[3] || '', isAdult: true, familyId: 'fam_' + Date.now() + cnt }; await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'members', (Date.now() + cnt).toString()), data); cnt++; } } alert(`Ingested ${cnt} members.`); window.showTab('directory'); };
+            
+            // ONE-TIME RECOVERY SCRIPT FOR MELISSA
+            setTimeout(async () => {
+                try {
+                    if (localStorage.getItem('melissa_recovered_v3')) return;
+                    const newM = window.members.find(m => m.firstName === 'Melissa');
+                    if (!newM) return;
+                    let oldId = null;
+                    window.attendanceRecords.forEach(r => {
+                        if(r.attendees) r.attendees.forEach(aid => {
+                            if (!window.members.find(m => m.id === aid)) {
+                                if (r.names && r.names.includes("Melissa")) oldId = aid;
+                            }
+                        });
+                    });
+                    if (oldId && newM.id && oldId !== newM.id) {
+                        let attUpdated = 0;
+                        for (let r of window.attendanceRecords) {
+                            if (r.attendees && r.attendees.includes(oldId)) {
+                                const newAttendees = r.attendees.filter(id => id !== oldId);
+                                newAttendees.push(newM.id);
+                                const newNames = r.names ? r.names.replace(/[^;]*Melissa[^;]*/, `${newM.lastName}, ${newM.firstName}`) : '';
+                                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'attendance', r.id), { attendees: newAttendees, names: newNames });
+                                attUpdated++;
+                            }
+                        }
+                        localStorage.setItem('melissa_recovered_v3', 'true');
+                        alert(`Melissa's attendance recovered for ${attUpdated} weeks!\n(Note: Past prayer requests were permanently deleted when the old profile was removed. Please re-enter them.)`);
+                    }
+                } catch(e) { console.error(e); }
+            }, 3000);
         }
     </script>
 </body>
