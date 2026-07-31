@@ -118,7 +118,7 @@
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
-            <span class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mt-1 ml-1">Care AI (v.6.14)</span>
+            <span class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mt-1 ml-1">Care AI (v.6.15)</span>
         </div>
         
         <div class="px-6 py-4 flex items-center gap-2 border-b border-white/5 bg-black/20">
@@ -159,7 +159,7 @@
                 <img src="SUMC%20Logo%20(%EC%95%84%EC%9D%B4%EC%BD%98).png" alt="Icon" class="h-8 w-auto object-contain">
                 <div class="flex flex-col">
                     <h1 class="text-lg font-black text-slate-900 leading-none">SUMC Care AI</h1>
-                    <span class="text-[9px] font-bold text-slate-500 tracking-widest mt-1 uppercase">(v.6.14)</span>
+                    <span class="text-[9px] font-bold text-slate-500 tracking-widest mt-1 uppercase">(v.6.15)</span>
                 </div>
             </div>
             <button onclick="window.toggleSidebar(); event.stopPropagation();" class="p-2 text-slate-600 focus:outline-none bg-slate-100 rounded-lg hover:bg-slate-200 transition"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg></button>
@@ -240,6 +240,10 @@
                     <div class="card overflow-hidden shadow-sm border border-slate-200">
                         <div class="bg-slate-50 p-4 border-b border-slate-200 flex justify-between items-center"><span class="text-xs font-bold text-slate-500 uppercase tracking-widest">Mark Attendance</span><span id="currentCheckCount" class="bg-slate-200 text-slate-700 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest">Selected: 0</span></div>
                         <div class="overflow-x-auto max-h-[60vh]"><table class="w-full text-left border-collapse"><tbody id="attendanceList" class="divide-y divide-slate-100"></tbody></table></div>
+                        <div class="bg-slate-50 p-4 border-t border-slate-200 flex justify-end gap-6 items-center">
+                            <div class="flex items-center gap-3"><label class="text-xs font-bold text-slate-500 uppercase tracking-widest">Visitor (Adult)</label><input type="number" id="visitorAdultCount" min="0" value="0" class="w-20 bg-white border border-slate-300 rounded-xl px-3 py-2 font-bold text-slate-700 focus:border-slate-800 outline-none"></div>
+                            <div class="flex items-center gap-3"><label class="text-xs font-bold text-slate-500 uppercase tracking-widest">Visitor (Child)</label><input type="number" id="visitorChildCount" min="0" value="0" class="w-20 bg-white border border-slate-300 rounded-xl px-3 py-2 font-bold text-slate-700 focus:border-slate-800 outline-none"></div>
+                        </div>
                     </div>
                 </div>
 
@@ -538,6 +542,8 @@
                             totalAtt += r.attendees.length;
                             r.attendees.forEach(aid => { const m = window.members.find(x => x.id === aid); if (m && m.isAdult) adultAtt++; });
                         }
+                        if (r.visitorAdults) { totalAtt += r.visitorAdults; adultAtt += r.visitorAdults; }
+                        if (r.visitorChildren) { totalAtt += r.visitorChildren; }
                     });
                     const len = window.attendanceRecords.length;
                     const avgAd = Math.round(adultAtt / len); const avgTot = Math.round(totalAtt / len);
@@ -553,8 +559,8 @@
                 const last = sorted[0];
                 if (last) {
                     const d = last.date.split('-'); latTitle.innerText = `${parseInt(d[1])}/${parseInt(d[2])} Attendance`;
-                    const atts = last.attendees || []; latCount.innerText = atts.length;
-                    let ad = 0, ch = 0; atts.forEach(aid => { const m = window.members.find(x => x.id === aid); if (m) m.isAdult ? ad++ : ch++; });
+                    const atts = last.attendees || []; const vAd = last.visitorAdults || 0; const vCh = last.visitorChildren || 0; latCount.innerText = atts.length + vAd + vCh;
+                    let ad = vAd, ch = vCh; atts.forEach(aid => { const m = window.members.find(x => x.id === aid); if (m) m.isAdult ? ad++ : ch++; });
                     latBrk.innerText = `Adult: ${ad} / Child: ${ch}`;
                 } else { latTitle.innerText = `Recent Attendance`; latCount.innerText = "0"; latBrk.innerText = `Adult: 0 / Child: 0`; }
             }
@@ -573,8 +579,8 @@
         function renderMainChart() {
             const canvas = document.getElementById('mainAttendanceChart'); if(!canvas) return; const ctx = canvas.getContext('2d'); if(window.mainChart) window.mainChart.destroy();
             const data = sundayLabels.map(l => { 
-                const rec = window.attendanceRecords.find(r => r.date === l); if (!rec || !rec.attendees) return 0;
-                let c = 0; rec.attendees.forEach(aid => { const m = window.members.find(x => x.id === aid); if (m && m.isAdult) c++; }); return c;
+                const rec = window.attendanceRecords.find(r => r.date === l); if (!rec) return 0;
+                let c = rec.visitorAdults || 0; if(rec.attendees) rec.attendees.forEach(aid => { const m = window.members.find(x => x.id === aid); if (m && m.isAdult) c++; }); return c;
             });
             let gradient = ctx.createLinearGradient(0, 0, 0, 400); gradient.addColorStop(0, 'rgba(30, 41, 59, 0.4)'); gradient.addColorStop(1, 'rgba(30, 41, 59, 0.0)');
             window.mainChart = new Chart(ctx, { type: 'line', data: { labels: sundayLabels, datasets: [{ data: data, borderColor: '#1e293b', backgroundColor: gradient, fill: true, tension: 0.4, borderWidth: 3, pointBackgroundColor: '#ffffff', pointBorderColor: '#dc2626', pointRadius: 5, pointHoverRadius: 7 }] }, options: { layout: { padding: { top: 25 } }, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { display: true, color: '#dc2626', anchor: 'end', align: 'top', offset: 4, font: { weight: '900', size: 12 }, formatter: (v) => v > 0 ? v : '' } }, scales: { y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' }, suggestedMax: Math.max(...data) + 5 }, x: { grid: { display: false } } } } });
@@ -601,7 +607,9 @@
             if (!dateInput.value) { const t = new Date(); t.setDate(t.getDate() - t.getDay()); dateInput.value = t.toISOString().split('T')[0]; }
             
             const existingRecord = window.attendanceRecords.find(r => r.date === dateInput.value); 
-            const checkedIds = existingRecord ? existingRecord.attendees : [];
+            const checkedIds = existingRecord && existingRecord.attendees ? existingRecord.attendees : [];
+            const vAd = document.getElementById('visitorAdultCount'); if(vAd) vAd.value = existingRecord ? (existingRecord.visitorAdults || 0) : 0;
+            const vCh = document.getElementById('visitorChildCount'); if(vCh) vCh.value = existingRecord ? (existingRecord.visitorChildren || 0) : 0;
             
             const counts = {}; window.members.forEach(m => counts[m.id] = 0);
             window.attendanceRecords.forEach(r => { if(r.attendees) r.attendees.forEach(id => { if(counts[id]!==undefined) counts[id]++; }); });
@@ -889,7 +897,7 @@ Text: ${yt || 'None'}`;
                     }
                 });
             });
-            window.saveAttendance = async () => { const date = document.getElementById('attendanceDate').value; const checkedIds = Array.from(document.querySelectorAll('.attendee-check:checked')).map(cb => cb.value); if (!date) return alert("Select date."); const attended = window.members.filter(m => checkedIds.includes(m.id)); const names = attended.map(m => `${m.lastName}, ${m.firstName}`).join('; '); await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'attendance', date), { date, attendees: checkedIds, names }); alert("Attendance Saved."); };
+            window.saveAttendance = async () => { const date = document.getElementById('attendanceDate').value; const checkedIds = Array.from(document.querySelectorAll('.attendee-check:checked')).map(cb => cb.value); if (!date) return alert("Select date."); const attended = window.members.filter(m => checkedIds.includes(m.id)); const names = attended.map(m => `${m.lastName}, ${m.firstName}`).join('; '); const vAdEl = document.getElementById('visitorAdultCount'); const vChEl = document.getElementById('visitorChildCount'); const visitorAdults = vAdEl ? parseInt(vAdEl.value)||0 : 0; const visitorChildren = vChEl ? parseInt(vChEl.value)||0 : 0; await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'attendance', date), { date, attendees: checkedIds, names, visitorAdults, visitorChildren }); alert("Attendance Saved."); };
             window.deleteMember = async (id) => { 
                 if(confirm("Remove Member?")) { 
                     try {
