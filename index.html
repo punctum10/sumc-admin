@@ -118,7 +118,7 @@
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
-            <span class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mt-1 ml-1">Care AI (v.6.17)</span>
+            <span class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mt-1 ml-1">Care AI (v.6.18)</span>
         </div>
         
         <div class="px-6 py-4 flex items-center gap-2 border-b border-white/5 bg-black/20">
@@ -159,7 +159,7 @@
                 <img src="SUMC%20Logo%20(%EC%95%84%EC%9D%B4%EC%BD%98).png" alt="Icon" class="h-8 w-auto object-contain">
                 <div class="flex flex-col">
                     <h1 class="text-lg font-black text-slate-900 leading-none">SUMC Care AI</h1>
-                    <span class="text-[9px] font-bold text-slate-500 tracking-widest mt-1 uppercase">(v.6.17)</span>
+                    <span class="text-[9px] font-bold text-slate-500 tracking-widest mt-1 uppercase">(v.6.18)</span>
                 </div>
             </div>
             <button onclick="window.toggleSidebar(); event.stopPropagation();" class="p-2 text-slate-600 focus:outline-none bg-slate-100 rounded-lg hover:bg-slate-200 transition"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg></button>
@@ -430,7 +430,8 @@
         window.livePrayers = []; window.processingPrayerIds = []; window.chatHistory = [];
         window.currentApiKey = localStorage.getItem('sumc_gemini_key') || "";
         window.currentCalendarId = localStorage.getItem('sumc_calendar_id') || "";
-        window.currentAiModel = localStorage.getItem('sumc_gemini_model') || "gemini-1.5-flash"; 
+        window.currentAiModel = localStorage.getItem('sumc_gemini_model') || "gemini-1.5-pro"; 
+        if (window.currentAiModel.includes('flash')) { window.currentAiModel = 'gemini-1.5-pro'; localStorage.setItem('sumc_gemini_model', window.currentAiModel); }
         
         const sundayLabels = Array.from({length: 6}, (_, i) => { const d = new Date(); d.setDate(d.getDate() - d.getDay() - (5 - i) * 7); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; });
 
@@ -467,8 +468,8 @@
                 const data = await rModels.json();
                 const availableModels = data.models.map(m => m.name);
 
-                let selectedModel = 'gemini-1.5-flash';
-                const preferredModels = ['models/gemini-1.5-flash-002', 'models/gemini-1.5-flash-001', 'models/gemini-1.5-flash', 'models/gemini-1.5-pro', 'models/gemini-1.0-pro'];
+                let selectedModel = 'gemini-1.5-pro';
+                const preferredModels = ['models/gemini-1.5-pro-002', 'models/gemini-1.5-pro-001', 'models/gemini-1.5-pro', 'models/gemini-1.5-flash-002', 'models/gemini-1.5-flash'];
                 
                 for (let pref of preferredModels) {
                     if (availableModels.includes(pref)) {
