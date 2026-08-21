@@ -118,7 +118,7 @@
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
-            <span class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mt-1 ml-1">Care AI (v.6.15)</span>
+            <span class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mt-1 ml-1">Care AI (v.6.16)</span>
         </div>
         
         <div class="px-6 py-4 flex items-center gap-2 border-b border-white/5 bg-black/20">
@@ -159,7 +159,7 @@
                 <img src="SUMC%20Logo%20(%EC%95%84%EC%9D%B4%EC%BD%98).png" alt="Icon" class="h-8 w-auto object-contain">
                 <div class="flex flex-col">
                     <h1 class="text-lg font-black text-slate-900 leading-none">SUMC Care AI</h1>
-                    <span class="text-[9px] font-bold text-slate-500 tracking-widest mt-1 uppercase">(v.6.15)</span>
+                    <span class="text-[9px] font-bold text-slate-500 tracking-widest mt-1 uppercase">(v.6.16)</span>
                 </div>
             </div>
             <button onclick="window.toggleSidebar(); event.stopPropagation();" class="p-2 text-slate-600 focus:outline-none bg-slate-100 rounded-lg hover:bg-slate-200 transition"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg></button>
@@ -369,10 +369,28 @@
                                 <div><label class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 block">Email</label><input type="email" name="email" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold focus:border-slate-800 outline-none"></div>
                                 <div><label class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 block">Date of Birth</label><input type="date" name="dob" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold focus:border-slate-800 outline-none"></div>
                             </div>
-                            <div class="flex flex-wrap gap-6 bg-slate-50 p-6 rounded-2xl border border-slate-200">
-                                <label class="flex items-center gap-3 cursor-pointer"><input type="checkbox" name="isAdult" checked class="w-5 h-5 accent-slate-800"><span class="font-bold text-slate-700">Adult Member</span></label>
-                                <label class="flex items-center gap-3 cursor-pointer"><input type="checkbox" name="isBaptized" class="w-5 h-5 accent-slate-800"><span class="font-bold text-slate-700">Baptized</span></label>
-                                <label class="flex items-center gap-3 cursor-pointer"><input type="checkbox" name="isNonMember" class="w-5 h-5 accent-slate-800"><span class="font-bold text-slate-700">Non-Member (Visitor)</span></label>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 bg-slate-50 p-6 rounded-2xl border border-slate-200">
+                                <div>
+                                    <label class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3 block">Age Group</label>
+                                    <div class="flex gap-4">
+                                        <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="ageGroup" value="adult" checked class="w-4 h-4 accent-slate-800"><span class="font-bold text-slate-700 text-sm">Adult</span></label>
+                                        <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="ageGroup" value="child" class="w-4 h-4 accent-slate-800"><span class="font-bold text-slate-700 text-sm">Child</span></label>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3 block">Baptized</label>
+                                    <div class="flex gap-4">
+                                        <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="baptized" value="yes" class="w-4 h-4 accent-slate-800"><span class="font-bold text-slate-700 text-sm">Yes</span></label>
+                                        <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="baptized" value="no" checked class="w-4 h-4 accent-slate-800"><span class="font-bold text-slate-700 text-sm">No</span></label>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3 block">Membership</label>
+                                    <div class="flex gap-4">
+                                        <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="membership" value="member" checked class="w-4 h-4 accent-slate-800"><span class="font-bold text-slate-700 text-sm">Member</span></label>
+                                        <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="membership" value="visitor" class="w-4 h-4 accent-slate-800"><span class="font-bold text-slate-700 text-sm">Visitor</span></label>
+                                    </div>
+                                </div>
                             </div>
                             <div><label class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 block">Pastoral Notes</label><textarea name="notes" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold focus:border-slate-800 resize-none outline-none"></textarea></div>
                             <div class="pt-4 border-t border-slate-100 flex justify-end gap-3"><button type="button" onclick="window.showTab('directory')" class="px-6 py-3 font-bold text-slate-500 hover:bg-slate-100 rounded-xl transition">Cancel</button><button type="submit" class="btn-primary px-8 py-3 rounded-xl font-bold shadow-md">Save Record</button></div>
@@ -675,7 +693,7 @@
             form.elements['address'].value = m.address || ''; form.elements['cellPhone'].value = m.cellPhone || '';
             form.elements['email'].value = m.email || ''; form.elements['notes'].value = m.notes || '';
             if(form.elements['dob']) form.elements['dob'].value = m.dob || '';
-            form.elements['isAdult'].checked = m.isAdult; form.elements['isBaptized'].checked = !!m.isBaptized; form.elements['isNonMember'].checked = !!m.isNonMember;
+            form.elements['ageGroup'].value = m.isAdult ? 'adult' : 'child'; form.elements['baptized'].value = m.isBaptized ? 'yes' : 'no'; form.elements['membership'].value = m.isNonMember ? 'visitor' : 'member';
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active-tab'));
             document.getElementById('new-member').classList.add('active-tab');
         };
@@ -915,9 +933,10 @@ Text: ${yt || 'None'}`;
                 try {
                     const fd = new FormData(e.target); 
                     const data = Object.fromEntries(fd.entries()); 
-                    data.isAdult = fd.get('isAdult') === 'on'; 
-                    data.isBaptized = fd.get('isBaptized') === 'on'; 
-                    data.isNonMember = fd.get('isNonMember') === 'on'; 
+                    data.isAdult = fd.get('ageGroup') === 'adult'; 
+                    data.isBaptized = fd.get('baptized') === 'yes'; 
+                    data.isNonMember = fd.get('membership') === 'visitor'; 
+                    delete data.ageGroup; delete data.baptized; delete data.membership;
                     data.familyId = data.familyId === 'new' ? 'fam_' + Date.now() : data.familyId; 
                     const id = data.id; 
                     delete data.id; 
