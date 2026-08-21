@@ -118,7 +118,7 @@
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
-            <span class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mt-1 ml-1">Care AI (v.6.16)</span>
+            <span class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mt-1 ml-1">Care AI (v.6.17)</span>
         </div>
         
         <div class="px-6 py-4 flex items-center gap-2 border-b border-white/5 bg-black/20">
@@ -159,7 +159,7 @@
                 <img src="SUMC%20Logo%20(%EC%95%84%EC%9D%B4%EC%BD%98).png" alt="Icon" class="h-8 w-auto object-contain">
                 <div class="flex flex-col">
                     <h1 class="text-lg font-black text-slate-900 leading-none">SUMC Care AI</h1>
-                    <span class="text-[9px] font-bold text-slate-500 tracking-widest mt-1 uppercase">(v.6.16)</span>
+                    <span class="text-[9px] font-bold text-slate-500 tracking-widest mt-1 uppercase">(v.6.17)</span>
                 </div>
             </div>
             <button onclick="window.toggleSidebar(); event.stopPropagation();" class="p-2 text-slate-600 focus:outline-none bg-slate-100 rounded-lg hover:bg-slate-200 transition"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg></button>
@@ -381,7 +381,8 @@
                                     <label class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3 block">Baptized</label>
                                     <div class="flex gap-4">
                                         <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="baptized" value="yes" class="w-4 h-4 accent-slate-800"><span class="font-bold text-slate-700 text-sm">Yes</span></label>
-                                        <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="baptized" value="no" checked class="w-4 h-4 accent-slate-800"><span class="font-bold text-slate-700 text-sm">No</span></label>
+                                        <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="baptized" value="no" class="w-4 h-4 accent-slate-800"><span class="font-bold text-slate-700 text-sm">No</span></label>
+                                        <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="baptized" value="unknown" checked class="w-4 h-4 accent-slate-800"><span class="font-bold text-slate-700 text-sm">Unknown</span></label>
                                     </div>
                                 </div>
                                 <div>
@@ -431,7 +432,7 @@
         window.currentCalendarId = localStorage.getItem('sumc_calendar_id') || "";
         window.currentAiModel = localStorage.getItem('sumc_gemini_model') || "gemini-1.5-flash"; 
         
-        const sundayLabels = Array.from({length: 6}, (_, i) => { const d = new Date(); d.setDate(d.getDate() - d.getDay() - (5 - i) * 7); return d.toISOString().split('T')[0]; });
+        const sundayLabels = Array.from({length: 6}, (_, i) => { const d = new Date(); d.setDate(d.getDate() - d.getDay() - (5 - i) * 7); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; });
 
         window.handleLogin = (e) => {
             e.preventDefault();
@@ -693,7 +694,7 @@
             form.elements['address'].value = m.address || ''; form.elements['cellPhone'].value = m.cellPhone || '';
             form.elements['email'].value = m.email || ''; form.elements['notes'].value = m.notes || '';
             if(form.elements['dob']) form.elements['dob'].value = m.dob || '';
-            form.elements['ageGroup'].value = m.isAdult ? 'adult' : 'child'; form.elements['baptized'].value = m.isBaptized ? 'yes' : 'no'; form.elements['membership'].value = m.isNonMember ? 'visitor' : 'member';
+            form.elements['ageGroup'].value = m.isAdult ? 'adult' : 'child'; form.elements['baptized'].value = m.baptized ? m.baptized : (m.isBaptized === true ? 'yes' : 'unknown'); form.elements['membership'].value = m.isNonMember ? 'visitor' : 'member';
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active-tab'));
             document.getElementById('new-member').classList.add('active-tab');
         };
@@ -934,9 +935,10 @@ Text: ${yt || 'None'}`;
                     const fd = new FormData(e.target); 
                     const data = Object.fromEntries(fd.entries()); 
                     data.isAdult = fd.get('ageGroup') === 'adult'; 
-                    data.isBaptized = fd.get('baptized') === 'yes'; 
+                    data.isBaptized = fd.get('baptized') === 'yes';
+                    data.baptized = fd.get('baptized');
                     data.isNonMember = fd.get('membership') === 'visitor'; 
-                    delete data.ageGroup; delete data.baptized; delete data.membership;
+                    delete data.ageGroup; delete data.membership;
                     data.familyId = data.familyId === 'new' ? 'fam_' + Date.now() : data.familyId; 
                     const id = data.id; 
                     delete data.id; 
