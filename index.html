@@ -118,7 +118,7 @@
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
-            <span class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mt-1 ml-1">Care AI (v.6.21)</span>
+            <span class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mt-1 ml-1">Care AI (v.6.22)</span>
         </div>
         
         <div class="px-6 py-4 flex items-center gap-2 border-b border-white/5 bg-black/20">
@@ -159,7 +159,7 @@
                 <img src="SUMC%20Logo%20(%EC%95%84%EC%9D%B4%EC%BD%98).png" alt="Icon" class="h-8 w-auto object-contain">
                 <div class="flex flex-col">
                     <h1 class="text-lg font-black text-slate-900 leading-none">SUMC Care AI</h1>
-                    <span class="text-[9px] font-bold text-slate-500 tracking-widest mt-1 uppercase">(v.6.21)</span>
+                    <span class="text-[9px] font-bold text-slate-500 tracking-widest mt-1 uppercase">(v.6.22)</span>
                 </div>
             </div>
             <button onclick="window.toggleSidebar(); event.stopPropagation();" class="p-2 text-slate-600 focus:outline-none bg-slate-100 rounded-lg hover:bg-slate-200 transition"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg></button>
@@ -469,9 +469,10 @@
                 const availableModels = data.models.map(m => m.name);
 
                 let selectedModel = null;
-                const preferredModels = ['models/gemini-1.5-pro-002', 'models/gemini-1.5-pro-001', 'models/gemini-1.5-pro-latest', 'models/gemini-1.5-pro', 'models/gemini-1.5-flash-002', 'models/gemini-1.5-flash-latest', 'models/gemini-1.5-flash', 'models/gemini-1.0-pro'];
+                const preferredProModels = ['models/gemini-1.5-pro-002', 'models/gemini-1.5-pro-latest', 'models/gemini-1.5-pro'];
+                let lastError = "";
                 
-                for (let pref of preferredModels) {
+                for (let pref of preferredProModels) {
                     if (availableModels.includes(pref)) {
                         const testModel = pref.split('/')[1];
                         try {
@@ -480,11 +481,16 @@
                                 body: JSON.stringify({ contents: [{ parts: [{ text: "ping" }] }] })
                             });
                             if (rPing.ok) { selectedModel = testModel; break; }
-                        } catch(e) {}
+                            else { const errData = await rPing.json(); lastError = errData.error?.message || "Unknown Error"; }
+                        } catch(e) { lastError = e.message; }
                     }
                 }
 
-                if (!selectedModel) throw new Error("No compatible models found for generateContent.");
+                if (!selectedModel) {
+                    if (availableModels.includes('models/gemini-1.5-flash-002')) selectedModel = 'gemini-1.5-flash-002';
+                    else if (availableModels.includes('models/gemini-1.5-flash')) selectedModel = 'gemini-1.5-flash';
+                    else throw new Error("Pro models failed (" + lastError + ") and Flash is unavailable.");
+                }
 
                 window.currentApiKey = key; localStorage.setItem('sumc_gemini_key', key);
                 window.currentAiModel = selectedModel; localStorage.setItem('sumc_gemini_model', selectedModel);
