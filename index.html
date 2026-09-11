@@ -118,7 +118,7 @@
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
-            <span class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mt-1 ml-1">Care AI (v.6.22)</span>
+            <span class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mt-1 ml-1">Care AI (v.6.23)</span>
         </div>
         
         <div class="px-6 py-4 flex items-center gap-2 border-b border-white/5 bg-black/20">
@@ -159,7 +159,7 @@
                 <img src="SUMC%20Logo%20(%EC%95%84%EC%9D%B4%EC%BD%98).png" alt="Icon" class="h-8 w-auto object-contain">
                 <div class="flex flex-col">
                     <h1 class="text-lg font-black text-slate-900 leading-none">SUMC Care AI</h1>
-                    <span class="text-[9px] font-bold text-slate-500 tracking-widest mt-1 uppercase">(v.6.22)</span>
+                    <span class="text-[9px] font-bold text-slate-500 tracking-widest mt-1 uppercase">(v.6.23)</span>
                 </div>
             </div>
             <button onclick="window.toggleSidebar(); event.stopPropagation();" class="p-2 text-slate-600 focus:outline-none bg-slate-100 rounded-lg hover:bg-slate-200 transition"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg></button>
@@ -465,31 +465,27 @@
             try {
                 const rModels = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${key}`);
                 if (!rModels.ok) throw new Error("Invalid API Key or Network Issue");
-                const data = await rModels.json();
-                const availableModels = data.models.map(m => m.name);
-
-                let selectedModel = null;
-                const preferredProModels = ['models/gemini-1.5-pro-002', 'models/gemini-1.5-pro-latest', 'models/gemini-1.5-pro'];
-                let lastError = "";
+                let selectedModel = 'gemini-1.5-flash';
+                const validModels = (data.models || []).map(m => m.name.replace('models/', ''));
                 
-                for (let pref of preferredProModels) {
-                    if (availableModels.includes(pref)) {
-                        const testModel = pref.split('/')[1];
-                        try {
-                            const rPing = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${testModel}:generateContent?key=${key}`, {
-                                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ contents: [{ parts: [{ text: "ping" }] }] })
-                            });
-                            if (rPing.ok) { selectedModel = testModel; break; }
-                            else { const errData = await rPing.json(); lastError = errData.error?.message || "Unknown Error"; }
-                        } catch(e) { lastError = e.message; }
-                    }
+                let foundPro = null;
+                const testQueue = ['gemini-1.5-pro-002', 'gemini-1.5-pro-latest', 'gemini-1.5-pro'].filter(m => validModels.includes(m));
+                
+                for (let tm of testQueue) {
+                    try {
+                        const rPing = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${tm}:generateContent?key=${key}`, {
+                            method: 'POST', headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ contents: [{ parts: [{ text: "ping" }] }] })
+                        });
+                        if (rPing.ok) { foundPro = tm; break; }
+                    } catch(e) {}
                 }
-
-                if (!selectedModel) {
-                    if (availableModels.includes('models/gemini-1.5-flash-002')) selectedModel = 'gemini-1.5-flash-002';
-                    else if (availableModels.includes('models/gemini-1.5-flash')) selectedModel = 'gemini-1.5-flash';
-                    else throw new Error("Pro models failed (" + lastError + ") and Flash is unavailable.");
+                
+                if (foundPro) {
+                    selectedModel = foundPro;
+                } else {
+                    if (validModels.includes('gemini-1.5-flash-002')) selectedModel = 'gemini-1.5-flash-002';
+                    else if (validModels.find(m => m.includes('1.5-flash'))) selectedModel = validModels.find(m => m.includes('1.5-flash'));
                 }
 
                 window.currentApiKey = key; localStorage.setItem('sumc_gemini_key', key);
